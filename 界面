@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>遗传评估结果发布平台</title>
+  <style>
+    /* 全局样式 */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+      color: #333;
+      background-image: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
+      min-height: 100vh;
+    }
+
+    /* 头部样式 */
+    header {
+      background-color: #2c3e50;
+      color: white;
+      text-align: center;
+      padding: 20px 0;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      width: 100%;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 600;
+    }
+
+    /* 导航栏样式 */
+    nav {
+      background-color: #34495e;
+      padding: 10px 0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      text-align: center;
+      position: relative;
+    }
+
+    nav a {
+      margin: 0 10px;
+      padding: 10px 20px;
+      background-color: #3498db;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    nav a:hover {
+      background-color: #2980b9;
+      transform: translateY(-2px);
+    }
+
+    /* 右上角按钮 */
+    .view-results-btn {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      padding: 10px 20px;
+      background-color: #27ae60;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      font-size: 14px;
+    }
+
+    .view-results-btn:hover {
+      background-color: #219653;
+      transform: translateY(-2px);
+    }
+
+    /* 搜索框样式 */
+    .search-box {
+      display: none;
+      position: absolute;
+      right: 20px;
+      top: 60px;
+      background-color: white;
+      padding: 15px;
+      border-radius: 5px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      z-index: 10;
+    }
+
+    .search-box input {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 14px;
+      width: 200px;
+      margin-right: 10px;
+    }
+
+    .search-box button {
+      padding: 8px 12px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .search-box button:hover {
+      background-color: #2980b9;
+    }
+
+    /* 主内容区样式 */
+    main {
+      width: 80%;
+      margin: 40px auto;
+      padding: 40px;
+      background-color: white;
+      border-radius: 15px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    main h2 {
+      font-size: 24px;
+      color: #2c3e50;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .publish-section {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .publish-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .publish-form:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .publish-form input,
+    .publish-form textarea,
+    .publish-form select {
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 14px;
+      transition: border-color 0.3s ease;
+    }
+
+    .publish-form input:focus,
+    .publish-form textarea:focus,
+    .publish-form select:focus {
+      border-color: #3498db;
+      outline: none;
+    }
+
+    .publish-form textarea {
+      resize: vertical;
+      min-height: 150px;
+    }
+
+    .publish-form button {
+      padding: 12px 20px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .publish-form button:hover {
+      background-color: #2980b9;
+      transform: translateY(-2px);
+    }
+
+    /* 底部样式 */
+    footer {
+      background-color: #2c3e50;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      margin-top: 40px;
+      box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .footer-buttons {
+      margin-bottom: 10px;
+    }
+
+    .footer-buttons button {
+      margin: 0 5px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      background-color: #3498db;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      font-size: 14px;
+    }
+
+    .footer-buttons button:hover {
+      background-color: #2980b9;
+      transform: translateY(-2px);
+    }
+
+    footer p {
+      font-size: 12px;
+      margin: 5px 0 0;
+    }
+
+    /* 模态框样式 */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: white;
+      padding: 30px;
+      border-radius: 10px;
+      width: 70%;
+      max-width: 800px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      position: relative;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      font-size: 24px;
+      cursor: pointer;
+      color: #777;
+    }
+
+    .close-btn:hover {
+      color: #333;
+    }
+
+    /* 表单组样式 */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 15px;
+    }
+
+    .form-col {
+      flex: 1;
+    }
+
+    /* 文件上传样式 */
+    .file-upload {
+      border: 2px dashed #ddd;
+      padding: 20px;
+      text-align: center;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: border-color 0.3s ease;
+    }
+
+    .file-upload:hover {
+      border-color: #3498db;
+    }
+
+    .file-upload input {
+      display: none;
+    }
+
+    /* 表格样式 */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+
+    .data-table th, .data-table td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
+
+    .data-table th {
+      background-color: #f2f2f2;
+    }
+
+    /* 选项卡样式 */
+    .tab-container {
+      margin-bottom: 20px;
+    }
+
+    .tab-buttons {
+      display: flex;
+      border-bottom: 1px solid #ddd;
+      margin-bottom: 20px;
+    }
+
+    .tab-btn {
+      padding: 10px 20px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s ease;
+    }
+
+    .tab-btn.active {
+      border-bottom: 3px solid #3498db;
+      color: #3498db;
+      font-weight: 600;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      main {
+        width: 90%;
+        padding: 20px;
+      }
+      
+      .modal-content {
+        width: 90%;
+      }
+      
+      .form-row {
+        flex-direction: column;
+        gap: 10px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>遗传改良信息服务平台</h1>
+  </header>
+  <nav>
+    <a onclick="openModal('phenotypeModal')">表型数据处理</a>
+    <a onclick="openModal('genotypeModal')">基因型数据处理</a>
+    <a href="#">亲缘关系矩阵计算</a>
+    <a href="#">全基因组关联分析</a>
+    <a href="#">遗传评估</a>
+    <a href="#">工具</a>
+    <a href="#">帮助</a>
+    <button class="view-results-btn" onclick="toggleSearchBox()">遗传评估结果查看</button>
+    <div class="search-box" id="searchBox">
+      <input type="text" placeholder="输入关键词搜索">
+      <button onclick="searchResults()">搜索</button>
+    </div>
+  </nav>
+  <main>
+    <h2>遗传评估结果发布</h2>
+    <div class="publish-section">
+      <form class="publish-form">
+        <input type="text" placeholder="输入评估标题" required>
+        <textarea placeholder="输入评估内容..." required></textarea>
+        <button type="submit">发布结果</button>
+      </form>
+    </div>
+  </main>
+  <footer>
+    <div class="footer-buttons">
+      <button>Update</button>
+      <button>Citation</button>
+      <button>Manual</button>
+    </div>
+    <p>如果发现bug，请联系我们。邮箱为ningchao@sdau.edu.cn</p>
+  </footer>
+
+  <!-- 表型数据处理模态框 -->
+  <div class="modal" id="phenotypeModal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeModal('phenotypeModal')">&times;</span>
+      <h2>表型数据处理</h2>
+      
+      <div class="tab-container">
+        <div class="tab-buttons">
+          <button class="tab-btn active" onclick="openTab(event, 'phenotype-upload')">数据上传</button>
+          <button class="tab-btn" onclick="openTab(event, 'phenotype-process')">数据处理</button>
+          <button class="tab-btn" onclick="openTab(event, 'phenotype-view')">数据查看</button>
+        </div>
+        
+        <div id="phenotype-upload" class="tab-content active">
+          <form class="publish-form">
+            <div class="form-group">
+              <label for="phenotype-file">上传表型数据文件</label>
+              <div class="file-upload" onclick="document.getElementById('phenotype-file').click()">
+                <input type="file" id="phenotype-file" accept=".csv, .xlsx, .txt">
+                <p>点击或拖拽文件到此处</p>
+                <p>支持格式: CSV, Excel, TXT</p>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="phenotype-name">数据集名称</label>
+              <input type="text" id="phenotype-name" placeholder="输入数据集名称" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="phenotype-description">数据集描述</label>
+              <textarea id="phenotype-description" placeholder="输入数据集描述"></textarea>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-col">
+                <label for="phenotype-species">物种</label>
+                <select id="phenotype-species" required>
+                  <option value="">选择物种</option>
+                  <option value="cattle">牛</option>
+                  <option value="pig">猪</option>
+                  <option value="sheep">羊</option>
+                  <option value="chicken">鸡</option>
+                </select>
+              </div>
+              
+              <div class="form-col">
+                <label for="phenotype-trait">性状类型</label>
+                <select id="phenotype-trait" required>
+                  <option value="">选择性状类型</option>
+                  <option value="growth">生长性状</option>
+                  <option value="reproduction">繁殖性状</option>
+                  <option value="milk">产奶性状</option>
+                  <option value="meat">肉质性状</option>
+                </select>
+              </div>
+            </div>
+            
+            <button type="submit">上传数据</button>
+          </form>
+        </div>
+        
+        <div id="phenotype-process" class="tab-content">
+          <form class="publish-form">
+            <div class="form-group">
+              <label for="phenotype-dataset">选择数据集</label>
+              <select id="phenotype-dataset" required>
+                <option value="">选择要处理的数据集</option>
+                <option value="dataset1">牛生长性状数据集 2023</option>
+                <option value="dataset2">猪繁殖性状数据集 2022</option>
+                <option value="dataset3">羊产奶性状数据集 2021</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label>数据处理选项</label>
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+                <label><input type="checkbox" name="phenotype-options" value="missing"> 缺失值处理</label>
+                <label><input type="checkbox" name="phenotype-options" value="outlier"> 异常值检测</label>
+                <label><input type="checkbox" name="phenotype-options" value="normalize"> 数据标准化</label>
+                <label><input type="checkbox" name="phenotype-options" value="transform"> 数据转换</label>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="phenotype-method">缺失值处理方法</label>
+              <select id="phenotype-method">
+                <option value="mean">均值填充</option>
+                <option value="median">中位数填充</option>
+                <option value="delete">删除缺失行</option>
+                <option value="regression">回归填充</option>
+              </select>
+            </div>
+            
+            <button type="submit">处理数据</button>
+          </form>
+        </div>
+        
+        <div id="phenotype-view" class="tab-content">
+          <div class="form-group">
+            <label for="phenotype-view-dataset">选择数据集</label>
+            <select id="phenotype-view-dataset" onchange="loadPhenotypeData()">
+              <option value="">选择要查看的数据集</option>
+              <option value="dataset1">牛生长性状数据集 2023</option>
+              <option value="dataset2">猪繁殖性状数据集 2022</option>
+              <option value="dataset3">羊产奶性状数据集 2021</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <div style="overflow-x: auto;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>个体ID</th>
+                    <th>性状1</th>
+                    <th>性状2</th>
+                    <th>性状3</th>
+                    <th>性状4</th>
+                    <th>性状5</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>ID001</td>
+                    <td>23.5</td>
+                    <td>45.2</td>
+                    <td>12.8</td>
+                    <td>67.3</td>
+                    <td>89.1</td>
+                  </tr>
+                  <tr>
+                    <td>ID002</td>
+                    <td>25.1</td>
+                    <td>43.7</td>
+                    <td>13.2</td>
+                    <td>65.8</td>
+                    <td>87.6</td>
+                  </tr>
+                  <tr>
+                    <td>ID003</td>
+                    <td>22.9</td>
+                    <td>46.5</td>
+                    <td>11.9</td>
+                    <td>68.4</td>
+                    <td>90.2</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+          <button onclick="exportPhenotypeData()">导出数据</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 基因型数据处理模态框 -->
+  <div class="modal" id="genotypeModal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeModal('genotypeModal')">&times;</span>
+      <h2>基因型数据处理</h2>
+      
+      <div class="tab-container">
+        <div class="tab-buttons">
+          <button class="tab-btn active" onclick="openTab(event, 'genotype-upload')">数据上传</button>
+          <button class="tab-btn" onclick="openTab(event, 'genotype-process')">质量控制</button>
+          <button class="tab-btn" onclick="openTab(event, 'genotype-view')">数据查看</button>
+        </div>
+        
+        <div id="genotype-upload" class="tab-content active">
+          <form class="publish-form">
+            <div class="form-group">
+              <label for="genotype-file">上传基因型数据文件</label>
+              <div class="file-upload" onclick="document.getElementById('genotype-file').click()">
+                <input type="file" id="genotype-file" accept=".vcf, .ped, .map, .bed">
+                <p>点击或拖拽文件到此处</p>
+                <p>支持格式: VCF, PED/MAP, BED/BIM/FAM</p>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="genotype-name">数据集名称</label>
+              <input type="text" id="genotype-name" placeholder="输入数据集名称" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="genotype-platform">基因分型平台</label>
+              <select id="genotype-platform" required>
+                <option value="">选择平台</option>
+                <option value="illumina">Illumina</option>
+                <option value="affymetrix">Affymetrix</option>
+                <option value="custom">自定义</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="genotype-species">物种</label>
+              <select id="genotype-species" required>
+                <option value="">选择物种</option>
+                <option value="cattle">牛</option>
+                <option value="pig">猪</option>
+                <option value="sheep">羊</option>
+                <option value="chicken">鸡</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="genotype-description">数据集描述</label>
+              <textarea id="genotype-description" placeholder="输入数据集描述"></textarea>
+            </div>
+            
+            <button type="submit">上传数据</button>
+          </form>
+        </div>
+        
+        <div id="genotype-process" class="tab-content">
+          <form class="publish-form">
+            <div class="form-group">
+              <label for="genotype-dataset">选择数据集</label>
+              <select id="genotype-dataset" required>
+                <option value="">选择要处理的数据集</option>
+                <option value="dataset1">牛全基因组SNP数据</option>
+                <option value="dataset2">猪芯片数据 50K</option>
+                <option value="dataset3">羊重测序数据</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label>质量控制参数</label>
+              <div class="form-row">
+                <div class="form-col">
+                  <label for="genotype-missing">个体缺失率阈值 (%)</label>
+                  <input type="number" id="genotype-missing" min="0" max="100" value="10" step="1">
+                </div>
+                <div class="form-col">
+                  <label for="snp-missing">SNP缺失率阈值 (%)</label>
+                  <input type="number" id="snp-missing" min="0" max="100" value="5" step="1">
+                </div>
+              </div>
+              
+              <div class="form-row">
+                <div class="form-col">
+                  <label for="maf">最小等位基因频率 (MAF)</label>
+                  <input type="number" id="maf" min="0" max="0.5" value="0.01" step="0.01">
+                </div>
+                <div class="form-col">
+                  <label for="hwe">HWE检验P值</label>
+                  <input type="number" id="hwe" min="0" max="1" value="0.0001" step="0.0001">
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label>其他选项</label>
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+                <label><input type="checkbox" name="genotype-options" value="prune"> LD修剪</label>
+                <label><input type="checkbox" name="genotype-options" value="impute"> 基因型填充</label>
+                <label><input type="checkbox" name="genotype-options" value="pca"> 主成分分析</label>
+              </div>
+            </div>
+            
+            <button type="submit">执行质量控制</button>
+          </form>
+        </div>
+        
+        <div id="genotype-view" class="tab-content">
+          <div class="form-group">
+            <label for="genotype-view-dataset">选择数据集</label>
+            <select id="genotype-view-dataset" onchange="loadGenotypeData()">
+              <option value="">选择要查看的数据集</option>
+              <option value="dataset1">牛全基因组SNP数据</option>
+              <option value="dataset2">猪芯片数据 50K</option>
+              <option value="dataset3">羊重测序数据</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <div style="overflow-x: auto;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>样本ID</th>
+                    <th>SNP001</th>
+                    <th>SNP002</th>
+                    <th>SNP003</th>
+                    <th>SNP004</th>
+                    <th>SNP005</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Sample1</td>
+                    <td>AA</td>
+                    <td>GG</td>
+                    <td>CC</td>
+                    <td>TT</td>
+                    <td>AG</td>
+                  </tr>
+                  <tr>
+                    <td>Sample2</td>
+                    <td>AG</td>
+                    <td>GA</td>
+                    <td>CT</td>
+                    <td>TC</td>
+                    <td>AA</td>
+                  </tr>
+                  <tr>
+                    <td>Sample3</td>
+                    <td>GG</td>
+                    <td>AA</td>
+                    <td>TT</td>
+                    <td>CC</td>
+                    <td>GG</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+          <button onclick="exportGenotypeData()">导出数据</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 切换搜索框显示状态
+    function toggleSearchBox() {
+      const searchBox = document.getElementById('searchBox');
+      searchBox.style.display = searchBox.style.display === 'block' ? 'none' : 'block';
+    }
+
+    // 搜索功能
+    function searchResults() {
+      const keyword = document.querySelector('.search-box input').value;
+      if (keyword) {
+        alert(`搜索关键词: ${keyword}`);
+        // 这里可以添加实际的搜索逻辑
+      } else {
+        alert('请输入搜索关键词');
+      }
+    }
+
+    // 打开模态框
+    function openModal(modalId) {
+      document.getElementById(modalId).style.display = 'flex';
+    }
+
+    // 关闭模态框
+    function closeModal(modalId) {
+      document.getElementById(modalId).style.display = 'none';
+    }
+
+    // 切换选项卡
+    function openTab(evt, tabId) {
+      // 获取所有选项卡内容和按钮
+      const tabContents = document.querySelectorAll('.tab-content');
+      const tabButtons = document.querySelectorAll('.tab-btn');
+      
+      // 隐藏所有选项卡内容
+      tabContents.forEach(content => {
+        content.classList.remove('active');
+      });
+      
+      // 移除所有按钮的active类
+      tabButtons.forEach(button => {
+        button.classList.remove('active');
+      });
+      
+      // 显示当前选项卡内容并激活按钮
+      document.getElementById(tabId).classList.add('active');
+      evt.currentTarget.classList.add('active');
+    }
+
+    // 加载表型数据
+    function loadPhenotypeData() {
+      const dataset = document.getElementById('phenotype-view-dataset').value;
+      if (dataset) {
+        // 这里可以添加实际的数据加载逻辑
+        console.log(`加载表型数据集: ${dataset}`);
+      }
+    }
+
+    // 导出表型数据
+    function exportPhenotypeData() {
+      const dataset = document.getElementById('phenotype-view-dataset').value;
+      if (dataset) {
+        alert(`导出表型数据集: ${dataset}`);
+        // 这里可以添加实际的数据导出逻辑
+      } else {
+        alert('请先选择数据集');
+      }
+    }
+
+    // 加载基因型数据
+    function loadGenotypeData() {
+      const dataset = document.getElementById('genotype-view-dataset').value;
+      if (dataset) {
+        // 这里可以添加实际的数据加载逻辑
+        console.log(`加载基因型数据集: ${dataset}`);
+      }
+    }
+
+    // 导出基因型数据
+    function exportGenotypeData() {
+      const dataset = document.getElementById('genotype-view-dataset').value;
+      if (dataset) {
+        alert(`导出基因型数据集: ${dataset}`);
+        // 这里可以添加实际的数据导出逻辑
+      } else {
+        alert('请先选择数据集');
+      }
+    }
+
+    // 点击模态框外部关闭模态框
+    window.onclick = function(event) {
+      if (event.target.className === 'modal') {
+        event.target.style.display = 'none';
+      }
+    }
+  </script>
+</body>
+
+</html>
