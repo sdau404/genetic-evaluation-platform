@@ -385,7 +385,7 @@
   <nav>
     <a onclick="openModal('phenotypeModal')">表型数据处理</a>
     <a onclick="openModal('genotypeModal')">基因型数据处理</a>
-    <a href="#">亲缘关系矩阵计算</a>
+    <a onclick="openKinshipModal()">亲缘关系矩阵计算</a>
     <a href="#">全基因组关联分析</a>
     <a href="#">遗传评估</a>
     <a href="#">工具</a>
@@ -741,7 +741,78 @@
       </div>
     </div>
   </div>
+<!-- 亲缘关系矩阵计算模态框（需新增） -->
+  <div class="modal" id="kinshipMatrixModal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeModal('kinshipMatrixModal')">&times;</span>
+      <h2>亲缘关系矩阵计算</h2>
 
+      <div class="tab-container">
+        <div class="tab-buttons">
+          <button class="tab-btn active" onclick="openTab(event, 'kinship-data')">数据选择</button>
+          <button class="tab-btn" onclick="openTab(event, 'kinship-params')">参数配置</button>
+          <button class="tab-btn" onclick="openTab(event, 'kinship-result')">结果查看</button>
+        </div>
+
+        <!-- 数据选择选项卡 -->
+        <div id="kinship-data" class="tab-content active">
+          <form class="publish-form">
+            <div class="form-group">
+              <label>选择基因型数据集（亲缘关系矩阵计算依赖基因型数据）</label>
+              <select id="kinship-genotype-dataset" required>
+                <option value="">选择已上传的基因型数据集</option>
+                <option value="dataset1">牛全基因组SNP数据</option>
+                <option value="dataset2">猪芯片数据 50K</option>
+              </select>
+            </div>
+            <button type="button" onclick="openTab(event, 'kinship-params')">下一步</button>
+          </form>
+        </div>
+
+        <!-- 参数配置选项卡 -->
+        <div id="kinship-params" class="tab-content">
+          <form class="publish-form">
+            <div class="form-group">
+              <label>计算方法</label>
+              <select id="kinship-method">
+                <option value="vanraden">VanRaden方法（常用）</option>
+                <option value="grm">GCTA-GRM方法</option>
+                <option value="identity-by-descent">IBD-based方法</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>过滤参数（SNP质量控制）</label>
+              <input type="number" id="kinship-maf" placeholder="最小等位基因频率（如0.01）" value="0.01">
+            </div>
+            <button type="button" onclick="calculateKinshipMatrix()">开始计算</button>
+          </form>
+        </div>
+
+        <!-- 结果查看选项卡 -->
+        <div id="kinship-result" class="tab-content">
+          <div class="form-group">
+            <label>亲缘关系矩阵结果</label>
+            <div style="overflow-x: auto;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>样本ID</th>
+                    <th>Sample1</th>
+                    <th>Sample2</th>
+                    <th>Sample3</th>
+                  </tr>
+                </thead>
+                <tbody id="kinship-result-table">
+                  <!-- 计算结果将通过JS动态填充 -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <button onclick="exportKinshipMatrix()">导出矩阵</button>
+        </div>
+      </div>
+    </div>
+  </div>
   <script>
     // 切换搜索框显示状态
     function toggleSearchBox() {
@@ -837,6 +908,42 @@
         event.target.style.display = 'none';
       }
     }
+    // 打开亲缘关系矩阵计算模态框（需新增）
+    function openKinshipModal() {
+    document.getElementById('kinshipMatrixModal').style.display = 'flex';
+   }
+
+    // 计算亲缘关系矩阵（模拟逻辑，实际需对接后台算法）
+    function calculateKinshipMatrix() {
+    const dataset = document.getElementById('kinship-genotype-dataset').value;
+    const method = document.getElementById('kinship-method').value;
+
+    if (!dataset) {
+      alert('请先选择基因型数据集');
+      return;
+    }
+
+    // 模拟计算过程（实际需调用后台算法，基于基因型数据计算亲缘关系）
+    alert(`正在使用${method}方法计算数据集${dataset}的亲缘关系矩阵...`);
+
+    // 模拟填充结果表格
+    const tableBody = document.getElementById('kinship-result-table');
+    tableBody.innerHTML = `
+      <tr><td>Sample1</td><td>1.000</td><td>0.482</td><td>0.051</td></tr>
+      <tr><td>Sample2</td><td>0.482</td><td>1.000</td><td>0.043</td></tr>
+      <tr><td>Sample3</td><td>0.051</td><td>0.043</td><td>1.000</td></tr>
+    `;
+
+    // 切换到结果查看选项卡
+    openTab(event, 'kinship-result');
+   }
+
+   // 导出亲缘关系矩阵（模拟）
+   function exportKinshipMatrix() {
+     alert('正在导出亲缘关系矩阵（支持CSV/TSV格式）');
+    // 实际需对接后台，下载计算结果文件
+   }
+   // 👆 新增JS函数结束
   </script>
 </body>
 
