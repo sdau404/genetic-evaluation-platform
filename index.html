@@ -386,7 +386,7 @@
     <a onclick="openModal('phenotypeModal')">表型数据处理</a>
     <a onclick="openModal('genotypeModal')">基因型数据处理</a>
     <a onclick="openKinshipModal()">亲缘关系矩阵计算</a>
-    <a href="#">全基因组关联分析</a>
+    <a onclick="openModal('gwasModal')">全基因组关联分析</a>
     <a href="#">遗传评估</a>
     <a href="#">工具</a>
     <a href="#">帮助</a>
@@ -813,6 +813,139 @@
       </div>
     </div>
   </div>
+  <!-- GWAS全基因组关联分析模态框 -->
+<div class="modal" id="gwasModal">
+  <div class="modal-content">
+    <span class="close-btn" onclick="closeModal('gwasModal')">&times;</span>
+    <h2>全基因组关联分析（GWAS）</h2>
+
+    <div class="tab-container">
+      <div class="tab-buttons">
+        <button class="tab-btn active" onclick="openTab(event, 'gwas-data')">数据选择</button>
+        <button class="tab-btn" onclick="openTab(event, 'gwas-params')">参数配置</button>
+        <button class="tab-btn" onclick="openTab(event, 'gwas-result')">结果查看</button>
+      </div>
+
+      <!-- 1. 数据选择选项卡 -->
+      <div id="gwas-data" class="tab-content active">
+        <form class="publish-form">
+          <div class="form-group">
+            <label for="gwas-phenotype">选择表型数据集</label>
+            <select id="gwas-phenotype" required>
+              <option value="">选择已处理的表型数据集</option>
+              <option value="pheno-dataset1">牛生长性状数据集 2023（已质控）</option>
+              <option value="pheno-dataset2">猪繁殖性状数据集 2022（已标准化）</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="gwas-genotype">选择基因型数据集</label>
+            <select id="gwas-genotype" required>
+              <option value="">选择已质控的基因型数据集</option>
+              <option value="geno-dataset1">牛全基因组SNP数据（MAF≥0.01）</option>
+              <option value="geno-dataset2">猪芯片数据 50K（SNP缺失率≤5%）</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="gwas-trait">选择目标性状（从表型数据中提取）</label>
+            <select id="gwas-trait" required disabled>
+              <option value="">请先选择表型数据集</option>
+              <!-- 后续通过JS根据选中的表型数据集动态加载性状 -->
+            </select>
+          </div>
+
+          <button type="button" onclick="gwasNextStep('gwas-params')">下一步</button>
+        </form>
+      </div>
+
+      <!-- 2. 参数配置选项卡 -->
+      <div id="gwas-params" class="tab-content">
+        <form class="publish-form">
+          <div class="form-group">
+            <label>关联分析模型</label>
+            <select id="gwas-model" required>
+              <option value="mlm">混合线性模型（MLM，控制群体分层+亲缘关系）</option>
+              <option value="glm">广义线性模型（GLM，仅控制群体分层）</option>
+              <option value="farmcpu">FarmCPU（高效混合模型，平衡功率与计算速度）</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>协变量设置</label>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <label><input type="checkbox" name="gwas-covariate" value="pca"> 主成分（PCA，控制群体分层）</label>
+              <label><input type="checkbox" name="gwas-covariate" value="sex"> 性别</label>
+              <label><input type="checkbox" name="gwas-covariate" value="age"> 年龄</label>
+              <input type="text" placeholder="其他协变量（用逗号分隔）" style="margin-top: 5px;">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-col">
+              <label for="gwas-pvalue">显著性阈值（P值）</label>
+              <input type="number" id="gwas-pvalue" min="0" max="1" value="5e-8" step="1e-8" readonly>
+              <small>常用阈值：5e-8（全基因组显著）、1e-5（建议显著）</small>
+            </div>
+            <div class="form-col">
+              <label for="gwas-missing">SNP缺失率过滤（补充质控）</label>
+              <input type="number" id="gwas-missing" min="0" max="100" value="5" step="1">
+            </div>
+          </div>
+
+          <button type="button" onclick="runGWAS()">运行GWAS分析</button>
+        </form>
+      </div>
+
+      <!-- 3. 结果查看选项卡 -->
+      <div id="gwas-result" class="tab-content">
+        <div class="form-group">
+          <h3>GWAS结果可视化</h3>
+          <div style="display: flex; gap: 20px; margin-bottom: 30px; flex-wrap: wrap;">
+            <!-- 曼哈顿图容器 -->
+            <div style="flex: 1; min-width: 400px; height: 350px; border: 1px solid #ddd; border-radius: 5px; padding: 10px;">
+              <h4>曼哈顿图（Manhattan Plot）</h4>
+              <div id="manhattan-plot" style="width: 100%; height: 300px;"></div>
+            </div>
+            <!-- QQ图容器 -->
+            <div style="flex: 1; min-width: 400px; height: 350px; border: 1px solid #ddd; border-radius: 5px; padding: 10px;">
+              <h4>QQ图（Quantile-Quantile Plot）</h4>
+              <div id="qq-plot" style="width: 100%; height: 300px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <h3>显著关联SNP列表（P ≤ 5e-8）</h3>
+          <div style="overflow-x: auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>SNP ID</th>
+                  <th>染色体</th>
+                  <th>物理位置（bp）</th>
+                  <th>等位基因（A1/A2）</th>
+                  <th>P值</th>
+                  <th>-log10(P)</th>
+                  <th>邻近基因</th>
+                </tr>
+              </thead>
+              <tbody id="gwas-snp-table">
+                <!-- 分析结果通过JS动态填充 -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div style="margin-top: 20px; display: flex; gap: 10px;">
+          <button onclick="exportGWASResult('table')">导出SNP表格（CSV）</button>
+          <button onclick="exportGWASResult('plot')">导出图表（PNG/SVG）</button>
+          <button onclick="exportGWASResult('full')">导出完整结果（含参数+数据）</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
   <script>
     // 切换搜索框显示状态
     function toggleSearchBox() {
