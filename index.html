@@ -5,6 +5,41 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>遗传评估结果发布平台</title>
+  <!-- 引入 Supabase SDK（确保加载顺序和完整性） -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
+  <script>
+    // 修复1：正确初始化 Supabase 客户端（添加 supabase. 前缀）
+    let supabaseClient = null;
+    try {
+      // 初始化 Supabase 客户端（挂载到window，避免变量冲突）
+      window.sb = supabase.createClient(
+        "https://cwpdenrqhipxgkcwewtv.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3cGRlbnJxaGlweGdrY3dld3R2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU5NDM5MzUsImV4cCI6MjA4MTUxOTkzNX0.qLvLmBeu00kCZ7rvQUd4iBQFxR4lDkRLqIRM44JZ3i4",
+        {
+          auth: {
+            persistSession: false, // 解决Tracking Prevention警告
+            autoRefreshToken: false,
+            detectSessionInUrl: false // 关闭URL会话检测，减少存储依赖
+          },
+          global: {
+            headers: {
+              'X-Client-Info': 'supabase-js/2.38.4' // 明确客户端信息，避免兼容性问题
+            }
+          }
+        }
+      );
+      supabaseClient = window.sb;
+      console.log("Supabase 初始化完成：", window.sb);
+    } catch (error) {
+      console.error("Supabase 初始化失败：", error);
+      alert("数据服务初始化失败，请检查网络或浏览器设置（如关闭严格的跟踪保护）");
+    }
+
+    // 修复2：页面加载后立即检查登录状态（避免DOM未加载完成的问题）
+    document.addEventListener('DOMContentLoaded', function() {
+      updateLoginStatus();
+    });
+  </script>
   <style>
     /* 全局样式 */
     body {
@@ -432,17 +467,17 @@
     <h1>遗传改良信息服务平台</h1>
   </header>
   <nav>
-    <!-- 第一步：把功能按钮移到最左侧 -->
+    <!-- 功能按钮 -->
     <button class="nav-btn login-btn" id="loginBtn" onclick="openModal('loginModal')">登录</button>
     <button class="nav-btn logout-btn" id="logoutBtn" onclick="logout()" style="display: none;">退出登录</button>
     <button class="nav-btn view-results-btn" id="viewResultsBtn" onclick="toggleSearchBox()" style="display: none;">遗传评估结果查看</button>
 
-    <!-- 第二步：保留原用户信息显示（在按钮右侧） -->
+    <!-- 用户信息 -->
     <div class="user-info" id="userInfo" style="display: none;">
       欢迎，<span id="usernameDisplay"></span>
     </div>
 
-    <!-- 第三步：核心功能导航（位置不变） -->
+    <!-- 核心功能导航 -->
     <a onclick="openModal('phenotypeModal')">表型数据处理</a>
     <a onclick="openModal('genotypeModal')">基因型数据处理</a>
     <a onclick="openKinshipModal()">亲缘关系矩阵计算</a>
@@ -451,22 +486,70 @@
     <a href="#">工具</a>
     <a href="#">帮助</a>
 
-    <!-- 第四步：搜索框（位置不变） -->
+    <!-- 搜索框 -->
     <div class="search-box" id="searchBox">
       <input type="text" placeholder="输入关键词搜索">
       <button onclick="searchResults()">搜索</button>
     </div>
   </nav>
+
   <main>
-    <h2>遗传评估结果发布</h2>
+    <h2>遗传评估结果发布与检索</h2>
     <div class="publish-section">
       <form class="publish-form" id="publishForm">
-        <input type="text" placeholder="输入评估标题" required>
-        <textarea placeholder="输入评估内容..." required></textarea>
+        <input type="text" placeholder="输入评估标题" required id="publishTitle">
+        <textarea placeholder="输入评估内容..." required id="publishContent"></textarea>
+        <div class="form-row">
+          <div class="form-col">
+            <label for="publishSpecies">物种</label>
+            <select id="publishSpecies" required>
+              <option value="">选择物种</option>
+              <option value="cattle">牛</option>
+              <option value="pig">猪</option>
+              <option value="sheep">羊</option>
+              <option value="chicken">鸡</option>
+            </select>
+          </div>
+          <div class="form-col">
+            <label for="publishTrait">性状类型</label>
+            <select id="publishTrait" required>
+              <option value="">选择性状类型</option>
+              <option value="growth">生长性状</option>
+              <option value="reproduction">繁殖性状</option>
+              <option value="milk">产奶性状</option>
+              <option value="meat">肉质性状</option>
+            </select>
+          </div>
+        </div>
         <button type="submit">发布结果</button>
       </form>
     </div>
+
+    <!-- 检索结果展示区 -->
+    <div id="searchResultSection" style="margin-top: 40px; display: none;">
+      <h3>检索结果</h3>
+      <div style="overflow-x: auto;">
+        <table class="data-table" id="searchResultTable">
+          <thead>
+            <tr>
+              <th>评估标题</th>
+              <th>物种</th>
+              <th>性状类型</th>
+              <th>发布时间</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="searchResultBody">
+            <!-- 检索结果动态渲染 -->
+          </tbody>
+        </table>
+      </div>
+      <div id="noResultTip" style="text-align: center; padding: 20px; display: none;">
+        未找到匹配结果，请调整关键词重试～
+      </div>
+    </div>
   </main>
+
   <footer>
     <div class="footer-buttons">
       <button>Update</button>
@@ -476,7 +559,7 @@
     <p>如果发现bug，请联系我们。邮箱为ningchao@sdau.edu.cn</p>
   </footer>
 
-  <!-- 登录模态框（新增） -->
+  <!-- 登录模态框 -->
   <div class="modal" id="loginModal">
     <div class="modal-content">
       <span class="close-btn" onclick="closeModal('loginModal')">&times;</span>
@@ -491,25 +574,48 @@
         <button type="submit">登录</button>
         <div class="form-footer">
           <a href="#">忘记密码？</a>
-          <a href="#" onclick="alert('请联系管理员注册账号')">注册账号</a>
+          <a href="#" onclick="switchModal('registerModal')">注册账号</a>
+        </div>
+      </form>
+    </div>
+  </div>
+    <!-- 注册模态框 -->
+  <div class="modal" id="registerModal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeModal('registerModal')">&times;</span>
+      <h2 style="text-align: center;">用户注册</h2>
+      <form class="login-form" id="registerForm">
+        <label for="regUsername">用户名</label>
+        <input type="text" id="regUsername" placeholder="请输入用户名（3-20位）" required>
+
+        <label for="regEmail">邮箱</label>
+        <input type="email" id="regEmail" placeholder="请输入用于注册的邮箱" required>
+
+        <label for="regPassword">密码</label>
+        <input type="password" id="regPassword" placeholder="请输入密码（6-20位）" required>
+
+        <label for="regConfirmPassword">确认密码</label>
+        <input type="password" id="regConfirmPassword" placeholder="请再次输入密码" required>
+
+        <button type="submit">注册</button>
+        <div class="form-footer">
+          <a href="#" onclick="switchModal('loginModal')">已有账号？去登录</a>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- 表型数据处理模态框（原有，未改动） -->
+  <!-- 表型数据处理模态框 -->
   <div class="modal" id="phenotypeModal">
     <div class="modal-content">
       <span class="close-btn" onclick="closeModal('phenotypeModal')">&times;</span>
       <h2>表型数据处理</h2>
-
       <div class="tab-container">
         <div class="tab-buttons">
           <button class="tab-btn active" onclick="openTab(event, 'phenotype-upload')">数据上传</button>
           <button class="tab-btn" onclick="openTab(event, 'phenotype-process')">数据处理</button>
           <button class="tab-btn" onclick="openTab(event, 'phenotype-view')">数据查看</button>
         </div>
-
         <div id="phenotype-upload" class="tab-content active">
           <form class="publish-form">
             <div class="form-group">
@@ -520,17 +626,14 @@
                 <p>支持格式: CSV, Excel, TXT</p>
               </div>
             </div>
-
             <div class="form-group">
               <label for="phenotype-name">数据集名称</label>
               <input type="text" id="phenotype-name" placeholder="输入数据集名称" required>
             </div>
-
             <div class="form-group">
               <label for="phenotype-description">数据集描述</label>
               <textarea id="phenotype-description" placeholder="输入数据集描述"></textarea>
             </div>
-
             <div class="form-row">
               <div class="form-col">
                 <label for="phenotype-species">物种</label>
@@ -542,7 +645,6 @@
                   <option value="chicken">鸡</option>
                 </select>
               </div>
-
               <div class="form-col">
                 <label for="phenotype-trait">性状类型</label>
                 <select id="phenotype-trait" required>
@@ -554,11 +656,9 @@
                 </select>
               </div>
             </div>
-
             <button type="submit">上传数据</button>
           </form>
         </div>
-
         <div id="phenotype-process" class="tab-content">
           <form class="publish-form">
             <div class="form-group">
@@ -570,7 +670,6 @@
                 <option value="dataset3">羊产奶性状数据集 2021</option>
               </select>
             </div>
-
             <div class="form-group">
               <label>数据处理选项</label>
               <div style="display: flex; flex-direction: column; gap: 10px;">
@@ -580,7 +679,6 @@
                 <label><input type="checkbox" name="phenotype-options" value="transform"> 数据转换</label>
               </div>
             </div>
-
             <div class="form-group">
               <label for="phenotype-method">缺失值处理方法</label>
               <select id="phenotype-method">
@@ -590,11 +688,9 @@
                 <option value="regression">回归填充</option>
               </select>
             </div>
-
             <button type="submit">处理数据</button>
           </form>
         </div>
-
         <div id="phenotype-view" class="tab-content">
           <div class="form-group">
             <label for="phenotype-view-dataset">选择数据集</label>
@@ -605,7 +701,6 @@
               <option value="dataset3">羊产奶性状数据集 2021</option>
             </select>
           </div>
-
           <div class="form-group">
             <div style="overflow-x: auto;">
               <table class="data-table">
@@ -648,26 +743,23 @@
               </table>
             </div>
           </div>
-
           <button onclick="exportPhenotypeData()">导出数据</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- 基因型数据处理模态框（原有，未改动） -->
+  <!-- 基因型数据处理模态框 -->
   <div class="modal" id="genotypeModal">
     <div class="modal-content">
       <span class="close-btn" onclick="closeModal('genotypeModal')">&times;</span>
       <h2>基因型数据处理</h2>
-
       <div class="tab-container">
         <div class="tab-buttons">
           <button class="tab-btn active" onclick="openTab(event, 'genotype-upload')">数据上传</button>
           <button class="tab-btn" onclick="openTab(event, 'genotype-process')">质量控制</button>
           <button class="tab-btn" onclick="openTab(event, 'genotype-view')">数据查看</button>
         </div>
-
         <div id="genotype-upload" class="tab-content active">
           <form class="publish-form">
             <div class="form-group">
@@ -678,12 +770,10 @@
                 <p>支持格式: VCF, PED/MAP, BED/BIM/FAM</p>
               </div>
             </div>
-
             <div class="form-group">
               <label for="genotype-name">数据集名称</label>
               <input type="text" id="genotype-name" placeholder="输入数据集名称" required>
             </div>
-
             <div class="form-group">
               <label for="genotype-platform">基因分型平台</label>
               <select id="genotype-platform" required>
@@ -693,7 +783,6 @@
                 <option value="custom">自定义</option>
               </select>
             </div>
-
             <div class="form-group">
               <label for="genotype-species">物种</label>
               <select id="genotype-species" required>
@@ -704,16 +793,13 @@
                 <option value="chicken">鸡</option>
               </select>
             </div>
-
             <div class="form-group">
               <label for="genotype-description">数据集描述</label>
               <textarea id="genotype-description" placeholder="输入数据集描述"></textarea>
             </div>
-
             <button type="submit">上传数据</button>
           </form>
         </div>
-
         <div id="genotype-process" class="tab-content">
           <form class="publish-form">
             <div class="form-group">
@@ -725,7 +811,6 @@
                 <option value="dataset3">羊重测序数据</option>
               </select>
             </div>
-
             <div class="form-group">
               <label>质量控制参数</label>
               <div class="form-row">
@@ -738,7 +823,6 @@
                   <input type="number" id="snp-missing" min="0" max="100" value="5" step="1">
                 </div>
               </div>
-
               <div class="form-row">
                 <div class="form-col">
                   <label for="maf">最小等位基因频率 (MAF)</label>
@@ -750,7 +834,6 @@
                 </div>
               </div>
             </div>
-
             <div class="form-group">
               <label>其他选项</label>
               <div style="display: flex; flex-direction: column; gap: 10px;">
@@ -759,11 +842,9 @@
                 <label><input type="checkbox" name="genotype-options" value="pca"> 主成分分析</label>
               </div>
             </div>
-
             <button type="submit">执行质量控制</button>
           </form>
         </div>
-
         <div id="genotype-view" class="tab-content">
           <div class="form-group">
             <label for="genotype-view-dataset">选择数据集</label>
@@ -774,7 +855,6 @@
               <option value="dataset3">羊重测序数据</option>
             </select>
           </div>
-
           <div class="form-group">
             <div style="overflow-x: auto;">
               <table class="data-table">
@@ -817,26 +897,23 @@
               </table>
             </div>
           </div>
-
           <button onclick="exportGenotypeData()">导出数据</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- 亲缘关系矩阵计算模态框（原有，未改动） -->
+  <!-- 亲缘关系矩阵计算模态框 -->
   <div class="modal" id="kinshipMatrixModal">
     <div class="modal-content">
       <span class="close-btn" onclick="closeModal('kinshipMatrixModal')">&times;</span>
       <h2>亲缘关系矩阵计算</h2>
-
       <div class="tab-container">
         <div class="tab-buttons">
           <button class="tab-btn active" onclick="openTab(event, 'kinship-data')">数据选择</button>
           <button class="tab-btn" onclick="openTab(event, 'kinship-params')">参数配置</button>
           <button class="tab-btn" onclick="openTab(event, 'kinship-result')">结果查看</button>
         </div>
-
         <div id="kinship-data" class="tab-content active">
           <form class="publish-form">
             <div class="form-group">
@@ -850,7 +927,6 @@
             <button type="button" onclick="openTab(event, 'kinship-params')">下一步</button>
           </form>
         </div>
-
         <div id="kinship-params" class="tab-content">
           <form class="publish-form">
             <div class="form-group">
@@ -868,7 +944,6 @@
             <button type="button" onclick="calculateKinshipMatrix()">开始计算</button>
           </form>
         </div>
-
         <div id="kinship-result" class="tab-content">
           <div class="form-group">
             <label>亲缘关系矩阵结果</label>
@@ -883,7 +958,7 @@
                   </tr>
                 </thead>
                 <tbody id="kinship-result-table">
-                  <!-- 计算结果将通过JS动态填充 -->
+                  <!-- 计算结果动态填充 -->
                 </tbody>
               </table>
             </div>
@@ -894,19 +969,17 @@
     </div>
   </div>
 
-  <!-- GWAS全基因组关联分析模态框（原有，未改动） -->
+  <!-- GWAS全基因组关联分析模态框 -->
   <div class="modal" id="gwasModal">
     <div class="modal-content">
       <span class="close-btn" onclick="closeModal('gwasModal')">&times;</span>
       <h2>全基因组关联分析（GWAS）</h2>
-
       <div class="tab-container">
         <div class="tab-buttons">
           <button class="tab-btn active" onclick="openTab(event, 'gwas-data')">数据选择</button>
           <button class="tab-btn" onclick="openTab(event, 'gwas-params')">参数配置</button>
           <button class="tab-btn" onclick="openTab(event, 'gwas-result')">结果查看</button>
         </div>
-
         <div id="gwas-data" class="tab-content active">
           <form class="publish-form">
             <div class="form-group">
@@ -917,7 +990,6 @@
                 <option value="pheno-dataset2">猪繁殖性状数据集 2022（已标准化）</option>
               </select>
             </div>
-
             <div class="form-group">
               <label for="gwas-genotype">选择基因型数据集</label>
               <select id="gwas-genotype" required>
@@ -926,18 +998,15 @@
                 <option value="geno-dataset2">猪芯片数据 50K（SNP缺失率≤5%）</option>
               </select>
             </div>
-
             <div class="form-group">
               <label for="gwas-trait">选择目标性状（从表型数据中提取）</label>
               <select id="gwas-trait" required disabled>
                 <option value="">请先选择表型数据集</option>
               </select>
             </div>
-
             <button type="button" onclick="gwasNextStep('gwas-params')">下一步</button>
           </form>
         </div>
-
         <div id="gwas-params" class="tab-content">
           <form class="publish-form">
             <div class="form-group">
@@ -948,7 +1017,6 @@
                 <option value="farmcpu">FarmCPU（高效混合模型，平衡功率与计算速度）</option>
               </select>
             </div>
-
             <div class="form-group">
               <label>协变量设置</label>
               <div style="display: flex; flex-direction: column; gap: 10px;">
@@ -958,7 +1026,6 @@
                 <input type="text" placeholder="其他协变量（用逗号分隔）" style="margin-top: 5px;">
               </div>
             </div>
-
             <div class="form-row">
               <div class="form-col">
                 <label for="gwas-pvalue">显著性阈值（P值）</label>
@@ -970,11 +1037,9 @@
                 <input type="number" id="gwas-missing" min="0" max="100" value="5" step="1">
               </div>
             </div>
-
             <button type="button" onclick="runGWAS()">运行GWAS分析</button>
           </form>
         </div>
-
         <div id="gwas-result" class="tab-content">
           <div class="form-group">
             <h3>GWAS结果可视化</h3>
@@ -989,7 +1054,6 @@
               </div>
             </div>
           </div>
-
           <div class="form-group">
             <h3>显著关联SNP列表（P ≤ 5e-8）</h3>
             <div style="overflow-x: auto;">
@@ -1006,12 +1070,11 @@
                   </tr>
                 </thead>
                 <tbody id="gwas-snp-table">
-                  <!-- 分析结果通过JS动态填充 -->
+                  <!-- 分析结果动态填充 -->
                 </tbody>
               </table>
             </div>
           </div>
-
           <div style="margin-top: 20px; display: flex; gap: 10px;">
             <button onclick="exportGWASResult('table')">导出SNP表格（CSV）</button>
             <button onclick="exportGWASResult('plot')">导出图表（PNG/SVG）</button>
@@ -1023,21 +1086,7 @@
   </div>
 
   <script>
-    // 原有功能函数（未改动）
-    function toggleSearchBox() {
-      const searchBox = document.getElementById('searchBox');
-      searchBox.style.display = searchBox.style.display === 'block' ? 'none' : 'block';
-    }
-
-    function searchResults() {
-      const keyword = document.querySelector('.search-box input').value;
-      if (keyword) {
-        alert(`搜索关键词: ${keyword}`);
-      } else {
-        alert('请输入搜索关键词');
-      }
-    }
-
+    // 1. 基础模态框/选项卡函数
     function openModal(modalId) {
       document.getElementById(modalId).style.display = 'flex';
     }
@@ -1049,171 +1098,304 @@
     function openTab(evt, tabId) {
       const tabContents = document.querySelectorAll('.tab-content');
       const tabButtons = document.querySelectorAll('.tab-btn');
-
       tabContents.forEach(content => content.classList.remove('active'));
       tabButtons.forEach(button => button.classList.remove('active'));
-
       document.getElementById(tabId).classList.add('active');
       evt.currentTarget.classList.add('active');
     }
 
-    function loadPhenotypeData() {
-      const dataset = document.getElementById('phenotype-view-dataset').value;
-      if (dataset) console.log(`加载表型数据集: ${dataset}`);
+    // 修复3：补充缺失的 openKinshipModal 函数
+    function openKinshipModal() {
+      openModal('kinshipMatrixModal');
     }
 
-    function exportPhenotypeData() {
+    // 2. 搜索框切换
+    function toggleSearchBox() {
+      const searchBox = document.getElementById('searchBox');
+      searchBox.style.display = searchBox.style.display === 'block' ? 'none' : 'block';
+    }
+
+    // 3. 搜索结果函数（修复语法错误+增加客户端判空）
+    async function searchResults() {
+      // 前置检查：Supabase客户端是否初始化
+      if (!window.sb) {
+        alert("数据服务未初始化，无法检索数据！");
+        return;
+      }
+
+      const keyword = document.querySelector('.search-box input').value.trim();
+      if (!keyword) {
+        alert('请输入搜索关键词');
+        return;
+      }
+
+      // 检查登录状态
+      const { data: { session }, error: sessionError } = await window.sb.auth.getSession();
+      if (sessionError) {
+        alert(`获取登录状态失败：${sessionError.message}`);
+        return;
+      }
+      if (!session) {
+        alert('请先登录后再检索数据！');
+        openModal('loginModal');
+        return;
+      }
+
+      // 查询数据库
+      const { data, error } = await window.sb
+        .from('genetic_evaluations')
+        .select('title, species, trait_type, created_at', { count: 'exact' })
+        .ilike('title', `%${keyword}%`)
+        .or(`content.ilike.%${keyword}%,species.ilike.%${keyword}%,trait_type.ilike.%${keyword}%`)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        alert(`检索失败：${error.message}`);
+        return;
+      }
+
+      // 渲染结果
+      const resultSection = document.getElementById('searchResultSection');
+      const resultBody = document.getElementById('searchResultBody');
+      const noResultTip = document.getElementById('noResultTip');
+      resultSection.style.display = 'block';
+      resultBody.innerHTML = '';
+
+      if (data.length === 0) {
+        noResultTip.style.display = 'block';
+        return;
+      }
+
+      noResultTip.style.display = 'none';
+      data.forEach(item => {
+        const row = document.createElement('tr');
+        const formattedTime = new Date(item.created_at).toLocaleString();
+        row.innerHTML = `
+          <td>${item.title}</td>
+          <td>${item.species}</td>
+          <td>${item.trait_type}</td>
+          <td>${formattedTime}</td>
+          <td><button onclick="viewEvaluationDetail('${item.title}')">查看详情</button></td>
+        `;
+        resultBody.appendChild(row);
+      });
+    }
+
+    // 4. 查看评估详情
+    function viewEvaluationDetail(title) {
+      alert(`查看详情：${title}\n（可扩展为模态框显示完整评估内容）`);
+    }
+
+    // 5. 发布表单提交（增加客户端判空）
+    document.getElementById('publishForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      // 前置检查：Supabase客户端是否初始化
+      if (!window.sb) {
+        alert("数据服务未初始化，无法发布数据！");
+        return;
+      }
+
+      const title = document.getElementById('publishTitle').value.trim();
+      const content = document.getElementById('publishContent').value.trim();
+      const species = document.getElementById('publishSpecies').value;
+      const traitType = document.getElementById('publishTrait').value;
+
+      // 检查登录
+      const { data: { session }, error: sessionError } = await window.sb.auth.getSession();
+      if (sessionError) {
+        alert(`获取登录状态失败：${sessionError.message}`);
+        return;
+      }
+      if (!session) {
+        alert('请先登录后再发布结果！');
+        openModal('loginModal');
+        return;
+      }
+
+      // 插入数据
+      const { error } = await window.sb
+        .from('genetic_evaluations')
+        .insert([{
+          user_id: session.user.id,
+          title,
+          content,
+          species,
+          trait_type: traitType
+        }]);
+
+      if (error) {
+        alert(`发布失败：${error.message}`);
+        return;
+      }
+
+      alert('发布成功！数据已存入数据库，可通过搜索框检索～');
+      this.reset();
+    });
+
+    // 6. 登录表单提交（增加客户端判空）
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      // 前置检查：Supabase客户端是否初始化
+      if (!window.sb) {
+        alert("数据服务未初始化，无法登录！");
+        return;
+      }
+
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      if (!username || !password) {
+        alert('请输入用户名/邮箱和密码！');
+        return;
+      }
+
+      try {
+        const { data, error } = await window.sb.auth.signInWithPassword({
+          email: username, // 注意：Supabase的signInWithPassword默认用email，若用用户名需配置
+          password: password,
+        });
+
+        if (error) {
+          throw error;
+        }
+
+        const userName = data.user.email || data.user.user_metadata?.username || '未知用户';
+        alert(`登录成功！欢迎 ${userName}`);
+        updateLoginStatus();
+        closeModal('loginModal');
+        this.reset();
+      } catch (error) {
+        alert(`登录失败：${error.message}`);
+        return;
+      }
+    });
+
+    // 7. 退出登录（增加客户端判空）
+    async function logout() {
+      // 前置检查：Supabase客户端是否初始化
+      if (!window.sb) {
+        alert("数据服务未初始化，无法退出登录！");
+        return;
+      }
+
+      const { error } = await window.sb.auth.signOut();
+      if (error) {
+        alert(`退出失败：${error.message}`);
+        return;
+      }
+      updateLoginStatus();
+      alert('退出登录成功！');
+    }
+
+    // 8. 更新登录状态（增加客户端判空）
+    async function updateLoginStatus() {
+      // 前置检查：Supabase客户端是否初始化
+      if (!window.sb) {
+        // 未初始化时隐藏登录相关按钮
+        document.getElementById('userInfo').style.display = 'none';
+        document.getElementById('loginBtn').style.display = 'inline-block';
+        document.getElementById('logoutBtn').style.display = 'none';
+        document.getElementById('viewResultsBtn').style.display = 'none';
+        document.getElementById('publishForm').querySelector('button[type="submit"]').disabled = true;
+        return;
+      }
+
+      const { data: { session }, error: sessionError } = await window.sb.auth.getSession();
+      if (sessionError) {
+        console.error("获取登录状态失败：", sessionError);
+        return;
+      }
+
+      const isLogin = !!session;
+      const user = session?.user;
+
+      document.getElementById('userInfo').style.display = isLogin ? 'block' : 'none';
+      if (isLogin) {
+        document.getElementById('usernameDisplay').textContent = user.email || user.user_metadata?.username || '未知用户';
+      }
+
+      document.getElementById('loginBtn').style.display = isLogin ? 'none' : 'inline-block';
+      document.getElementById('logoutBtn').style.display = isLogin ? 'inline-block' : 'none';
+      document.getElementById('viewResultsBtn').style.display = isLogin ? 'inline-block' : 'none';
+      document.getElementById('publishForm').querySelector('button[type="submit"]').disabled = !isLogin;
+    }
+
+    // 9. 辅助函数（表型/基因型数据处理）
+    function loadPhenotypeData() {
       const dataset = document.getElementById('phenotype-view-dataset').value;
-      dataset ? alert(`导出表型数据集: ${dataset}`) : alert('请先选择数据集');
+      if (dataset) {
+        console.log(`加载表型数据集: ${dataset}`);
+        // 可扩展：从Supabase加载真实数据并渲染到表格
+      }
     }
 
     function loadGenotypeData() {
       const dataset = document.getElementById('genotype-view-dataset').value;
-      if (dataset) console.log(`加载基因型数据集: ${dataset}`);
+      if (dataset) {
+        console.log(`加载基因型数据集: ${dataset}`);
+        // 可扩展：从Supabase加载真实数据并渲染到表格
+      }
+    }
+
+    function exportPhenotypeData() {
+      alert('表型数据导出功能开发中...');
     }
 
     function exportGenotypeData() {
-      const dataset = document.getElementById('genotype-view-dataset').value;
-      dataset ? alert(`导出基因型数据集: ${dataset}`) : alert('请先选择数据集');
-    }
-
-    window.onclick = function(event) {
-      if (event.target.className === 'modal') event.target.style.display = 'none';
-    }
-
-    function openKinshipModal() {
-      document.getElementById('kinshipMatrixModal').style.display = 'flex';
+      alert('基因型数据导出功能开发中...');
     }
 
     function calculateKinshipMatrix() {
-      const dataset = document.getElementById('kinship-genotype-dataset').value;
-      const method = document.getElementById('kinship-method').value;
-      if (!dataset) { alert('请先选择基因型数据集'); return; }
-
-      alert(`正在使用${method}方法计算数据集${dataset}的亲缘关系矩阵...`);
-      const tableBody = document.getElementById('kinship-result-table');
-      tableBody.innerHTML = `
-        <tr><td>Sample1</td><td>1.000</td><td>0.482</td><td>0.051</td></tr>
-        <tr><td>Sample2</td><td>0.482</td><td>1.000</td><td>0.043</td></tr>
-        <tr><td>Sample3</td><td>0.051</td><td>0.043</td><td>1.000</td></tr>
-      `;
       openTab(event, 'kinship-result');
+      // 模拟结果填充
+      const resultTable = document.getElementById('kinship-result-table');
+      resultTable.innerHTML = `
+        <tr><td>Sample1</td><td>1.000</td><td>0.250</td><td>0.125</td></tr>
+        <tr><td>Sample2</td><td>0.250</td><td>1.000</td><td>0.062</td></tr>
+        <tr><td>Sample3</td><td>0.125</td><td>0.062</td><td>1.000</td></tr>
+      `;
+      alert('亲缘关系矩阵计算完成！');
     }
 
     function exportKinshipMatrix() {
-      alert('正在导出亲缘关系矩阵（支持CSV/TSV格式）');
+      alert('亲缘关系矩阵导出功能开发中...');
     }
 
     function gwasNextStep(tabId) {
-      const phenotype = document.getElementById('gwas-phenotype').value;
-      if (phenotype) {
-        const traitSelect = document.getElementById('gwas-trait');
-        traitSelect.disabled = false;
-        traitSelect.innerHTML = `
-          <option value="">选择目标性状</option>
-          <option value="weight">体重</option>
-          <option value="gain">日增重</option>
-          <option value="fat">背膘厚</option>
-        `;
-        openTab(event, tabId);
-      } else alert('请先选择表型数据集');
+      const phenotypeDataset = document.getElementById('gwas-phenotype').value;
+      if (!phenotypeDataset) {
+        alert('请先选择表型数据集！');
+        return;
+      }
+      // 模拟加载性状列表
+      const traitSelect = document.getElementById('gwas-trait');
+      traitSelect.disabled = false;
+      traitSelect.innerHTML = `
+        <option value="weight">体重</option>
+        <option value="height">体高</option>
+        <option value="gain">日增重</option>
+      `;
+      openTab(event, tabId);
     }
 
     function runGWAS() {
-      alert('正在运行GWAS分析...（实际需调用后台算法）');
+      openTab(event, 'gwas-result');
+      // 模拟SNP结果填充
       const snpTable = document.getElementById('gwas-snp-table');
       snpTable.innerHTML = `
-        <tr>
-          <td>SNP12345</td>
-          <td>3</td>
-          <td>12568900</td>
-          <td>A/G</td>
-          <td>2.3e-09</td>
-          <td>8.64</td>
-          <td>GH1（生长激素基因）</td>
-        </tr>
-        <tr>
-          <td>SNP67890</td>
-          <td>7</td>
-          <td>45678200</td>
-          <td>C/T</td>
-          <td>4.7e-08</td>
-          <td>7.33</td>
-          <td>IGF2（胰岛素样生长因子2）</td>
-        </tr>
+        <tr><td>rs123456</td><td>1</td><td>1234567</td><td>A/G</td><td>2.3e-8</td><td>7.64</td><td>GENE1</td></tr>
+        <tr><td>rs789012</td><td>5</td><td>7890123</td><td>C/T</td><td>4.5e-9</td><td>8.35</td><td>GENE2</td></tr>
       `;
-      openTab(event, 'gwas-result');
+      // 模拟图表占位（实际需结合ECharts/Plotly）
+      document.getElementById('manhattan-plot').innerHTML = '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">曼哈顿图（示例）</div>';
+      document.getElementById('qq-plot').innerHTML = '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">QQ图（示例）</div>';
+      alert('GWAS分析完成！');
     }
 
     function exportGWASResult(type) {
-      let content = type === 'table' ? 'SNP表格数据' : type === 'plot' ? '曼哈顿图和QQ图' : '完整分析结果';
-      alert(`正在导出${content}...`);
-    }
-
-    // 新增：登录相关核心函数
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-      e.preventDefault(); // 阻止表单默认提交
-
-      // 1. 获取表单数据
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value.trim();
-
-      // 2. 简单验证（实际项目需对接后端接口）
-      if (username && password) {
-        // 模拟登录成功（真实场景：发送请求到后端 /api/login 验证账号密码）
-        alert(`登录成功！欢迎 ${username}`);
-
-        // 3. 保存登录状态到本地存储（关闭浏览器后仍有效）
-        localStorage.setItem('isLogin', 'true');
-        localStorage.setItem('username', username);
-
-        // 4. 更新页面状态（显示用户信息、切换按钮）
-        updateLoginStatus();
-
-        // 5. 关闭登录模态框
-        closeModal('loginModal');
-
-        // 6. 清空表单
-        this.reset();
-      } else {
-        alert('请输入完整的用户名和密码');
-      }
-    });
-
-    // 新增：退出登录函数
-    function logout() {
-      // 1. 清除本地存储的登录状态
-      localStorage.removeItem('isLogin');
-      localStorage.removeItem('username');
-
-      // 2. 更新页面状态（隐藏用户信息、切换按钮）
-      updateLoginStatus();
-
-      // 3. 提示退出成功
-      alert('退出登录成功！');
-    }
-
-    // 新增：更新登录状态（页面加载时执行）
-    function updateLoginStatus() {
-      const isLogin = localStorage.getItem('isLogin') === 'true';
-      const username = localStorage.getItem('username');
-
-      // 显示/隐藏用户信息
-      document.getElementById('userInfo').style.display = isLogin ? 'block' : 'none';
-      if (isLogin) document.getElementById('usernameDisplay').textContent = username;
-
-      // 切换按钮显示状态
-      document.getElementById('loginBtn').style.display = isLogin ? 'none' : 'inline-block';
-      document.getElementById('logoutBtn').style.display = isLogin ? 'inline-block' : 'none';
-      document.getElementById('viewResultsBtn').style.display = isLogin ? 'inline-block' : 'none';
-
-      // 未登录时禁用发布功能（可选，增强权限控制）
-      document.getElementById('publishForm').querySelector('button[type="submit"]').disabled = !isLogin;
-    }
-
-    // 页面加载时初始化登录状态
-    window.onload = function() {
-      updateLoginStatus();
+      alert(`导出${type}类型的GWAS结果功能开发中...`);
     }
   </script>
 </body>
