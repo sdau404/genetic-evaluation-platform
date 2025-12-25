@@ -4,27 +4,65 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>遗传评估结果发布平台</title>
-  <!-- 引入 Supabase SDK -->
+  <title>遗传改良信息服务平台</title>
+  <!-- 引入Supabase官方SDK（用于Auth和数据库操作） -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
   <style>
-    /* 所有CSS样式保持不变... */
+    /* 原有样式保持不变 */
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-size: 18px;
+    }
+    .loading-text {
+      background: #2c3e50;
+      padding: 20px 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .upload-toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 15px 25px;
+      border-radius: 8px;
+      color: white;
+      font-size: 14px;
+      z-index: 9998;
+      display: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .toast-success {
+      background: #27ae60;
+    }
+    .toast-error {
+      background: #e74c3c;
+    }
     body {
        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
        margin: 0;
        padding: 0;
        color: #333;
-      /* 核心：背景图 + 透明度 + 底色叠加 */
        background:
-         linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.65)), /* 白色底色 + 85%不透明度（数值越小越透明） */
-         url("asset/images/sdau.jpg"); /* 替换为你的背景图片地址（本地/网络） */
-       background-size: cover; /* 背景图自适应屏幕大小 */
-       background-position: center; /* 背景图居中显示 */
-       background-attachment: fixed; /* 滚动页面时背景图固定不动 */
-       background-repeat: no-repeat; /* 背景图不重复 */
+         linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.65)),
+         url("asset/images/sdau.jpg");
+       background-size: cover;
+       background-position: center;
+       background-attachment: fixed;
+       background-repeat: no-repeat;
        min-height: 100vh;
     }
-
     header {
       background-color: #2c3e50;
       color: white;
@@ -33,13 +71,11 @@
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       width: 100%;
     }
-
     header h1 {
       margin: 0;
       font-size: 28px;
       font-weight: 600;
     }
-
     nav {
       background-color: #34495e;
       padding: 10px 0;
@@ -52,18 +88,14 @@
       align-items: center;
       gap: 10px;
     }
-
-    /* 左侧功能区容器（修改后） */
     .nav-left {
       display: flex;
       align-items: center;
       gap: 14px;
-      margin-left: 10px; /* 基础左侧间距，可调整 */
-      justify-content: flex-end; /* 让容器内的按钮靠右排列 */
-      width: 50%; /* 可选：给容器设置宽度，让按钮有足够空间靠右 */
+      margin-left: 10px;
+      justify-content: flex-end;
+      width: 50%;
     }
-
-    /* 右侧操作区容器 */
     .nav-right {
       display: flex;
       align-items: center;
@@ -71,7 +103,6 @@
       margin-left: auto;
       margin-right: 20px;
     }
-
     nav a {
       margin: 0;
       padding: 10px 20px;
@@ -83,31 +114,25 @@
       font-size: 14px;
       cursor: pointer;
       display: inline-block;
+      opacity: 1;
+      pointer-events: auto;
     }
-
-    /* 首页按钮特殊样式（区分核心功能） */
     .home-btn {
       background-color: #2ecc71 !important;
     }
-
     .home-btn:hover {
       background-color: #27ae60 !important;
     }
-
     nav a:hover {
       background-color: #2980b9;
       transform: translateY(-2px);
     }
-
-    /* 未登录时的导航链接样式 */
     nav a.disabled {
       opacity: 0.6;
       cursor: not-allowed;
       pointer-events: none;
       background-color: #95a5a6 !important;
     }
-
-    /* 登录后的导航链接样式 */
     nav a.enabled {
       opacity: 1;
       cursor: pointer;
@@ -115,7 +140,6 @@
       background-color: #3498db;
       transition: all 0.3s ease;
     }
-
     .nav-btn {
       margin: 0;
       padding: 10px 15px;
@@ -127,34 +151,27 @@
       color: white;
       display: inline-block;
     }
-
     .login-btn {
       background-color: #e67e22;
     }
-
     .login-btn:hover {
       background-color: #d35400;
       transform: translateY(-2px);
     }
-
     .logout-btn {
       background-color: #e74c3c;
     }
-
     .logout-btn:hover {
       background-color: #c0392b;
       transform: translateY(-2px);
     }
-
     .view-results-btn {
       background-color: #27ae60;
     }
-
     .view-results-btn:hover {
       background-color: #219653;
       transform: translateY(-2px);
     }
-
     .search-box {
       display: none;
       position: absolute;
@@ -166,7 +183,6 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       z-index: 10;
     }
-
     .search-box input {
       padding: 8px;
       border: 1px solid #ddd;
@@ -175,7 +191,6 @@
       width: 200px;
       margin-right: 10px;
     }
-
     .search-box button {
       padding: 8px 12px;
       background-color: #3498db;
@@ -185,11 +200,9 @@
       cursor: pointer;
       transition: background-color 0.3s ease;
     }
-
     .search-box button:hover {
       background-color: #2980b9;
     }
-
     main {
       width: 80%;
       margin: 40px auto;
@@ -198,19 +211,16 @@
       border-radius: 15px;
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
     }
-
     main h2 {
       font-size: 24px;
       color: #2c3e50;
       margin-bottom: 30px;
       text-align: center;
     }
-
     .publish-section {
       max-width: 600px;
       margin: 0 auto;
     }
-
     .publish-form {
       display: flex;
       flex-direction: column;
@@ -221,12 +231,10 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
-
     .publish-form:hover {
       transform: translateY(-5px);
       box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
     }
-
     .publish-form input,
     .publish-form textarea,
     .publish-form select {
@@ -236,19 +244,16 @@
       font-size: 14px;
       transition: border-color 0.3s ease;
     }
-
     .publish-form input:focus,
     .publish-form textarea:focus,
     .publish-form select:focus {
       border-color: #3498db;
       outline: none;
     }
-
     .publish-form textarea {
       resize: vertical;
       min-height: 120px;
     }
-
     .publish-form button {
       padding: 12px 20px;
       background-color: #3498db;
@@ -259,12 +264,10 @@
       cursor: pointer;
       transition: background-color 0.3s ease, transform 0.2s ease;
     }
-
     .publish-form button:hover {
       background-color: #2980b9;
       transform: translateY(-2px);
     }
-
     footer {
       background-color: #2c3e50;
       color: white;
@@ -273,11 +276,9 @@
       margin-top: 40px;
       box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
     }
-
     .footer-buttons {
       margin-bottom: 10px;
     }
-
     .footer-buttons button {
       margin: 0 5px;
       padding: 10px 20px;
@@ -289,17 +290,14 @@
       transition: background-color 0.3s ease, transform 0.2s ease;
       font-size: 14px;
     }
-
     .footer-buttons button:hover {
       background-color: #2980b9;
       transform: translateY(-2px);
     }
-
     footer p {
       font-size: 12px;
       margin: 5px 0 0;
     }
-
     .modal {
       display: none;
       position: fixed;
@@ -314,7 +312,6 @@
       padding: 30px 0;
       overflow-y: auto;
     }
-
     .modal-content {
       background-color: white;
       padding: 20px;
@@ -326,7 +323,6 @@
       position: relative;
       overflow-y: auto;
     }
-
     .close-btn {
       position: absolute;
       top: 15px;
@@ -335,30 +331,25 @@
       cursor: pointer;
       color: #777;
     }
-
     .close-btn:hover {
       color: #333;
     }
-
     .login-form {
       display: flex;
       flex-direction: column;
       gap: 15px;
       margin-top: 20px;
     }
-
     .login-form label {
       font-weight: 600;
       color: #2c3e50;
     }
-
     .login-form input {
       padding: 12px;
       border: 1px solid #ddd;
       border-radius: 5px;
       font-size: 14px;
     }
-
     .login-form button {
       padding: 12px;
       background-color: #3498db;
@@ -369,48 +360,39 @@
       cursor: pointer;
       transition: background-color 0.3s ease;
     }
-
     .login-form button:hover {
       background-color: #2980b9;
     }
-
     .login-form .form-footer {
       display: flex;
       justify-content: space-between;
       font-size: 13px;
       margin-top: 5px;
     }
-
     .login-form .form-footer a {
       color: #3498db;
       text-decoration: none;
     }
-
     .login-form .form-footer a:hover {
       text-decoration: underline;
     }
-
     .form-group {
       margin-bottom: 12px;
     }
-
     .form-group label {
       display: block;
       margin-bottom: 8px;
       font-weight: 600;
       color: #2c3e50;
     }
-
     .form-row {
       display: flex;
       gap: 12px;
       margin-bottom: 12px;
     }
-
     .form-col {
       flex: 1;
     }
-
     .file-upload {
       border: 2px dashed #ddd;
       padding: 15px;
@@ -419,48 +401,39 @@
       cursor: pointer;
       transition: border-color 0.3s ease;
     }
-
     .file-upload:hover {
       border-color: #3498db;
     }
-
     .file-upload input {
       display: none;
     }
-
     .file-upload p {
       margin: 5px 0;
       font-size: 14px;
     }
-
     .data-table {
       width: 100%;
       border-collapse: collapse;
       margin: 15px 0;
       font-size: 13px;
     }
-
     .data-table th,
     .data-table td {
       border: 1px solid #ddd;
       padding: 8px;
       text-align: left;
     }
-
     .data-table th {
       background-color: #f2f2f2;
     }
-
     .tab-container {
       margin-bottom: 15px;
     }
-
     .tab-buttons {
       display: flex;
       border-bottom: 1px solid #ddd;
       margin-bottom: 15px;
     }
-
     .tab-btn {
       padding: 8px 15px;
       background: none;
@@ -470,27 +443,22 @@
       transition: all 0.3s ease;
       font-size: 14px;
     }
-
     .tab-btn.active {
       border-bottom: 3px solid #3498db;
       color: #3498db;
       font-weight: 600;
     }
-
     .tab-content {
       display: none;
     }
-
     .tab-content.active {
       display: block;
     }
-
     .user-info {
       color: white;
       font-size: 14px;
       margin-right: 15px;
     }
-
     @media (max-width: 1200px) {
       nav {
         flex-wrap: wrap;
@@ -504,152 +472,124 @@
         margin-right: 0;
       }
     }
-
     @media (max-width: 768px) {
       main {
         width: 90%;
         padding: 20px;
       }
-
       .modal-content {
         width: 90%;
         max-height: calc(100vh - 60px);
       }
-
       .form-row {
         flex-direction: column;
         gap: 10px;
       }
-
       nav {
         flex-direction: column;
         align-items: center;
         gap: 8px;
       }
-
       .nav-left, .nav-right {
         flex-direction: column;
         width: 100%;
         align-items: center;
       }
-
       nav a,
       .nav-btn {
         width: 80%;
         margin: 3px 0;
         text-align: center;
       }
-
       .user-info {
         display: none;
       }
-
       .search-box {
         left: 50%;
         transform: translateX(-50%);
         right: auto;
       }
     }
-    /* 卡片的css样式 */
-    /* 多卡片容器 */
     .img-text-cards {
       display: flex;
       gap: 25px;
-      flex-wrap: wrap; /* 自动换行 */
+      flex-wrap: wrap;
       margin: 30px 0;
     }
-
-    /* 单张卡片样式 */
     .img-text-card {
       flex: 1;
-      min-width: 280px; /* 最小宽度，避免过窄 */
+      min-width: 280px;
       background-color: white;
       border-radius: 12px;
-      overflow: hidden; /* 裁剪圆角 */
+      overflow: hidden;
       box-shadow: 0 4px 10px rgba(0,0,0,0.05);
       transition: transform 0.3s;
     }
-
-/* 卡片悬浮效果 */
     .img-text-card:hover {
-      transform: translateY(-5px); /* 轻微上浮 */
+      transform: translateY(-5px);
     }
-
-/* 卡片图片 */
     .card-img img {
       width: 100%;
-      height: 180px; /* 固定图片高度，保持整齐 */
-      object-fit: cover; /* 避免图片拉伸 */
+      height: 180px;
+      object-fit: cover;
     }
-
-/* 卡片文字 */
     .card-text {
       padding: 20px;
     }
-
     .card-text h4 {
       color: #2c3e50;
       font-size: 18px;
       margin-bottom: 10px;
     }
-
     .card-text p {
       color: #666;
       font-size: 14px;
       line-height: 1.6;
       margin-bottom: 15px;
     }
-
     .card-text a {
       color: #3498db;
       text-decoration: none;
       font-size: 14px;
       font-weight: 600;
     }
-
     .card-text a:hover {
       color: #2980b9;
       text-decoration: underline;
     }
-
-
   </style>
 </head>
 
 <body>
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-text">
+      <span>加载中...</span>
+    </div>
+  </div>
+  <div class="upload-toast" id="uploadToast"></div>
+
   <header>
     <h1>遗传改良信息服务平台</h1>
   </header>
 
   <nav>
-    <!-- 左侧功能区：首页按钮 + 核心功能导航 -->
     <div class="nav-left">
-      <!-- 首页按钮（添加在核心功能左侧，点击返回index） -->
       <a href="index.html" class="home-btn" title="返回首页">首页</a>
-
-      <!-- 核心功能导航 -->
       <a id="navPhenotype" onclick="checkLoginBeforeOpen('phenotypeModal')">表型数据上传</a>
       <a id="navGenotype" onclick="checkLoginBeforeOpen('genotypeModal')">基因型数据上传</a>
       <a id="navKinship" onclick="checkLoginBeforeOpen('kinshipMatrixModal')">系谱上传</a>
-      <!-- 删除 <a id="navGwas" onclick="checkLoginBeforeOpen('gwasModal')">全基因组关联分析</a>-->
-      <!-- 删除 <a id="navEvaluation" onclick="checkLoginBeforeOpen('geneticEvaluationModal')">遗传评估</a>-->
       <a href="介绍.html">介绍</a>
     </div>
 
-    <!-- 右侧操作区：用户信息 + 登录/退出/搜索按钮 -->
     <div class="nav-right">
-      <!-- 用户信息 -->
       <div class="user-info" id="userInfo" style="display: none;">
         欢迎，<span id="usernameDisplay"></span>
       </div>
-
-      <!-- 操作按钮 -->
       <button class="nav-btn login-btn" id="loginBtn" onclick="openModal('loginModal')">登录</button>
       <button class="nav-btn logout-btn" id="logoutBtn" onclick="logout()" style="display: none;">退出登录</button>
       <button class="nav-btn view-results-btn" id="viewResultsBtn" onclick="toggleSearchBox()" style="display: none;">遗传评估结果查看</button>
     </div>
 
-    <!-- 搜索框（位置调整为右侧对齐） -->
     <div class="search-box" id="searchBox">
       <input type="text" placeholder="输入关键词搜索">
       <button onclick="searchResults()">搜索</button>
@@ -715,8 +655,8 @@
       <span class="close-btn" onclick="closeModal('loginModal')">&times;</span>
       <h2 style="text-align: center;">用户登录</h2>
       <form class="login-form" id="loginForm">
-        <label for="username">用户名/邮箱</label>
-        <input type="text" id="username" placeholder="请输入用户名或邮箱" required>
+        <label for="username">邮箱</label>
+        <input type="email" id="username" placeholder="请输入注册邮箱" required>
 
         <label for="password">密码</label>
         <input type="password" id="password" placeholder="请输入密码" required>
@@ -742,7 +682,7 @@
         <input type="email" id="regEmail" placeholder="请输入用于注册的邮箱" required>
 
         <label for="regPassword">密码</label>
-        <input type="password" id="regPassword" placeholder="请输入密码（6-20位）" required>
+        <input type="password" id="regPassword" placeholder="请输入密码（至少6位）" required>
 
         <label for="regConfirmPassword">确认密码</label>
         <input type="password" id="regConfirmPassword" placeholder="请再次输入密码" required>
@@ -755,12 +695,12 @@
     </div>
   </div>
 
-  <!-- 简单的表型数据处理模态框（其他类似） -->
+  <!-- 表型数据处理模态框 -->
   <div class="modal" id="phenotypeModal">
     <div class="modal-content">
       <span class="close-btn" onclick="closeModal('phenotypeModal')">&times;</span>
       <h2>表型数据处理</h2>
-      <div class="publish-form">
+      <div class="publish-form" id="phenotypeForm">
         <div class="form-group">
           <label for="phenotype-file">上传表型数据文件</label>
           <div class="file-upload" onclick="document.getElementById('phenotype-file').click()">
@@ -773,7 +713,7 @@
           <label for="phenotype-name">数据集名称</label>
           <input type="text" id="phenotype-name" placeholder="输入数据集名称" required>
         </div>
-        <button type="submit">上传数据</button>
+        <button onclick="uploadData('phenotype')">上传表型数据</button>
       </div>
     </div>
   </div>
@@ -783,7 +723,7 @@
     <div class="modal-content">
       <span class="close-btn" onclick="closeModal('genotypeModal')">&times;</span>
       <h2>基因型数据处理</h2>
-      <div class="publish-form">
+      <div class="publish-form" id="genotypeForm">
         <div class="form-group">
           <label for="genotype-file">上传基因型数据文件</label>
           <div class="file-upload" onclick="document.getElementById('genotype-file').click()">
@@ -796,7 +736,7 @@
           <label for="genotype-name">数据集名称</label>
           <input type="text" id="genotype-name" placeholder="输入数据集名称" required>
         </div>
-        <button type="submit">上传数据</button>
+        <button onclick="uploadData('genotype')">上传基因型数据</button>
       </div>
     </div>
   </div>
@@ -806,7 +746,7 @@
     <div class="modal-content">
       <span class="close-btn" onclick="closeModal('kinshipMatrixModal')">&times;</span>
       <h2>亲缘关系矩阵计算</h2>
-      <div class="publish-form">
+      <div class="publish-form" id="kinshipForm">
         <div class="form-group">
           <label for="kinship-file">上传亲缘关系矩阵文件</label>
           <div class="file-upload" onclick="document.getElementById('kinship-file').click()">
@@ -819,42 +759,17 @@
           <label for="kinship-name">矩阵名称</label>
           <input type="text" id="kinship-name" placeholder="输入矩阵名称" required>
         </div>
-        <button type="submit">上传矩阵</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 全基因组关联分析模态框 -->
-  <div class="modal" id="gwasModal">
-    <div class="modal-content">
-      <span class="close-btn" onclick="closeModal('gwasModal')">&times;</span>
-      <h2>全基因组关联分析（GWAS）</h2>
-      <div class="publish-form">
-        <div class="form-group">
-          <label for="gwas-file">上传GWAS结果文件</label>
-          <div class="file-upload" onclick="document.getElementById('gwas-file').click()">
-            <input type="file" id="gwas-file" accept=".csv, .txt, .gwas">
-            <p>点击或拖拽文件到此处</p>
-            <p>支持格式: CSV, TXT, GWAS</p>
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="gwas-name">分析名称</label>
-          <input type="text" id="gwas-name" placeholder="输入分析名称" required>
-        </div>
-        <button type="submit">上传结果</button>
+        <button onclick="uploadData('kinship')">上传亲缘关系数据</button>
       </div>
     </div>
   </div>
 
   <!-- 遗传评估模态框 -->
-  <!-- 新：遗传评估结果查看模态框 -->
   <div class="modal" id="geneticEvaluationModal">
     <div class="modal-content">
       <span class="close-btn" onclick="closeModal('geneticEvaluationModal')">&times;</span>
       <h2>遗传评估结果查看</h2>
 
-      <!-- 筛选条件（默认筛选猪） -->
       <div class="publish-form" style="margin-bottom: 20px;">
         <div class="form-row">
           <div class="form-col">
@@ -882,7 +797,6 @@
         </div>
       </div>
 
-    <!-- 结果列表 -->
       <div style="max-height: 400px; overflow-y: auto;">
         <table class="data-table" id="eval-results-table">
           <thead>
@@ -895,7 +809,6 @@
             </tr>
           </thead>
           <tbody id="eval-results-body">
-            <!-- 动态渲染结果 -->
           </tbody>
         </table>
         <div id="eval-no-result" style="text-align: center; padding: 20px; display: none;">
@@ -903,11 +816,9 @@
         </div>
       </div>
 
-      <!-- 结果详情弹窗 -->
       <div id="eval-detail-modal" style="display: none; margin-top: 20px; padding: 15px; border: 1px solid #eee; border-radius: 8px; background: #f9f9f9;">
         <h4 style="margin-top: 0;" id="detail-title">评估详情</h4>
         <div id="detail-content">
-          <!-- 动态渲染详情 -->
         </div>
         <button onclick="closeEvalDetail()" style="margin-top: 10px; padding: 8px 15px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer;">关闭详情</button>
       </div>
@@ -915,326 +826,432 @@
   </div>
 
 <script>
-// 修复的JavaScript代码
-// 1. 修复Supabase初始化
-let supabaseClient = null;
+  // 1. 初始化Supabase客户端（使用官方SDK，支持Auth、Storage、Database）
+  const supabaseUrl = "https://cwpdenrqhipxgkcwewtv.supabase.co";
+  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3cGRlbnJxaGlweGdrY3dld3R2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU5NDM5MzUsImV4cCI6MjA4MTUxOTkzNX0.qLvLmBeu00kCZ7rvQUd4iBQFxR4lDkRLqIRM44JZ3i4";
+  const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-document.addEventListener('DOMContentLoaded', function() {
-  initSupabase();
-  updateLoginStatus();
-});
+  // 2. 全局变量
+  let currentUser = null; // 当前登录用户
 
-function initSupabase() {
-  try {
-    window.sb = supabase.createClient(
-      "https://cwpdenrqhipxgkcwewtv.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3cGRlbnJxaGlweGdrY3dld3R2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU5NDM5MzUsImV4cCI6MjA4MTUxOTkzNX0.qLvLmBeu00kCZ7rvQUd4iBQFxR4lDkRLqIRM44JZ3i4",
-      {
-        auth: {
-          persistSession: true,
-          autoRefreshToken: true,
-          detectSessionInUrl: true,
-          storage: localStorage
-        },
-        global: {
-          headers: {
-            'X-Client-Info': 'supabase-js/2.38.4'
-          }
-        }
+  // 3. 页面加载时初始化
+  window.onload = async function() {
+    try {
+      // 检查用户是否已登录（持久化登录状态）
+      const { data: { session }, error } = await supabaseClient.auth.getSession();
+      if (error) throw error;
+
+      if (session) {
+        currentUser = session.user;
       }
-    );
-    supabaseClient = window.sb;
-    console.log("Supabase 初始化完成");
-  } catch (error) {
-    console.warn("Supabase 初始化失败，使用离线模式：", error);
-    // 即使Supabase初始化失败，也允许页面继续运行
-    window.sb = null;
-  }
-}
 
-// 2. 基础模态框函数（添加错误检查）
-function openModal(modalId) {
-  const modal = document.getElementById(modalId);
-  if (!modal) {
-    console.error('未找到模态框：', modalId);
-    alert('功能暂不可用，请检查页面是否完整加载');
-    return;
-  }
-  modal.style.display = 'flex';
-}
+      // 更新登录状态UI
+      updateLoginStatus();
+      // 绑定文件选择事件
+      bindFileChangeEvents();
 
-function closeModal(modalId) {
-  const modal = document.getElementById(modalId);
-  if (modal) {
-    modal.style.display = 'none';
-  }
-}
-
-// 3. 检查登录状态的通用函数（修复版）
-function checkLoginBeforeOpen(modalId) {
-  // 先检查模态框是否存在
-  const modal = document.getElementById(modalId);
-  if (!modal) {
-    console.error('未找到模态框：', modalId);
-    alert('功能暂不可用，请刷新页面重试！');
-    return;
-  }
-
-  // 如果Supabase不可用，直接打开模态框（离线模式）
-  if (!window.sb) {
-    console.warn('Supabase不可用，使用离线模式');
-    openModal(modalId);
-    return;
-  }
-
-  // 检查登录状态
-  window.sb.auth.getSession().then(({ data: { session } }) => {
-    if (session) {
-      openModal(modalId);
-    } else {
-      alert('请先登录后使用此功能！');
-      // 确保登录模态框存在
-      const loginModal = document.getElementById('loginModal');
-      if (loginModal) {
-        openModal('loginModal');
-      } else {
-        alert('登录功能暂不可用，请刷新页面重试！');
-      }
+      console.log("Supabase初始化完成，当前用户：", currentUser?.email || "未登录");
+    } catch (e) {
+      console.error("初始化失败:", e);
+      showToast("系统初始化失败，请刷新页面重试！", false);
     }
-  }).catch(error => {
-    console.error("检查登录状态失败:", error);
-    alert('检查登录状态失败，请重试！');
-  });
-}
+  };
 
-// 4. 更新导航栏状态
-function updateNavbarStatus(isLogin) {
-  const navLinks = [
-    'navPhenotype',
-    'navGenotype',
-    'navKinship',
-    'navGwas',
-    'navEvaluation'
-  ];
-
-  navLinks.forEach(id => {
-    const link = document.getElementById(id);
-    if (link) {
-      if (isLogin) {
-        link.classList.remove('disabled');
-        link.classList.add('enabled');
-      } else {
-        link.classList.remove('enabled');
-        link.classList.add('disabled');
-      }
-    }
-  });
-}
-
-// 5. 更新登录状态（修复版）
-async function updateLoginStatus() {
-  // 如果Supabase不可用，假设用户未登录
-  if (!window.sb) {
-    console.warn('Supabase不可用，使用离线模式');
-    document.getElementById('userInfo').style.display = 'none';
-    document.getElementById('loginBtn').style.display = 'inline-block';
-    document.getElementById('logoutBtn').style.display = 'none';
-    document.getElementById('viewResultsBtn').style.display = 'none';
-    document.getElementById('publishForm').querySelector('button[type="submit"]').disabled = true;
-    updateNavbarStatus(false);
-    return;
+  // 4. 绑定文件选择事件
+  function bindFileChangeEvents() {
+    document.getElementById('phenotype-file').addEventListener('change', (e) => {
+      console.log("选择表型文件：", e.target.files[0]?.name);
+    });
+    document.getElementById('genotype-file').addEventListener('change', (e) => {
+      console.log("选择基因型文件：", e.target.files[0]?.name);
+    });
+    document.getElementById('kinship-file').addEventListener('change', (e) => {
+      console.log("选择亲缘关系文件：", e.target.files[0]?.name);
+    });
   }
 
-  try {
-    const { data: { session }, error: sessionError } = await window.sb.auth.getSession();
-    if (sessionError) {
-      console.error("获取登录状态失败：", sessionError);
-      updateNavbarStatus(false);
+  // 5. 显示/隐藏加载提示
+  function showLoading(text = "上传中...") {
+    const loading = document.getElementById('loadingOverlay');
+    loading.querySelector('.loading-text span').textContent = text;
+    loading.style.display = 'flex';
+  }
+
+  function hideLoading() {
+    document.getElementById('loadingOverlay').style.display = 'none';
+  }
+
+  // 6. 显示上传提示
+  function showToast(message, isSuccess = true) {
+    const toast = document.getElementById('uploadToast');
+    toast.textContent = message;
+    toast.className = 'upload-toast ' + (isSuccess ? 'toast-success' : 'toast-error');
+    toast.style.display = 'block';
+    setTimeout(() => {
+      toast.style.display = 'none';
+    }, 3000);
+  }
+
+  // 7. 核心上传函数（关联用户ID）
+  async function uploadData(dataType) {
+    // 检查登录状态
+    if (!currentUser) {
+      showToast('请先登录后再上传数据！', false);
+      openModal('loginModal');
       return;
     }
 
-    const isLogin = !!session;
-    const user = session?.user;
-
-    document.getElementById('userInfo').style.display = isLogin ? 'block' : 'none';
-    if (isLogin) {
-      document.getElementById('usernameDisplay').textContent = user.email || user.user_metadata?.username || '未知用户';
+    // 获取DOM元素
+    let dataNameDomId = '';
+    let fileInputDomId = '';
+    let typeName = '';
+    switch(dataType) {
+      case 'phenotype':
+        dataNameDomId = 'phenotype-name';
+        fileInputDomId = 'phenotype-file';
+        typeName = '表型';
+        break;
+      case 'genotype':
+        dataNameDomId = 'genotype-name';
+        fileInputDomId = 'genotype-file';
+        typeName = '基因型';
+        break;
+      case 'kinship':
+        dataNameDomId = 'kinship-name';
+        fileInputDomId = 'kinship-file';
+        typeName = '亲缘关系';
+        break;
+      default:
+        showToast('未知的上传类型！', false);
+        return;
     }
 
-    document.getElementById('loginBtn').style.display = isLogin ? 'none' : 'inline-block';
-    document.getElementById('logoutBtn').style.display = isLogin ? 'inline-block' : 'none';
-    document.getElementById('viewResultsBtn').style.display = isLogin ? 'inline-block' : 'none';
+    // 获取输入值和文件
+    const dataName = document.getElementById(dataNameDomId).value.trim();
+    const fileInput = document.getElementById(fileInputDomId);
+    const selectedFile = fileInput.files[0];
 
-
-    updateNavbarStatus(isLogin);
-  } catch (error) {
-    console.error('更新登录状态出错:', error);
-    updateNavbarStatus(false);
-  }
-}
-
-// 6. 登录表单提交
-document.getElementById('loginForm').addEventListener('submit', async function(e) {
-  e.preventDefault();
-
-  const username = document.getElementById('username').value.trim();
-  const password = document.getElementById('password').value.trim();
-
-  if (!username || !password) {
-    alert('请输入用户名/邮箱和密码！');
-    return;
-  }
-
-  // 如果Supabase不可用，模拟登录
-  if (!window.sb) {
-    console.warn('Supabase不可用，使用模拟登录');
-    alert('登录成功！欢迎 测试用户');
-    // 模拟更新登录状态
-    document.getElementById('userInfo').style.display = 'block';
-    document.getElementById('usernameDisplay').textContent = '测试用户';
-    document.getElementById('loginBtn').style.display = 'none';
-    document.getElementById('logoutBtn').style.display = 'inline-block';
-    document.getElementById('viewResultsBtn').style.display = 'inline-block';
-    document.getElementById('publishForm').querySelector('button[type="submit"]').disabled = false;
-    updateNavbarStatus(true);
-    closeModal('loginModal');
-    this.reset();
-    return;
-  }
-
-  try {
-    const { data, error } = await window.sb.auth.signInWithPassword({
-      email: username,
-      password: password,
-    });
-
-    if (error) {
-      throw error;
+    // 基础校验
+    if (!dataName) {
+      showToast(`请输入${typeName}数据集名称！`, false);
+      return;
+    }
+    if (!selectedFile) {
+      showToast(`请选择${typeName}上传文件！`, false);
+      return;
+    }
+    if (selectedFile.size > 5 * 1024 * 1024) {
+      showToast('文件大小超过5MB（Supabase免费版上限）！', false);
+      return;
     }
 
-    const userName = data.user.email || data.user.user_metadata?.username || '未知用户';
-    alert(`登录成功！欢迎 ${userName}`);
-    updateLoginStatus();
-    closeModal('loginModal');
-    this.reset();
-  } catch (error) {
-    console.error('登录失败:', error);
-    alert(`登录失败：${error.message}`);
-  }
-});
+    try {
+      showLoading(`正在上传${typeName}数据...`);
 
-// 7. 退出登录
-async function logout() {
-  // 如果Supabase不可用，模拟登出
-  if (!window.sb) {
-    console.warn('Supabase不可用，使用模拟登出');
-    alert('退出登录成功！');
-    updateLoginStatus();
-    return;
-  }
+      // 生成安全文件名（包含用户ID，确保文件隔离）
+      const safeFileName = selectedFile.name.replace(/[^a-zA-Z0-9_\-\.]/g, '_');
+      const fileName = `${Date.now()}_${safeFileName}`;
+      // 文件路径：类型/用户ID/文件名（确保每个用户的文件隔离）
+      const filePath = `${dataType}/${currentUser.id}/${fileName}`;
 
-  try {
-    const { error } = await window.sb.auth.signOut();
-    if (error) {
-      throw error;
+      // 步骤1：上传文件到Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabaseClient
+        .storage
+        .from('genetic-data')
+        .upload(filePath, selectedFile, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) throw uploadError;
+
+     // 替换原getPublicUrl的代码
+const { data: signedUrlData, error: signedUrlError } = await supabaseClient
+  .storage
+  .from('genetic-data')
+  .createSignedUrl(filePath, 60 * 60 * 24); // 有效期24小时
+
+if (signedUrlError) throw signedUrlError;
+
+
+
+
+      // 步骤3：将数据记录写入Supabase数据库（关联用户ID）
+      const { error: dbError } = await supabaseClient
+        .from('uploaded_data') // 请确保Supabase中已创建此表
+        .insert([
+          {
+            user_id: currentUser.id,          // 用户ID
+            data_type: dataType,              // 数据类型
+            data_name: dataName,              // 数据集名称
+            file_name: selectedFile.name,     // 原始文件名
+            file_path: filePath,              // 存储路径
+            file_url: signedUrlData.signedUrl,      // 访问URL// 存入数据库的URL改为签名URL
+            file_size: selectedFile.size,     // 文件大小
+            upload_time: new Date().toISOString(), // 上传时间
+            file_type: dataType               //文件类型（基因型、表型、系谱）
+
+          }
+        ]);
+
+      if (dbError) throw dbError;
+
+      // 上传成功
+      hideLoading();
+      showToast(`${typeName}数据集上传成功！`);
+      alert(`✅ ${typeName}数据集上传成功！
+      名称：${dataName}
+      用户ID：${currentUser.id}
+      存储路径：${filePath}`);
+
+      // 重置表单
+      document.getElementById(dataNameDomId).value = '';
+      fileInput.value = '';
+
+    } catch (e) {
+      hideLoading();
+      console.error(`${typeName}上传失败:`, e);
+      showToast(`${typeName}上传失败：${e.message}`, false);
+      alert(`❌ ${typeName}上传失败：${e.message}
+      请检查：
+      1. 文件大小是否<5MB
+      2. 网络是否正常
+      3. 数据集名称是否填写`);
     }
-    alert('退出登录成功！');
-    updateLoginStatus();
-  } catch (error) {
-    console.error('退出登录失败:', error);
-    alert(`退出失败：${error.message}`);
   }
-}
 
-// 8. 切换模态框
-function switchModal(targetModalId) {
-  const modals = document.querySelectorAll('.modal');
-  modals.forEach(modal => {
-    if (modal.style.display === 'flex') {
+  // 8. 模态框操作函数
+  function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (!modal) {
+      console.error('未找到模态框：', modalId);
+      showToast('功能暂不可用，请检查页面！', false);
+      return;
+    }
+    modal.style.display = 'flex';
+  }
+
+  function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
       modal.style.display = 'none';
     }
-  });
-
-  openModal(targetModalId);
-}
-
-// 9. 搜索框切换
-function toggleSearchBox() {
-  const searchBox = document.getElementById('searchBox');
-  if (searchBox) {
-    searchBox.style.display = searchBox.style.display === 'block' ? 'none' : 'block';
   }
-}
 
-
-// 11. 点击模态框外部关闭功能
-document.addEventListener('click', function(e) {
-  const modals = document.querySelectorAll('.modal');
-  modals.forEach(modal => {
-    if (e.target === modal) {
-      modal.style.display = 'none';
-    }
-  });
-});
-
-// 12. 按ESC键关闭模态框
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') {
+  function switchModal(targetModalId) {
     const modals = document.querySelectorAll('.modal');
     modals.forEach(modal => {
-      modal.style.display = 'none';
+      if (modal.style.display === 'flex') {
+        modal.style.display = 'none';
+      }
     });
-  }
-});
-
-// 13. 搜索功能（补充实现）
-function searchResults() {
-  const searchInput = document.querySelector('.search-box input').value.trim();
-  const resultSection = document.getElementById('searchResultSection');
-  const resultBody = document.getElementById('searchResultBody');
-  const noResultTip = document.getElementById('noResultTip');
-
-  // 清空之前的结果
-  resultBody.innerHTML = '';
-
-  if (!searchInput) {
-    alert('请输入搜索关键词！');
-    return;
+    openModal(targetModalId);
   }
 
-  // 模拟搜索结果（实际项目中替换为Supabase查询）
-  const mockResults = [
-    { title: '牛生长性状遗传评估', species: '牛', trait: '生长性状', time: '2025-01-15' },
-    { title: '猪繁殖性状GWAS分析', species: '猪', trait: '繁殖性状', time: '2025-01-10' },
-    { title: '羊产肉性状遗传参数估计', species: '羊', trait: '肉质性状', time: '2025-01-05' }
-  ];
+  // 9. 登录状态相关函数
+  function checkLoginBeforeOpen(modalId) {
+    if (!currentUser) {
+      showToast('请先登录后使用此功能！', false);
+      openModal('loginModal');
+      return;
+    }
+    openModal(modalId);
+  }
 
-  // 过滤匹配结果
-  const matchedResults = mockResults.filter(item =>
-    item.title.includes(searchInput) ||
-    item.species.includes(searchInput) ||
-    item.trait.includes(searchInput)
-  );
+  function updateLoginStatus() {
+    // 更新导航栏和按钮状态
+    document.getElementById('userInfo').style.display = currentUser ? 'block' : 'none';
+    document.getElementById('loginBtn').style.display = currentUser ? 'none' : 'inline-block';
+    document.getElementById('logoutBtn').style.display = currentUser ? 'inline-block' : 'none';
+    document.getElementById('viewResultsBtn').style.display = currentUser ? 'inline-block' : 'none';
 
-  // 显示结果
-  resultSection.style.display = 'block';
-  if (matchedResults.length > 0) {
-    noResultTip.style.display = 'none';
-    matchedResults.forEach(item => {
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td>${item.title}</td>
-        <td>${item.species}</td>
-        <td>${item.trait}</td>
-        <td>${item.time}</td>
-        <td><button style="padding:5px 10px; background:#3498db; color:white; border:none; border-radius:3px; cursor:pointer;">查看详情</button></td>
-      `;
-      resultBody.appendChild(row);
+    // 更新导航链接状态（未登录时禁用上传功能）
+    const navLinks = ['navPhenotype', 'navGenotype', 'navKinship'];
+    navLinks.forEach(id => {
+      const link = document.getElementById(id);
+      if (link) {
+        link.classList.toggle('disabled', !currentUser);
+        link.classList.toggle('enabled', currentUser);
+      }
     });
-  } else {
-    noResultTip.style.display = 'block';
+
+    // 显示用户名
+    if (currentUser) {
+      document.getElementById('usernameDisplay').textContent = currentUser.email.split('@')[0];
+    }
   }
-}
+
+  // 10. 真实的登录功能（Supabase Auth）
+  document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const email = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
+
+    if (!email || !password) {
+      showToast('请输入邮箱和密码！', false);
+      return;
+    }
+
+    try {
+      showLoading("登录中...");
+      // 调用Supabase Auth登录
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: password,
+      });
+
+      if (error) throw error;
+
+      // 登录成功，更新用户信息
+      currentUser = data.user;
+      showToast('登录成功！');
+      updateLoginStatus();
+      closeModal('loginModal');
+      this.reset();
+
+      console.log("用户登录成功：", currentUser.email);
+    } catch (e) {
+      hideLoading();
+      console.error("登录失败：", e);
+      // 友好的错误提示
+      if (e.message.includes('Invalid login credentials')) {
+        showToast('邮箱或密码错误！', false);
+      } else {
+        showToast(`登录失败：${e.message}`, false);
+      }
+    } finally {
+    hideLoading();
+
+    }
+  });
+
+  // 11. 真实的注册功能（Supabase Auth）
+  document.getElementById('registerForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const username = document.getElementById('regUsername').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const password = document.getElementById('regPassword').value.trim();
+    const confirmPassword = document.getElementById('regConfirmPassword').value.trim();
+
+    // 表单验证
+    if (!username || username.length < 3) {
+      showToast('用户名至少3位！', false);
+      return;
+    }
+    if (!email) {
+      showToast('请输入有效的邮箱！', false);
+      return;
+    }
+    if (password.length < 6) {
+      showToast('密码至少6位！', false);
+      return;
+    }
+    if (password !== confirmPassword) {
+      showToast('两次输入的密码不一致！', false);
+      return;
+    }
+
+    try {
+      showLoading("注册中...");
+      // 调用Supabase Auth注册
+      const { data, error } = await supabaseClient.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            username: username // 额外的用户信息
+          }
+        }
+      });
+
+      if (error) throw error;
+
+      // 注册成功
+      showToast('注册成功！请查收验证邮件后登录', true);
+      switchModal('loginModal');
+      this.reset();
+
+      console.log("用户注册成功：", email);
+    } catch (e) {
+      hideLoading();
+      console.error("注册失败：", e);
+      // 友好的错误提示
+      if (e.message.includes('Email already registered')) {
+        showToast('该邮箱已被注册！', false);
+      } else {
+        showToast(`注册失败：${e.message}`, false);
+      }
+    } finally {
+      hideLoading();
+    }
+  });
+
+  // 12. 退出登录功能
+  async function logout() {
+    try {
+      showLoading("退出登录中...");
+      // 调用Supabase Auth退出登录
+      const { error } = await supabaseClient.auth.signOut();
+
+      if (error) throw error;
+
+      // 重置用户状态
+      currentUser = null;
+      showToast('退出登录成功！');
+      updateLoginStatus();
+
+      console.log("用户已退出登录");
+    } catch (e) {
+      hideLoading();
+      console.error("退出登录失败：", e);
+      showToast(`退出登录失败：${e.message}`, false);
+    } finally {
+      hideLoading();
+    }
+  }
+
+  // 13. 其他辅助函数
+  function toggleSearchBox() {
+    const searchBox = document.getElementById('searchBox');
+    searchBox.style.display = searchBox.style.display === 'block' ? 'none' : 'block';
+  }
+
+  function searchResults() {
+    const searchInput = document.querySelector('.search-box input').value.trim();
+    if (!searchInput) {
+      showToast('请输入搜索关键词！', false);
+      return;
+    }
+    alert(`搜索关键词：${searchInput}\n（模拟搜索功能，暂无真实数据）`);
+  }
+
+  function closeEvalDetail() {
+    document.getElementById('eval-detail-modal').style.display = 'none';
+  }
+
+  function filterEvalResults() {
+    showToast('筛选功能待实现', false);
+  }
+
+  // 点击模态框外部关闭
+  document.addEventListener('click', function(e) {
+    const modals = document.querySelectorAll('.modal');
+    modals.forEach(modal => {
+      if (e.target === modal) {
+        modal.style.display = 'none';
+      }
+    });
+  });
+
+  // 按ESC键关闭模态框
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      const modals = document.querySelectorAll('.modal');
+      modals.forEach(modal => {
+        modal.style.display = 'none';
+      });
+    }
+  });
 </script>
 
 </body>
