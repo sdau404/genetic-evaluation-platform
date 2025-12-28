@@ -639,6 +639,7 @@
       <button>Update</button>
       <button>Citation</button>
       <button>Manual</button>
+      <button onclick="createTestEvalResult()" style="background-color: #9b59b6;">创建测试评估结果</button>
     </div>
     <p>如果发现bug，请联系我们。邮箱为ningchao@sdau.edu.cn</p>
   </footer>
@@ -827,6 +828,7 @@
 
   // 2. 全局变量
   let currentUser = null; // 当前登录用户
+  let evalResults = [];//存储当前用户的所有遗传评估结果
 
   // 3. 页面加载时初始化
   window.onload = async function() {
@@ -1206,10 +1208,183 @@ if (signedUrlError) throw signedUrlError;
 
   // 13. 其他辅助函数
   function toggleSearchBox() {
-    const searchBox = document.getElementById('searchBox');
-    searchBox.style.display = searchBox.style.display === 'block' ? 'none' : 'block';
-  }
+  const searchBox = document.getElementById('searchBox');
+  searchBox.style.display = 'none'; // 隐藏旧的简单搜索框
+  openModal('geneticEvaluationModal'); // 打开遗传评估结果模态框
+  loadEvalResults(); // 加载评估结果数据
+}
+    // ========== 新增：渲染评估结果表格 ==========
+  function renderEvalResultsTable(data) {
+    const tableBody = document.getElementById('eval-results-body');
+    const noResultDiv = document.getElementById('eval-no-result');
 
+    // 清空表格
+    tableBody.innerHTML = '';
+
+    // 无数据时显示提示
+    if (data.length === 0) {
+      noResultDiv.style.display = 'block';
+      return;
+    }
+    noResultDiv.style.display = 'none';
+
+    // 渲染每一行数据
+    data.forEach(item => {
+      const tr = document.createElement('tr');
+
+      // 格式化时间（本地时间）
+      const evalTime = new Date(item.eval_time);
+      const formattedTime = evalTime.toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+
+      tr.innerHTML = `
+        <td>${item.eval_name || '未命名评估'}</td>
+        <td>${item.species || '未知'}</td>
+        <td>${item.trait_type || '未知'}</td>
+        <td>${formattedTime}</td>
+        <td>
+          <button onclick="viewEvalDetail('${item.id}')" style="padding: 5px 10px; background: #27ae60; color: white; border: none; border-radius: 4px; cursor: pointer;">查看详情</button>
+          <button onclick="downloadEvalResult('${item.id}')" style="margin-left: 5px; padding: 5px 10px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">下载结果</button>
+        </td>
+      `;
+      tableBody.appendChild(tr);
+    });
+  }
+  // ========== 新增：加载遗传评估结果（核心函数） ==========
+  async function loadEvalResults() {
+    if (!currentUser) {
+      showToast('请先登录后查看评估结果！', false);
+      return;
+    }
+
+    try {
+      showLoading('正在加载评估结果...');
+
+      // 从Supabase获取当前用户的遗传评估数据
+      const { data, error } = await supabaseClient
+        .from('genetic_evaluation')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .order('eval_time', { ascending: false }); // 按评估时间倒序
+
+      if (error) throw error;
+
+      evalResults = data || [];
+      renderEvalResultsTable(evalResults); // 渲染表格
+      hideLoading();
+
+    } catch (e) {
+      hideLoading();
+      console.error('加载评估结果失败：', e);
+      showToast(`加载失败：${e.message}`, false);
+      renderEvalResultsTable([]); // 清空表格
+    }
+  }
+  // ========== 新增：查看评估详情 ==========
+  async function viewEvalDetail(evalId) {
+    try {
+      showLoading('加载详情...');
+
+      // 从数据库获取详情
+      const { data, error } = await supabaseClient
+        .from('genetic_evaluation')
+        .select('*')
+        .eq('id', evalId)
+        .single();
+
+      if (error) throw error;
+
+      const detailModal = document.getElementById('eval-detail-modal');
+      const detailTitle = document.getElementById('detail-title');
+      const detailContent = document.getElementById('detail-content');
+
+      // 设置标题
+      detailTitle.textContent = `评估详情：${data.eval_name || '未命名评估'}`;
+
+      // 渲染详情内容（适配JSON格式的详情数据）
+      let detailsHtml = `
+        <div style="line-height: 1.8;">
+          <p><strong>物种：</strong>${data.species || '未知'}</p>
+          <p><strong>性状类型：</strong>${data.trait_type || '未知'}</p>
+          <p><strong>评估时间：</strong>${new Date(data.eval_time).toLocaleString('zh-CN')}</p>
+          <p><strong>关联数据ID：</strong>${data.data_id || '无'}</p>
+          <hr>
+          <p><strong>评估结果详情：</strong></p>
+      `;
+
+      // 解析JSON格式的评估详情
+      if (typeof data.eval_details === 'object' && data.eval_details !== null) {
+        detailsHtml += '<ul style="padding-left: 20px;">';
+        Object.entries(data.eval_details).forEach(([key, value]) => {
+          detailsHtml += `<li><strong>${key}：</strong>${JSON.stringify(value, null, 2)}</li>`;
+        });
+        detailsHtml += '</ul>';
+      } else {
+        detailsHtml += `<p>${data.eval_details || '无详情数据'}</p>`;
+      }
+
+      detailsHtml += '</div>';
+      detailContent.innerHTML = detailsHtml;
+
+      // 显示详情模态框
+      detailModal.style.display = 'block';
+      hideLoading();
+
+    } catch (e) {
+      hideLoading();
+      console.error('加载详情失败：', e);
+      showToast(`加载详情失败：${e.message}`, false);
+    }
+  }
+  // ========== 新增：下载评估结果 ==========
+  async function downloadEvalResult(evalId) {
+    try {
+      showLoading('准备下载文件...');
+
+      // 1. 获取评估数据
+      const { data: evalData, error: evalError } = await supabaseClient
+        .from('genetic_evaluation')
+        .select('*')
+        .eq('id', evalId)
+        .single();
+
+      if (evalError) throw evalError;
+
+      // 2. 构造下载内容（可以是JSON/CSV格式）
+      const downloadContent = JSON.stringify({
+        评估名称: evalData.eval_name,
+        物种: evalData.species,
+        性状类型: evalData.trait_type,
+        评估时间: new Date(evalData.eval_time).toLocaleString('zh-CN'),
+        评估详情: evalData.eval_details
+      }, null, 2);
+
+      // 3. 创建下载链接
+      const blob = new Blob([downloadContent], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${evalData.eval_name || '遗传评估结果'}_${new Date().getTime()}.json`;
+      document.body.appendChild(a);
+      a.click();
+
+      // 4. 清理
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      hideLoading();
+      showToast('下载成功！');
+
+    } catch (e) {
+      hideLoading();
+      console.error('下载失败：', e);
+      showToast(`下载失败：${e.message}`, false);
+    }
+  }
   function searchResults() {
     const searchInput = document.querySelector('.search-box input').value.trim();
     if (!searchInput) {
@@ -1223,10 +1398,74 @@ if (signedUrlError) throw signedUrlError;
     document.getElementById('eval-detail-modal').style.display = 'none';
   }
 
+  // ========== 修改：实现筛选功能 ==========
   function filterEvalResults() {
-    showToast('筛选功能待实现', false);
-  }
+    if (evalResults.length === 0) {
+      showToast('暂无数据可筛选', false);
+      return;
+    }
 
+    // 获取筛选条件
+    const species = document.getElementById('eval-species').value;
+    const trait = document.getElementById('eval-trait').value;
+    const keyword = document.getElementById('eval-search').value.trim().toLowerCase();
+
+    // 执行筛选
+    const filteredData = evalResults.filter(item => {
+      // 物种筛选
+      const matchSpecies = species === 'all' || item.species === species;
+      // 性状类型筛选
+      const matchTrait = trait === 'all' || item.trait_type === trait;
+      // 关键词筛选（匹配评估名称、物种、性状类型）
+      const matchKeyword = keyword === ''
+        ? true
+        : (item.eval_name?.toLowerCase().includes(keyword) ||
+           item.species?.toLowerCase().includes(keyword) ||
+           item.trait_type?.toLowerCase().includes(keyword));
+
+      return matchSpecies && matchTrait && matchKeyword;
+    });
+
+    // 渲染筛选后的结果
+    renderEvalResultsTable(filteredData);
+  }
+  // ========== 新增：模拟生成评估结果（用于测试，可根据实际业务调整） ==========
+  async function createTestEvalResult() {
+    // 测试数据：关联当前用户的第一条上传数据
+    const { data: uploadData } = await supabaseClient
+      .from('uploaded_data')
+      .select('id')
+      .eq('user_id', currentUser.id)
+      .limit(1);
+
+    const testData = {
+      user_id: currentUser.id,
+      eval_name: `猪生长性状评估_${new Date().getTime()}`,
+      species: '猪',
+      trait_type: '生长性状',
+      eval_time: new Date().toISOString(),
+      eval_details: {
+        遗传力: 0.35,
+        育种值排名: [
+          { 个体ID: 'P001', 育种值: 125.6, 排名: 1 },
+          { 个体ID: 'P002', 育种值: 123.8, 排名: 2 },
+          { 个体ID: 'P003', 育种值: 121.5, 排名: 3 }
+        ],
+        评估方法: 'GBLUP',
+        准确性: 0.89
+      },
+      data_id: uploadData?.[0]?.id || null
+    };
+
+    const { error } = await supabaseClient
+      .from('genetic_evaluation')
+      .insert([testData]);
+
+    if (!error) {
+      showToast('测试评估结果创建成功！');
+      loadEvalResults(); // 重新加载数据
+    }
+  }
   // 点击模态框外部关闭
   document.addEventListener('click', function(e) {
     const modals = document.querySelectorAll('.modal');
