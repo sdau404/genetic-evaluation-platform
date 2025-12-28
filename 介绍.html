@@ -746,10 +746,10 @@
   <div class="modal" id="kinshipMatrixModal">
     <div class="modal-content">
       <span class="close-btn" onclick="closeModal('kinshipMatrixModal')">&times;</span>
-      <h2>亲缘关系矩阵计算</h2>
+      <h2>亲缘关系上传</h2>
       <div class="publish-form" id="kinshipForm">
         <div class="form-group">
-          <label for="kinship-file">上传亲缘关系矩阵文件</label>
+          <label for="kinship-file">上传亲缘关系文件</label>
           <div class="file-upload" onclick="document.getElementById('kinship-file').click()">
             <input type="file" id="kinship-file" accept=".csv, .txt, .matrix">
             <p>点击或拖拽文件到此处</p>
@@ -757,8 +757,8 @@
           </div>
         </div>
         <div class="form-group">
-          <label for="kinship-name">矩阵名称</label>
-          <input type="text" id="kinship-name" placeholder="输入矩阵名称" required>
+          <label for="kinship-name">文件名称</label>
+          <input type="text" id="kinship-name" placeholder="输入文件名称" required>
         </div>
         <button onclick="uploadData('kinship')">上传亲缘关系数据</button>
       </div>
