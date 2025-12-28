@@ -557,6 +557,85 @@
       color: #2980b9;
       text-decoration: underline;
     }
+    /* ===== 新增：多文件预览样式 ===== */
+    .file-preview {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 5px;
+      background-color: #f8f9fa;
+      display: none;
+      flex-direction: column; /* 多文件垂直排列 */
+      gap: 8px;
+      border: 1px solid #e9ecef;
+    }
+    .file-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px;
+      border-radius: 4px;
+      background-color: #fff;
+      border: 1px solid #eee;
+    }
+    .file-icon {
+      font-size: 20px;
+    }
+    /* 不同文件类型的图标颜色 */
+    .icon-csv, .icon-txt, .icon-matrix {
+      color: #3498db; /* 蓝色 - 文本类文件 */
+    }
+    .icon-xlsx {
+      color: #27ae60; /* 绿色 - Excel文件 */
+    }
+    .icon-vcf, .icon-ped, .icon-map, .icon-bed, .icon-bim, .icon-fam {
+      color: #9b59b6; /* 紫色 - 基因型文件 */
+    }
+    .file-info {
+      flex: 1;
+    }
+    .file-name {
+      font-weight: 500;
+      color: #2c3e50;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .file-size {
+      font-size: 12px;
+      color: #6c757d;
+    }
+    .file-remove {
+      padding: 3px 8px;
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background-color 0.2s ease;
+    }
+    .file-remove:hover {
+      background-color: #c0392b;
+    }
+    /* 拖拽高亮样式 */
+    .file-upload.drag-over {
+      border-color: #3498db;
+      background-color: #f0f8ff;
+    }
+    /* 新增清空按钮样式 */
+    .clear-files-btn {
+      margin-top: 8px;
+      padding: 5px 10px;
+      background-color: #95a5a6;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .clear-files-btn:hover {
+      background-color: #7f8c8d;
+    }
   </style>
 </head>
 
@@ -639,7 +718,6 @@
       <button>Update</button>
       <button>Citation</button>
       <button>Manual</button>
-<!--      <button onclick="createTestEvalResult()" style="background-color: #9b59b6;">创建测试评估结果</button>-->
     </div>
     <p>如果发现bug，请联系我们。邮箱为ningchao@sdau.edu.cn</p>
   </footer>
@@ -690,19 +768,21 @@
     </div>
   </div>
 
-  <!-- 表型数据处理模态框 -->
+  <!-- 表型数据处理模态框（新增multiple属性+清空按钮） -->
   <div class="modal" id="phenotypeModal">
     <div class="modal-content">
-      <span class="close-btn" onclick="closeModal('phenotypeModal')">&times;</span>
+      <span class="close-btn" onclick="closeModal('phenotypeModal'); clearAllFiles('phenotype')">&times;</span>
       <h2>表型数据处理</h2>
       <div class="publish-form" id="phenotypeForm">
         <div class="form-group">
-          <label for="phenotype-file">上传表型数据文件</label>
+          <label for="phenotype-file">上传表型数据文件（支持多选/多次追加）</label>
           <div class="file-upload" onclick="document.getElementById('phenotype-file').click()">
-            <input type="file" id="phenotype-file" accept=".csv, .xlsx, .txt">
-            <p>点击或拖拽文件到此处</p>
+            <input type="file" id="phenotype-file" accept=".csv, .xlsx, .txt" multiple>
+            <p>点击或拖拽文件到此处（可多选/多次追加）</p>
             <p>支持格式: CSV, Excel, TXT</p>
+            <div class="file-preview" id="phenotype-file-preview"></div><!--预览框-->
           </div>
+          <button class="clear-files-btn" onclick="clearAllFiles('phenotype')">清空已选文件</button>
         </div>
         <div class="form-group">
           <label for="phenotype-name">数据集名称</label>
@@ -713,19 +793,21 @@
     </div>
   </div>
 
-  <!-- 基因型数据处理模态框 -->
+  <!-- 基因型数据处理模态框（新增multiple属性+清空按钮） -->
   <div class="modal" id="genotypeModal">
     <div class="modal-content">
-      <span class="close-btn" onclick="closeModal('genotypeModal')">&times;</span>
+      <span class="close-btn" onclick="closeModal('genotypeModal'); clearAllFiles('genotype')">&times;</span>
       <h2>基因型数据处理</h2>
       <div class="publish-form" id="genotypeForm">
         <div class="form-group">
-          <label for="genotype-file">上传基因型数据文件</label>
+          <label for="genotype-file">上传基因型数据文件（支持多选/多次追加）</label>
           <div class="file-upload" onclick="document.getElementById('genotype-file').click()">
-            <input type="file" id="genotype-file" accept=".vcf, .ped, .map, .bed">
-            <p>点击或拖拽文件到此处</p>
+            <input type="file" id="genotype-file" accept=".vcf, .ped, .map, .bed" multiple>
+            <p>点击或拖拽文件到此处（可多选/多次追加）</p>
             <p>支持格式: VCF, PED/MAP, BED/BIM/FAM</p>
+            <div class="file-preview" id="genotype-file-preview"></div><!--预览框-->
           </div>
+          <button class="clear-files-btn" onclick="clearAllFiles('genotype')">清空已选文件</button>
         </div>
         <div class="form-group">
           <label for="genotype-name">数据集名称</label>
@@ -736,19 +818,21 @@
     </div>
   </div>
 
-  <!-- 亲缘关系矩阵计算模态框 -->
+  <!-- 亲缘关系矩阵计算模态框（新增multiple属性+清空按钮） -->
   <div class="modal" id="kinshipMatrixModal">
     <div class="modal-content">
-      <span class="close-btn" onclick="closeModal('kinshipMatrixModal')">&times;</span>
+      <span class="close-btn" onclick="closeModal('kinshipMatrixModal'); clearAllFiles('kinship')">&times;</span>
       <h2>亲缘关系数据上传</h2>
       <div class="publish-form" id="kinshipForm">
         <div class="form-group">
-          <label for="kinship-file">上传亲缘关系文件</label>
+          <label for="kinship-file">上传亲缘关系文件（支持多选/多次追加）</label>
           <div class="file-upload" onclick="document.getElementById('kinship-file').click()">
-            <input type="file" id="kinship-file" accept=".csv, .txt, .matrix">
-            <p>点击或拖拽文件到此处</p>
+            <input type="file" id="kinship-file" accept=".csv, .txt, .matrix" multiple>
+            <p>点击或拖拽文件到此处（可多选/多次追加）</p>
             <p>支持格式: CSV, TXT, MATRIX</p>
+            <div class="file-preview" id="kinship-file-preview"></div><!--预览框-->
           </div>
+          <button class="clear-files-btn" onclick="clearAllFiles('kinship')">清空已选文件</button>
         </div>
         <div class="form-group">
           <label for="kinship-name">文件名称</label>
@@ -829,6 +913,10 @@
   // 2. 全局变量
   let currentUser = null; // 当前登录用户
   let evalResults = [];//存储当前用户的所有遗传评估结果
+  // ===== 新增：多文件追加缓存数组 =====
+  let phenotypeFilesCache = []; // 表型文件缓存
+  let genotypeFilesCache = [];  // 基因型文件缓存
+  let kinshipFilesCache = [];   // 亲缘关系文件缓存
 
   // 3. 页面加载时初始化
   window.onload = async function() {
@@ -853,17 +941,177 @@
     }
   };
 
-  // 4. 绑定文件选择事件
+  // ===== 重写：绑定文件选择事件（支持追加） =====
   function bindFileChangeEvents() {
-    document.getElementById('phenotype-file').addEventListener('change', (e) => {
-      console.log("选择表型文件：", e.target.files[0]?.name);
+    // 阻止拖拽默认行为
+    function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    // 表型文件 - 支持追加
+    const phenotypeFile = document.getElementById('phenotype-file');
+    phenotypeFile.addEventListener('change', (e) => {
+      handleFileAdd('phenotype', e.target.files);
+      e.target.value = ''; // 清空input值，避免相同文件不触发change
     });
-    document.getElementById('genotype-file').addEventListener('change', (e) => {
-      console.log("选择基因型文件：", e.target.files[0]?.name);
+
+    // 基因型文件 - 支持追加
+    const genotypeFile = document.getElementById('genotype-file');
+    genotypeFile.addEventListener('change', (e) => {
+      handleFileAdd('genotype', e.target.files);
+      e.target.value = '';
     });
-    document.getElementById('kinship-file').addEventListener('change', (e) => {
-      console.log("选择亲缘关系文件：", e.target.files[0]?.name);
+
+    // 亲缘关系文件 - 支持追加
+    const kinshipFile = document.getElementById('kinship-file');
+    kinshipFile.addEventListener('change', (e) => {
+      handleFileAdd('kinship', e.target.files);
+      e.target.value = '';
     });
+
+    // 拖拽上传支持（同步修改为追加逻辑）
+    const fileUploadAreas = document.querySelectorAll('.file-upload');
+    fileUploadAreas.forEach(area => {
+      // 阻止默认拖拽行为
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        area.addEventListener(eventName, preventDefaults, false);
+      });
+
+      // 拖拽高亮
+      ['dragenter', 'dragover'].forEach(eventName => {
+        area.addEventListener(eventName, () => area.classList.add('drag-over'), false);
+      });
+
+      ['dragleave', 'drop'].forEach(eventName => {
+        area.addEventListener(eventName, () => area.classList.remove('drag-over'), false);
+      });
+
+      // 处理文件拖放（追加逻辑）
+      area.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files.length === 0) return;
+
+        // 找到对应的文件类型
+        const fileInput = area.querySelector('input[type="file"]');
+        if (fileInput.id === 'phenotype-file') handleFileAdd('phenotype', files);
+        if (fileInput.id === 'genotype-file') handleFileAdd('genotype', files);
+        if (fileInput.id === 'kinship-file') handleFileAdd('kinship', files);
+      }, false);
+    });
+  }
+
+  // ===== 新增：处理文件追加核心函数 =====
+  function handleFileAdd(fileType, newFiles) {
+    // 1. 确定缓存数组和预览ID
+    let cacheArray, previewId;
+    switch(fileType) {
+      case 'phenotype':
+        cacheArray = phenotypeFilesCache;
+        previewId = 'phenotype-file-preview';
+        break;
+      case 'genotype':
+        cacheArray = genotypeFilesCache;
+        previewId = 'genotype-file-preview';
+        break;
+      case 'kinship':
+        cacheArray = kinshipFilesCache;
+        previewId = 'kinship-file-preview';
+        break;
+      default: return;
+    }
+
+    // 2. 把新选的文件追加到缓存（去重：避免重复选同一个文件）
+    const newFilesArray = Array.from(newFiles);
+    newFilesArray.forEach(newFile => {
+      // 按文件名+大小去重（避免重复添加）
+      const isDuplicate = cacheArray.some(oldFile =>
+        oldFile.name === newFile.name && oldFile.size === newFile.size
+      );
+      if (!isDuplicate) {
+        cacheArray.push(newFile);
+      }
+    });
+
+    // 3. 重新渲染预览（基于缓存数组）
+    renderFilePreview(cacheArray, previewId);
+  }
+
+  // ===== 重写：基于缓存数组渲染预览 =====
+  function renderFilePreview(fileArray, previewId) {
+    const previewContainer = document.getElementById(previewId);
+
+    if (!fileArray || fileArray.length === 0) {
+      previewContainer.style.display = 'none';
+      return;
+    }
+
+    // 构建多文件预览HTML
+    let previewHtml = '';
+    fileArray.forEach((file, index) => {
+      const iconClass = getFileIconClass(file.name);
+      const fileSize = formatFileSize(file.size);
+      previewHtml += `
+        <div class="file-item" data-index="${index}">
+          <div class="file-icon ${iconClass}">📄</div>
+          <div class="file-info">
+            <div class="file-name" title="${file.name}">${file.name}</div>
+            <div class="file-size">${fileSize}</div>
+          </div>
+          <button class="file-remove" onclick="removeCachedFile(this, ${index})">移除</button>
+        </div>
+      `;
+    });
+
+    previewContainer.innerHTML = previewHtml;
+    previewContainer.style.display = 'flex';
+  }
+
+  // ===== 新增：移除缓存中的单个文件 =====
+  function removeCachedFile(btn, index) {
+    // 1. 找到对应的缓存数组（通过预览容器的ID）
+    let cacheArray;
+    const previewContainer = btn.closest('.file-preview');
+    if (previewContainer.id === 'phenotype-file-preview') {
+      cacheArray = phenotypeFilesCache;
+    } else if (previewContainer.id === 'genotype-file-preview') {
+      cacheArray = genotypeFilesCache;
+    } else if (previewContainer.id === 'kinship-file-preview') {
+      cacheArray = kinshipFilesCache;
+    } else {
+      return;
+    }
+
+    // 2. 删除指定索引的文件
+    cacheArray.splice(index, 1);
+
+    // 3. 重新渲染预览
+    renderFilePreview(cacheArray, previewContainer.id);
+  }
+
+  // ===== 新增：清空指定类型的所有缓存文件 =====
+  function clearAllFiles(fileType) {
+    let cacheArray, previewId;
+    switch(fileType) {
+      case 'phenotype':
+        cacheArray = phenotypeFilesCache;
+        previewId = 'phenotype-file-preview';
+        break;
+      case 'genotype':
+        cacheArray = genotypeFilesCache;
+        previewId = 'genotype-file-preview';
+        break;
+      case 'kinship':
+        cacheArray = kinshipFilesCache;
+        previewId = 'kinship-file-preview';
+        break;
+      default: return;
+    }
+    // 清空缓存
+    cacheArray.length = 0;
+    // 清空预览
+    renderFilePreview([], previewId);
   }
 
   // 5. 显示/隐藏加载提示
@@ -888,7 +1136,7 @@
     }, 3000);
   }
 
-  // 7. 核心上传函数（关联用户ID）
+  // 7. 核心上传函数（修改为从缓存读取文件）
   async function uploadData(dataType) {
     // 检查登录状态
     if (!currentUser) {
@@ -899,22 +1147,22 @@
 
     // 获取DOM元素
     let dataNameDomId = '';
-    let fileInputDomId = '';
+    let cacheArray = []; // 读取对应的缓存数组
     let typeName = '';
     switch(dataType) {
       case 'phenotype':
         dataNameDomId = 'phenotype-name';
-        fileInputDomId = 'phenotype-file';
+        cacheArray = phenotypeFilesCache; // 从缓存读取
         typeName = '表型';
         break;
       case 'genotype':
         dataNameDomId = 'genotype-name';
-        fileInputDomId = 'genotype-file';
+        cacheArray = genotypeFilesCache;  // 从缓存读取
         typeName = '基因型';
         break;
       case 'kinship':
         dataNameDomId = 'kinship-name';
-        fileInputDomId = 'kinship-file';
+        cacheArray = kinshipFilesCache;   // 从缓存读取
         typeName = '亲缘关系';
         break;
       default:
@@ -922,87 +1170,104 @@
         return;
     }
 
-    // 获取输入值和文件
+    // 获取输入值
     const dataName = document.getElementById(dataNameDomId).value.trim();
-    const fileInput = document.getElementById(fileInputDomId);
-    const selectedFile = fileInput.files[0];
 
     // 基础校验
     if (!dataName) {
       showToast(`请输入${typeName}数据集名称！`, false);
       return;
     }
-    if (!selectedFile) {
+    if (!cacheArray || cacheArray.length === 0) {
       showToast(`请选择${typeName}上传文件！`, false);
       return;
     }
-    if (selectedFile.size > 5 * 1024 * 1024) {
-      showToast('文件大小超过5MB（Supabase免费版上限）！', false);
-      return;
+
+    // 校验每个文件大小
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    for (const file of cacheArray) {
+      if (file.size > maxSize) {
+        showToast(`文件【${file.name}】大小超过5MB！`, false);
+        return;
+      }
     }
 
     try {
-      showLoading(`正在上传${typeName}数据...`);
+      showLoading(`正在上传${typeName}数据（共${cacheArray.length}个文件）...`);
 
-      // 生成安全文件名（包含用户ID，确保文件隔离）
-      const safeFileName = selectedFile.name.replace(/[^a-zA-Z0-9_\-\.]/g, '_');
-      const fileName = `${Date.now()}_${safeFileName}`;
-      // 文件路径：类型/用户ID/文件名（确保每个用户的文件隔离）
-      const filePath = `${dataType}/${currentUser.id}/${fileName}`;
+      // 循环上传每个文件（从缓存数组读取）
+      const uploadResults = [];
+      for (const file of cacheArray) {
+        // 生成安全文件名
+        const safeFileName = file.name.replace(/[^a-zA-Z0-9_\-\.]/g, '_');
+        const fileName = `${Date.now()}_${safeFileName}`;
+        const filePath = `${dataType}/${currentUser.id}/${fileName}`;
 
-      // 步骤1：上传文件到Supabase Storage
-      const { data: uploadData, error: uploadError } = await supabaseClient
-        .storage
-        .from('genetic-data')
-        .upload(filePath, selectedFile, {
-          cacheControl: '3600',
-          upsert: false
-        });
+        // 步骤1：上传文件到Supabase Storage
+        const { data: uploadData, error: uploadError } = await supabaseClient
+          .storage
+          .from('genetic-data')
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
 
-      if (uploadError) throw uploadError;
+        if (uploadError) throw new Error(`文件【${file.name}】上传失败：${uploadError.message}`);
 
-     // 替换原getPublicUrl的代码
-const { data: signedUrlData, error: signedUrlError } = await supabaseClient
-  .storage
-  .from('genetic-data')
-  .createSignedUrl(filePath, 60 * 60 * 24); // 有效期24小时
+        // 步骤2：获取签名URL
+        const { data: signedUrlData, error: signedUrlError } = await supabaseClient
+          .storage
+          .from('genetic-data')
+          .createSignedUrl(filePath, 60 * 60 * 24); // 24小时有效期
 
-if (signedUrlError) throw signedUrlError;
+        if (signedUrlError) throw new Error(`文件【${file.name}】获取URL失败：${signedUrlError.message}`);
 
+        // 步骤3：写入数据库（每个文件一条记录）
+        const { error: dbError } = await supabaseClient
+          .from('uploaded_data') // 请确保Supabase中已创建此表
+          .insert([
+            {
+              user_id: currentUser.id,          // 用户ID
+              data_type: dataType,              // 数据类型
+              data_name: dataName,              // 数据集名称
+              file_name: file.name,             // 原始文件名
+              file_path: filePath,              // 存储路径
+              file_url: signedUrlData.signedUrl,// 访问URL
+              file_size: file.size,             // 文件大小
+              upload_time: new Date().toISOString(), // 上传时间
+              file_type: dataType               //文件类型（基因型、表型、系谱）
+            }
+          ]);
 
+        if (dbError) throw new Error(`文件【${file.name}】写入数据库失败：${dbError.message}`);
 
+        uploadResults.push(file.name);
+      }
 
-      // 步骤3：将数据记录写入Supabase数据库（关联用户ID）
-      const { error: dbError } = await supabaseClient
-        .from('uploaded_data') // 请确保Supabase中已创建此表
-        .insert([
-          {
-            user_id: currentUser.id,          // 用户ID
-            data_type: dataType,              // 数据类型
-            data_name: dataName,              // 数据集名称
-            file_name: selectedFile.name,     // 原始文件名
-            file_path: filePath,              // 存储路径
-            file_url: signedUrlData.signedUrl,      // 访问URL// 存入数据库的URL改为签名URL
-            file_size: selectedFile.size,     // 文件大小
-            upload_time: new Date().toISOString(), // 上传时间
-            file_type: dataType               //文件类型（基因型、表型、系谱）
-
-          }
-        ]);
-
-      if (dbError) throw dbError;
-
-      // 上传成功
+      // 所有文件上传成功
       hideLoading();
-      showToast(`${typeName}数据集上传成功！`);
+      showToast(`${typeName}数据集上传成功！共上传${uploadResults.length}个文件`, true);
       alert(`✅ ${typeName}数据集上传成功！
       名称：${dataName}
       用户ID：${currentUser.id}
-      存储路径：${filePath}`);
+      上传文件：${uploadResults.join('\n- ')}`);
 
-      // 重置表单
+      // 重置表单（清空输入框+缓存+预览）
       document.getElementById(dataNameDomId).value = '';
-      fileInput.value = '';
+      // 清空对应缓存
+      if (dataType === 'phenotype') phenotypeFilesCache = [];
+      if (dataType === 'genotype') genotypeFilesCache = [];
+      if (dataType === 'kinship') kinshipFilesCache = [];
+      // 清空预览
+      const previewId = dataNameDomId.replace('-name', '-file-preview');
+      const previewContainer = document.getElementById(previewId);
+      if (previewContainer) {
+        previewContainer.style.display = 'none';
+        previewContainer.innerHTML = '';
+      }
+
+      // 关闭模态框
+      closeModal(`${dataType}Modal`);
 
     } catch (e) {
       hideLoading();
@@ -1010,13 +1275,13 @@ if (signedUrlError) throw signedUrlError;
       showToast(`${typeName}上传失败：${e.message}`, false);
       alert(`❌ ${typeName}上传失败：${e.message}
       请检查：
-      1. 文件大小是否<5MB
+      1. 所有文件大小是否<5MB
       2. 网络是否正常
       3. 数据集名称是否填写`);
     }
   }
 
-  // 8. 模态框操作函数
+  // 8. 模态框操作函数（保持不变）
   function openModal(modalId) {
     const modal = document.getElementById(modalId);
     if (!modal) {
@@ -1025,6 +1290,10 @@ if (signedUrlError) throw signedUrlError;
       return;
     }
     modal.style.display = 'flex';
+    // 打开模态框时清空缓存和预览
+    if (modalId === 'phenotypeModal') clearAllFiles('phenotype');
+    if (modalId === 'genotypeModal') clearAllFiles('genotype');
+    if (modalId === 'kinshipMatrixModal') clearAllFiles('kinship');
   }
 
   function closeModal(modalId) {
@@ -1044,7 +1313,7 @@ if (signedUrlError) throw signedUrlError;
     openModal(targetModalId);
   }
 
-  // 9. 登录状态相关函数
+  // 9. 登录状态相关函数（保持不变）
   function checkLoginBeforeOpen(modalId) {
     if (!currentUser) {
       showToast('请先登录后使用此功能！', false);
@@ -1077,7 +1346,7 @@ if (signedUrlError) throw signedUrlError;
     }
   }
 
-  // 10. 真实的登录功能（Supabase Auth）
+  // 10. 真实的登录功能（保持不变）
   document.getElementById('loginForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     const email = document.getElementById('username').value.trim();
@@ -1116,12 +1385,11 @@ if (signedUrlError) throw signedUrlError;
         showToast(`登录失败：${e.message}`, false);
       }
     } finally {
-    hideLoading();
-
+      hideLoading();
     }
   });
 
-  // 11. 真实的注册功能（Supabase Auth）
+  // 11. 真实的注册功能（保持不变）
   document.getElementById('registerForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     const username = document.getElementById('regUsername').value.trim();
@@ -1182,7 +1450,7 @@ if (signedUrlError) throw signedUrlError;
     }
   });
 
-  // 12. 退出登录功能
+  // 12. 退出登录功能（保持不变）
   async function logout() {
     try {
       showLoading("退出登录中...");
@@ -1196,6 +1464,11 @@ if (signedUrlError) throw signedUrlError;
       showToast('退出登录成功！');
       updateLoginStatus();
 
+      // 清空文件缓存
+      phenotypeFilesCache = [];
+      genotypeFilesCache = [];
+      kinshipFilesCache = [];
+
       console.log("用户已退出登录");
     } catch (e) {
       hideLoading();
@@ -1206,14 +1479,15 @@ if (signedUrlError) throw signedUrlError;
     }
   }
 
-  // 13. 其他辅助函数
+  // 13. 其他辅助函数（保持不变）
   function toggleSearchBox() {
-  const searchBox = document.getElementById('searchBox');
-  searchBox.style.display = 'none'; // 隐藏旧的简单搜索框
-  openModal('geneticEvaluationModal'); // 打开遗传评估结果模态框
-  loadEvalResults(); // 加载评估结果数据
-}
-    // ========== 新增：渲染评估结果表格 ==========
+    const searchBox = document.getElementById('searchBox');
+    searchBox.style.display = 'none'; // 隐藏旧的简单搜索框
+    openModal('geneticEvaluationModal'); // 打开遗传评估结果模态框
+    loadEvalResults(); // 加载评估结果数据
+  }
+
+  // ========== 新增：渲染评估结果表格 ==========
   function renderEvalResultsTable(data) {
     const tableBody = document.getElementById('eval-results-body');
     const noResultDiv = document.getElementById('eval-no-result');
@@ -1255,6 +1529,7 @@ if (signedUrlError) throw signedUrlError;
       tableBody.appendChild(tr);
     });
   }
+
   // ========== 新增：加载遗传评估结果（核心函数） ==========
   async function loadEvalResults() {
     if (!currentUser) {
@@ -1285,6 +1560,7 @@ if (signedUrlError) throw signedUrlError;
       renderEvalResultsTable([]); // 清空表格
     }
   }
+
   // ========== 新增：查看评估详情 ==========
   async function viewEvalDetail(evalId) {
     try {
@@ -1341,6 +1617,7 @@ if (signedUrlError) throw signedUrlError;
       showToast(`加载详情失败：${e.message}`, false);
     }
   }
+
   // ========== 新增：下载评估结果 ==========
   async function downloadEvalResult(evalId) {
     try {
@@ -1385,6 +1662,7 @@ if (signedUrlError) throw signedUrlError;
       showToast(`下载失败：${e.message}`, false);
     }
   }
+
   function searchResults() {
     const searchInput = document.querySelector('.search-box input').value.trim();
     if (!searchInput) {
@@ -1422,50 +1700,13 @@ if (signedUrlError) throw signedUrlError;
         : (item.eval_name?.toLowerCase().includes(keyword) ||
            item.species?.toLowerCase().includes(keyword) ||
            item.trait_type?.toLowerCase().includes(keyword));
-
-      return matchSpecies && matchTrait && matchKeyword;
+        return matchSpecies && matchTrait && matchKeyword;
     });
 
     // 渲染筛选后的结果
     renderEvalResultsTable(filteredData);
   }
-  // ========== 新增：模拟生成评估结果（用于测试，可根据实际业务调整） ==========
-  //async function createTestEvalResult() {
-    // 测试数据：关联当前用户的第一条上传数据
-    //const { data: uploadData } = await supabaseClient
-     // .from('uploaded_data')
-  //    .select('id')
-  //    .eq('user_id', currentUser.id)
-  //    .limit(1);
 
-    //const testData = {
-    //  user_id: currentUser.id,
-      //eval_name: `猪生长性状评估_${new Date().getTime()}`,
-     // species: '猪',
-      //trait_type: '生长性状',
-      //eval_time: new Date().toISOString(),
-      //eval_details: {
-       // 遗传力: 0.35,
-        //育种值排名: [
-         // { 个体ID: 'P001', 育种值: 125.6, 排名: 1 },
-          //{ 个体ID: 'P002', 育种值: 123.8, 排名: 2 },
-          //{ 个体ID: 'P003', 育种值: 121.5, 排名: 3 }
-        //],
-        //评估方法: 'GBLUP',
-        //准确性: 0.89
-      //},
-      //data_id: uploadData?.[0]?.id || null
-    //};
-
-    //const { error } = await supabaseClient
-      //.from('genetic_evaluation')
-      //.insert([testData]);
-
-    //if (!error) {
-      //showToast('测试评估结果创建成功！');
-      //loadEvalResults(); // 重新加载数据
-    //}
-  //}
   // 点击模态框外部关闭
   document.addEventListener('click', function(e) {
     const modals = document.querySelectorAll('.modal');
@@ -1485,6 +1726,95 @@ if (signedUrlError) throw signedUrlError;
       });
     }
   });
+
+  // ===== 新增：辅助函数 - 获取文件类型对应的图标类 =====
+  function getFileIconClass(fileName) {
+    const ext = fileName.split('.').pop().toLowerCase();
+    switch(ext) {
+      case 'csv': return 'icon-csv';
+      case 'xlsx': return 'icon-xlsx';
+      case 'txt': return 'icon-txt';
+      case 'matrix': return 'icon-matrix';
+      case 'vcf': return 'icon-vcf';
+      case 'ped': return 'icon-ped';
+      case 'map': return 'icon-map';
+      case 'bed': return 'icon-bed';
+      case 'bim': return 'icon-bim';
+      case 'fam': return 'icon-fam';
+      default: return 'icon-csv'; // 默认图标
+    }
+  }
+
+  // ===== 新增：辅助函数 - 格式化文件大小（字节转KB/MB） =====
+  function formatFileSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+  }
+
+  // ===== 修改：支持多文件预览 =====
+  function showFilePreview(fileInputId, previewId) {
+    const fileInput = document.getElementById(fileInputId);
+    const previewContainer = document.getElementById(previewId);
+    const files = fileInput.files; // 现在是 FileList（多文件）
+
+    if (!files || files.length === 0) {
+      previewContainer.style.display = 'none';
+      return;
+    }
+
+    // 构建多文件预览HTML
+    let previewHtml = '';
+    Array.from(files).forEach((file, index) => {
+      const iconClass = getFileIconClass(file.name);
+      const fileSize = formatFileSize(file.size);
+      // 每个文件项加索引，方便移除
+      previewHtml += `
+        <div class="file-item" data-index="${index}">
+          <div class="file-icon ${iconClass}">📄</div>
+          <div class="file-info">
+            <div class="file-name" title="${file.name}">${file.name}</div>
+            <div class="file-size">${fileSize}</div>
+          </div>
+          <button class="file-remove" onclick="removeSingleFile('${fileInputId}', '${previewId}', ${index})">移除</button>
+        </div>
+      `;
+    });
+
+    previewContainer.innerHTML = previewHtml;
+    previewContainer.style.display = 'flex'; // 显示多文件列表
+  }
+
+  // ===== 新增：移除单个文件（多文件场景） =====
+  function removeSingleFile(fileInputId, previewId, removeIndex) {
+    const fileInput = document.getElementById(fileInputId);
+    const previewContainer = document.getElementById(previewId);
+    const files = fileInput.files;
+
+    // FileList 是只读的，需要转成数组处理
+    const fileArray = Array.from(files);
+    // 删除指定索引的文件
+    fileArray.splice(removeIndex, 1);
+
+    // 重新构建 FileList（通过 DataTransfer）
+    const dt = new DataTransfer();
+    fileArray.forEach(file => dt.items.add(file));
+    fileInput.files = dt.files;
+
+    // 重新渲染预览
+    showFilePreview(fileInputId, previewId);
+  }
+
+  // ===== 修改：批量清空文件 =====
+  function removeFile(fileInputId, previewId) {
+    const fileInput = document.getElementById(fileInputId);
+    const previewContainer = document.getElementById(previewId);
+
+    // 清空所有文件
+    fileInput.value = '';
+    previewContainer.style.display = 'none';
+    previewContainer.innerHTML = '';
+  }
 </script>
 
 </body>
