@@ -639,7 +639,7 @@
       <button>Update</button>
       <button>Citation</button>
       <button>Manual</button>
-      <button onclick="createTestEvalResult()" style="background-color: #9b59b6;">创建测试评估结果</button>
+<!--      <button onclick="createTestEvalResult()" style="background-color: #9b59b6;">创建测试评估结果</button>-->
     </div>
     <p>如果发现bug，请联系我们。邮箱为ningchao@sdau.edu.cn</p>
   </footer>
@@ -1430,42 +1430,42 @@ if (signedUrlError) throw signedUrlError;
     renderEvalResultsTable(filteredData);
   }
   // ========== 新增：模拟生成评估结果（用于测试，可根据实际业务调整） ==========
-  async function createTestEvalResult() {
+  //async function createTestEvalResult() {
     // 测试数据：关联当前用户的第一条上传数据
-    const { data: uploadData } = await supabaseClient
-      .from('uploaded_data')
-      .select('id')
-      .eq('user_id', currentUser.id)
-      .limit(1);
+    //const { data: uploadData } = await supabaseClient
+     // .from('uploaded_data')
+  //    .select('id')
+  //    .eq('user_id', currentUser.id)
+  //    .limit(1);
 
-    const testData = {
-      user_id: currentUser.id,
-      eval_name: `猪生长性状评估_${new Date().getTime()}`,
-      species: '猪',
-      trait_type: '生长性状',
-      eval_time: new Date().toISOString(),
-      eval_details: {
-        遗传力: 0.35,
-        育种值排名: [
-          { 个体ID: 'P001', 育种值: 125.6, 排名: 1 },
-          { 个体ID: 'P002', 育种值: 123.8, 排名: 2 },
-          { 个体ID: 'P003', 育种值: 121.5, 排名: 3 }
-        ],
-        评估方法: 'GBLUP',
-        准确性: 0.89
-      },
-      data_id: uploadData?.[0]?.id || null
-    };
+    //const testData = {
+    //  user_id: currentUser.id,
+      //eval_name: `猪生长性状评估_${new Date().getTime()}`,
+     // species: '猪',
+      //trait_type: '生长性状',
+      //eval_time: new Date().toISOString(),
+      //eval_details: {
+       // 遗传力: 0.35,
+        //育种值排名: [
+         // { 个体ID: 'P001', 育种值: 125.6, 排名: 1 },
+          //{ 个体ID: 'P002', 育种值: 123.8, 排名: 2 },
+          //{ 个体ID: 'P003', 育种值: 121.5, 排名: 3 }
+        //],
+        //评估方法: 'GBLUP',
+        //准确性: 0.89
+      //},
+      //data_id: uploadData?.[0]?.id || null
+    //};
 
-    const { error } = await supabaseClient
-      .from('genetic_evaluation')
-      .insert([testData]);
+    //const { error } = await supabaseClient
+      //.from('genetic_evaluation')
+      //.insert([testData]);
 
-    if (!error) {
-      showToast('测试评估结果创建成功！');
-      loadEvalResults(); // 重新加载数据
-    }
-  }
+    //if (!error) {
+      //showToast('测试评估结果创建成功！');
+      //loadEvalResults(); // 重新加载数据
+    //}
+  //}
   // 点击模态框外部关闭
   document.addEventListener('click', function(e) {
     const modals = document.querySelectorAll('.modal');
