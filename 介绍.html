@@ -510,52 +510,108 @@
         right: auto;
       }
     }
+    /* 保留你原有所有样式，仅修改/新增以下图片相关样式 */
     .img-text-cards {
       display: flex;
-      gap: 25px;
-      flex-wrap: wrap;
+      gap: 25px; /* 卡片之间的间距（水平+垂直） */
+      flex-wrap: wrap; /* 自动换行 */
       margin: 30px 0;
+      justify-content: flex-start; /* 靠左对齐，保证列数规整 */
     }
+
     .img-text-card {
-      flex: 1;
-      min-width: 280px;
+      width: calc(33.333% - (25px * 2 / 3));
+      min-width: unset;
       background-color: white;
       border-radius: 12px;
       overflow: hidden;
       box-shadow: 0 4px 10px rgba(0,0,0,0.05);
       transition: transform 0.3s;
     }
+
     .img-text-card:hover {
       transform: translateY(-5px);
     }
-    .card-img img {
-      width: 100%;
-      height: 180px;
-      object-fit: cover;
-    }
-    .card-text {
-      padding: 20px;
-    }
-    .card-text h4 {
-      color: #2c3e50;
-      font-size: 18px;
-      margin-bottom: 10px;
-    }
-    .card-text p {
-      color: #666;
-      font-size: 14px;
-      line-height: 1.6;
-      margin-bottom: 15px;
-    }
-    .card-text a {
-      color: #3498db;
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 600;
-    }
-    .card-text a:hover {
-      color: #2980b9;
-      text-decoration: underline;
+
+ /* 保留原有其他样式，仅替换以下卡片/图片相关样式 */
+.img-text-cards {
+  display: flex;
+  gap: 20px; /* 微调间距，让三列布局更紧凑适配完整图片 */
+  flex-wrap: wrap;
+  margin: 30px 0;
+  justify-content: center; /* 改为居中对齐，视觉更规整 */
+}
+
+.img-text-card {
+  width: calc(30% - 15px); /* 调整宽度（从33.333%改为30%），给完整图片留出空间 */
+  min-width: 180px; /* 保证小屏幕下卡片不挤在一起 */
+  background-color: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  transition: transform 0.3s;
+}
+
+/* 新增：给图片容器设置固定比例（适合头像类图片，比如正方形） */
+.card-img {
+  aspect-ratio: 1 / 1; /* 强制图片容器为正方形，适配头像比例 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f5f5; /* 图片周围空白区域设为浅灰色，更美观 */
+}
+
+/* 核心：图片完整显示，不裁剪 */
+.card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* 替换cover为contain：图片完整显示，不裁剪 */
+  object-position: center;
+}
+
+.card-text {
+  padding: 15px; /* 微调内边距，让卡片更紧凑 */
+  text-align: center; /* 文字居中，和头像搭配更协调 */
+}
+
+.card-text h4 {
+  color: #2c3e50;
+  font-size: 16px; /* 微调字体大小，适配紧凑卡片 */
+  margin-bottom: 5px;
+}
+
+.card-text p {
+  color: #666;
+  font-size: 12px;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+/* 响应式适配保持三列/两列/一列，同步调整图片容器比例 */
+@media (max-width: 768px) {
+  .img-text-card {
+    width: 80%; /* 移动端单行1列，宽度更舒适 */
+  }
+  .card-img {
+    aspect-ratio: 4 / 3; /* 移动端图片比例稍宽 */
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1200px) {
+  .img-text-card {
+    width: calc(45% - 10px); /* 平板端2列布局 */
+  }
+
+    /* 可选：屏幕在768-1200px之间时改为2列 */
+    @media (min-width: 769px) and (max-width: 1200px) {
+      .img-text-card {
+        width: calc(50% - 12.5px);
+      }
+      /* 平板端图片尺寸折中 */
+      .card-img img {
+        height: 110px;
+        max-height: 110px;
+      }
     }
     /* ===== 新增：多文件预览样式 ===== */
     .file-preview {
@@ -682,36 +738,102 @@
       <!-- 卡片1 -->
       <div class="img-text-card">
         <div class="card-img">
-          <img src="asset/images/sdau1.jpg" alt="xxx">
+          <img src="asset/images/zhangqin.jpg" alt="张勤">
         </div>
         <div class="card-text">
-          <h4>xxx</h4>
-          <p>文本介绍</p>
-          <a href="链接" target="_blank" rel="noopener noreferrer">链接</a>
+          <h4>张勤</h4>
+          <p>教授</p>
+          <a href="https://dkdy.sdau.edu.cn/2019/0904/c14944a249751/page.psp" target="_blank" rel="noopener noreferrer">链接</a>
         </div>
       </div>
 
       <!-- 卡片2 -->
       <div class="img-text-card">
         <div class="card-img">
-          <img src="asset/images/sdau2.jpg" alt="jieshao">
+          <img src="asset/images/zeng.png" alt="jieshao">
         </div>
         <div class="card-text">
-          <h4>xxx</h4>
-          <p>文本</p>
-          <a href="链接" target="_blank" rel="noopener noreferrer">链接</a>
+          <h4>曾勇庆</h4>
+          <p>教授</p>
+          <a href="https://dkdy.sdau.edu.cn/2019/0904/c14944a249757/page.psp" target="_blank" rel="noopener noreferrer">链接</a>
         </div>
       </div>
 
       <!-- 卡片3 -->
       <div class="img-text-card">
         <div class="card-img">
-          <img src="asset/images/sdau.jpg" alt="jieshao">
+          <img src="asset/images/fan.png" alt="jieshao">
         </div>
         <div class="card-text">
-          <h4>xxx</h4>
-          <p>xxx介绍</p>
+          <h4>樊新忠</h4>
+          <p>教授</p>
+          <a href="https://dkdy.sdau.edu.cn/2019/0904/c14944a249761/page.psp" target="_blank" rel="noopener noreferrer">链接</a>
+        </div>
+      </div>
+      <!-- 卡片4 -->
+      <div class="img-text-card">
+        <div class="card-img">
+          <img src="asset/images/tang.jpg" alt="xxx">
+        </div>
+        <div class="card-text">
+          <h4>唐辉</h4>
+          <p>教授</p>
+          <a href="https://dkdy.sdau.edu.cn/2019/0904/c14944a249772/page.psp" target="_blank" rel="noopener noreferrer">链接</a>
+        </div>
+      </div>
+      <!-- 卡片5 -->
+      <div class="img-text-card">
+        <div class="card-img">
+          <img src="asset/images/shi.png" alt="xxx">
+        </div>
+        <div class="card-text">
+          <h4>师科荣</h4>
+          <p>教授</p>
+          <a href="https://dkdy.sdau.edu.cn/2019/0904/c14944a249770/page.htm" target="_blank" rel="noopener noreferrer">链接</a>
+        </div>
+      </div>
+      <!-- 卡片6 -->
+      <div class="img-text-card">
+        <div class="card-img">
+          <img src="asset/images/chao.jpg" alt="xxx">
+        </div>
+        <div class="card-text">
+          <h4>宁超</h4>
+          <p>教授</p>
           <a href="https://dkdy.sdau.edu.cn/2019/0904/c1553a154966/page.psp" target="_blank" rel="noopener noreferrer">链接</a>
+        </div>
+      </div>
+      <!-- 卡片7 -->
+      <div class="img-text-card">
+        <div class="card-img">
+          <img src="asset/images/wangdan.png" alt="xxx">
+        </div>
+        <div class="card-text">
+          <h4>王丹</h4>
+          <p>教授</p>
+          <a href="https://dkdy.sdau.edu.cn/2022/1110/c14944a249753/page.psp" target="_blank" rel="noopener noreferrer">链接</a>
+        </div>
+      </div>
+      <!-- 卡片8 -->
+      <div class="img-text-card">
+        <div class="card-img">
+          <img src="asset/images/chen.jpg" alt="xxx">
+        </div>
+        <div class="card-text">
+          <h4>陈伟</h4>
+          <p>副教授</p>
+          <a href="https://dkdy.sdau.edu.cn/2019/0904/c14944a249760/page.psp" target="_blank" rel="noopener noreferrer">链接</a>
+        </div>
+      </div>
+      <!-- 卡片9 -->
+      <div class="img-text-card">
+        <div class="card-img">
+          <img src="asset/images/wenwen.jpg" alt="xxx">
+        </div>
+        <div class="card-text">
+          <h4>王文文</h4>
+          <p>副教授</p>
+          <a href="https://dkdy.sdau.edu.cn/2019/0904/c14944a249748/page.psp" target="_blank" rel="noopener noreferrer">链接</a>
         </div>
       </div>
     </div>
