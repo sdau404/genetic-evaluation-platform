@@ -1,1997 +1,765 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>遗传改良信息服务平台</title>
-  <!-- 引入Supabase官方SDK（用于Auth和数据库操作） -->
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <style>
-    /* 原有样式保持不变 */
-    .loading-overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      z-index: 9999;
-      justify-content: center;
-      align-items: center;
-      color: white;
-      font-size: 18px;
-    }
-    .loading-text {
-      background: #2c3e50;
-      padding: 20px 40px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .upload-toast {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      padding: 15px 25px;
-      border-radius: 8px;
-      color: white;
-      font-size: 14px;
-      z-index: 9998;
-      display: none;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
-    .toast-success {
-      background: #27ae60;
-    }
-    .toast-error {
-      background: #e74c3c;
-    }
-    body {
-       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-       margin: 0;
-       padding: 0;
-       color: #333;
-       background:
-         linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.65)),
-         url("asset/images/sdau.jpg");
-       background-size: cover;
-       background-position: center;
-       background-attachment: fixed;
-       background-repeat: no-repeat;
-       min-height: 100vh;
-    }
-    header {
-      background-color: #2c3e50;
-      color: white;
-      text-align: center;
-      padding: 20px 0;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      width: 100%;
-    }
-    header h1 {
-      margin: 0;
-      font-size: 28px;
-      font-weight: 600;
-    }
-    nav {
-      background-color: #34495e;
-      padding: 10px 0;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      width: 100%;
-      text-align: center;
-      position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
-    }
-    .nav-left {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      margin-left: 10px;
-      justify-content: flex-end;
-      width: 50%;
-    }
-    .nav-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-left: auto;
-      margin-right: 20px;
-    }
-    nav a {
-      margin: 0;
-      padding: 10px 20px;
-      background-color: #3498db;
-      color: white;
-      text-decoration: none;
-      border-radius: 5px;
-      transition: background-color 0.3s ease, transform 0.2s ease;
-      font-size: 14px;
-      cursor: pointer;
-      display: inline-block;
-      opacity: 1;
-      pointer-events: auto;
-    }
-    .home-btn {
-      background-color: #2ecc71 !important;
-    }
-    .home-btn:hover {
-      background-color: #27ae60 !important;
-    }
-    nav a:hover {
-      background-color: #2980b9;
-      transform: translateY(-2px);
-    }
-    nav a.disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      pointer-events: none;
-      background-color: #95a5a6 !important;
-    }
-    nav a.enabled {
-      opacity: 1;
-      cursor: pointer;
-      pointer-events: auto;
-      background-color: #3498db;
-      transition: all 0.3s ease;
-    }
-    .nav-btn {
-      margin: 0;
-      padding: 10px 15px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s ease, transform 0.2s ease;
-      font-size: 14px;
-      color: white;
-      display: inline-block;
-    }
-    .login-btn {
-      background-color: #e67e22;
-    }
-    .login-btn:hover {
-      background-color: #d35400;
-      transform: translateY(-2px);
-    }
-    .logout-btn {
-      background-color: #e74c3c;
-    }
-    .logout-btn:hover {
-      background-color: #c0392b;
-      transform: translateY(-2px);
-    }
-    .view-results-btn {
-      background-color: #27ae60;
-    }
-    .view-results-btn:hover {
-      background-color: #219653;
-      transform: translateY(-2px);
-    }
-    .search-box {
-      display: none;
-      position: absolute;
-      right: 20px;
-      top: 60px;
-      background-color: white;
-      padding: 15px;
-      border-radius: 5px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      z-index: 10;
-    }
-    .search-box input {
-      padding: 8px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      font-size: 14px;
-      width: 200px;
-      margin-right: 10px;
-    }
-    .search-box button {
-      padding: 8px 12px;
-      background-color: #3498db;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-    .search-box button:hover {
-      background-color: #2980b9;
-    }
-    main {
-      width: 80%;
-      margin: 40px auto;
-      padding: 40px;
-      background-color: white;
-      border-radius: 15px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-    }
-    main h2 {
-      font-size: 24px;
-      color: #2c3e50;
-      margin-bottom: 30px;
-      text-align: center;
-    }
-    .publish-section {
-      max-width: 600px;
-      margin: 0 auto;
-    }
-    .publish-form {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-      background-color: #ffffff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .publish-form:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-    }
-    .publish-form input,
-    .publish-form textarea,
-    .publish-form select {
-      padding: 12px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      font-size: 14px;
-      transition: border-color 0.3s ease;
-    }
-    .publish-form input:focus,
-    .publish-form textarea:focus,
-    .publish-form select:focus {
-      border-color: #3498db;
-      outline: none;
-    }
-    .publish-form textarea {
-      resize: vertical;
-      min-height: 120px;
-    }
-    .publish-form button {
-      padding: 12px 20px;
-      background-color: #3498db;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background-color 0.3s ease, transform 0.2s ease;
-    }
-    .publish-form button:hover {
-      background-color: #2980b9;
-      transform: translateY(-2px);
-    }
-    footer {
-      background-color: #2c3e50;
-      color: white;
-      padding: 20px;
-      text-align: center;
-      margin-top: 40px;
-      box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
-    }
-    .footer-buttons {
-      margin-bottom: 10px;
-    }
-    .footer-buttons button {
-      margin: 0 5px;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 5px;
-      background-color: #3498db;
-      color: white;
-      cursor: pointer;
-      transition: background-color 0.3s ease, transform 0.2s ease;
-      font-size: 14px;
-    }
-    .footer-buttons button:hover {
-      background-color: #2980b9;
-      transform: translateY(-2px);
-    }
-    footer p {
-      font-size: 12px;
-      margin: 5px 0 0;
-    }
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      z-index: 100;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 30px 0;
-      overflow-y: auto;
-    }
-    .modal-content {
-      background-color: white;
-      padding: 20px;
-      border-radius: 10px;
-      width: 100%;
-      max-width: 550px;
-      max-height: calc(100vh - 80px);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-      position: relative;
-      overflow-y: auto;
-    }
-    .close-btn {
-      position: absolute;
-      top: 15px;
-      right: 15px;
-      font-size: 24px;
-      cursor: pointer;
-      color: #777;
-    }
-    .close-btn:hover {
-      color: #333;
-    }
-    .login-form {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-      margin-top: 20px;
-    }
-    .login-form label {
-      font-weight: 600;
-      color: #2c3e50;
-    }
-    .login-form input {
-      padding: 12px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      font-size: 14px;
-    }
-    .login-form button {
-      padding: 12px;
-      background-color: #3498db;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-    .login-form button:hover {
-      background-color: #2980b9;
-    }
-    .login-form .form-footer {
-      display: flex;
-      justify-content: space-between;
-      font-size: 13px;
-      margin-top: 5px;
-    }
-    .login-form .form-footer a {
-      color: #3498db;
-      text-decoration: none;
-    }
-    .login-form .form-footer a:hover {
-      text-decoration: underline;
-    }
-    .form-group {
-      margin-bottom: 12px;
-    }
-    .form-group label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 600;
-      color: #2c3e50;
-    }
-    .form-row {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-    .form-col {
-      flex: 1;
-    }
-    .file-upload {
-      border: 2px dashed #ddd;
-      padding: 15px;
-      text-align: center;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: border-color 0.3s ease;
-    }
-    .file-upload:hover {
-      border-color: #3498db;
-    }
-    .file-upload input {
-      display: none;
-    }
-    .file-upload p {
-      margin: 5px 0;
-      font-size: 14px;
-    }
-    .data-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 15px 0;
-      font-size: 13px;
-    }
-    .data-table th,
-    .data-table td {
-      border: 1px solid #ddd;
-      padding: 8px;
-      text-align: left;
-    }
-    .data-table th {
-      background-color: #f2f2f2;
-    }
-    .tab-container {
-      margin-bottom: 15px;
-    }
-    .tab-buttons {
-      display: flex;
-      border-bottom: 1px solid #ddd;
-      margin-bottom: 15px;
-    }
-    .tab-btn {
-      padding: 8px 15px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      border-bottom: 3px solid transparent;
-      transition: all 0.3s ease;
-      font-size: 14px;
-    }
-    .tab-btn.active {
-      border-bottom: 3px solid #3498db;
-      color: #3498db;
-      font-weight: 600;
-    }
-    .tab-content {
-      display: none;
-    }
-    .tab-content.active {
-      display: block;
-    }
-    .user-info {
-      color: white;
-      font-size: 14px;
-      margin-right: 15px;
-    }
-    @media (max-width: 1200px) {
-      nav {
-        flex-wrap: wrap;
-        padding: 10px 20px;
-      }
-      .nav-left, .nav-right {
-        margin: 5px 0;
-      }
-      .nav-right {
-        margin-left: auto;
-        margin-right: 0;
-      }
-    }
-    @media (max-width: 768px) {
-      main {
-        width: 90%;
-        padding: 20px;
-      }
-      .modal-content {
-        width: 90%;
-        max-height: calc(100vh - 60px);
-      }
-      .form-row {
-        flex-direction: column;
-        gap: 10px;
-      }
-      nav {
-        flex-direction: column;
-        align-items: center;
-        gap: 8px;
-      }
-      .nav-left, .nav-right {
-        flex-direction: column;
-        width: 100%;
-        align-items: center;
-      }
-      nav a,
-      .nav-btn {
-        width: 80%;
-        margin: 3px 0;
-        text-align: center;
-      }
-      .user-info {
-        display: none;
-      }
-      .search-box {
-        left: 50%;
-        transform: translateX(-50%);
-        right: auto;
-      }
-    }
-    .img-text-cards {
-      display: flex;
-      gap: 25px;
-      flex-wrap: wrap;
-      margin: 30px 0;
-    }
-    .img-text-card {
-      flex: 1;
-      min-width: 280px;
-      background-color: white;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-      transition: transform 0.3s;
-    }
-    .img-text-card:hover {
-      transform: translateY(-5px);
-    }
-    .card-img img {
-      width: 100%;
-      height: 180px;
-      object-fit: cover;
-    }
-    .card-text {
-      padding: 20px;
-    }
-    .card-text h4 {
-      color: #2c3e50;
-      font-size: 18px;
-      margin-bottom: 10px;
-    }
-    .card-text p {
-      color: #666;
-      font-size: 14px;
-      line-height: 1.6;
-      margin-bottom: 15px;
-    }
-    .card-text a {
-      color: #3498db;
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 600;
-    }
-    .card-text a:hover {
-      color: #2980b9;
-      text-decoration: underline;
-    }
-    /* ===== 新增：多文件预览样式 ===== */
-    .file-preview {
-      margin-top: 10px;
-      padding: 10px;
-      border-radius: 5px;
-      background-color: #f8f9fa;
-      display: none;
-      flex-direction: column; /* 多文件垂直排列 */
-      gap: 8px;
-      border: 1px solid #e9ecef;
-    }
-    .file-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px;
-      border-radius: 4px;
-      background-color: #fff;
-      border: 1px solid #eee;
-    }
-    .file-icon {
-      font-size: 20px;
-    }
-    /* 不同文件类型的图标颜色 */
-    .icon-csv, .icon-txt, .icon-matrix {
-      color: #3498db; /* 蓝色 - 文本类文件 */
-    }
-    .icon-xlsx {
-      color: #27ae60; /* 绿色 - Excel文件 */
-    }
-    .icon-vcf, .icon-ped, .icon-map, .icon-bed, .icon-bim, .icon-fam {
-      color: #9b59b6; /* 紫色 - 基因型文件 */
-    }
-    .file-info {
-      flex: 1;
-    }
-    .file-name {
-      font-weight: 500;
-      color: #2c3e50;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .file-size {
-      font-size: 12px;
-      color: #6c757d;
-    }
-    .file-remove {
-      padding: 3px 8px;
-      background-color: #e74c3c;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 12px;
-      transition: background-color 0.2s ease;
-    }
-    .file-remove:hover {
-      background-color: #c0392b;
-    }
-    /* 拖拽高亮样式 */
-    .file-upload.drag-over {
-      border-color: #3498db;
-      background-color: #f0f8ff;
-    }
-    /* 新增清空按钮样式 */
-    .clear-files-btn {
-      margin-top: 8px;
-      padding: 5px 10px;
-      background-color: #95a5a6;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 12px;
-    }
-    .clear-files-btn:hover {
-      background-color: #7f8c8d;
-    }
-    /* 轮播样式 */
-  .carousel {
-            position: relative;
-            width: 80%;
-            max-width: 900px;
-            height: 700px;
-            margin: 50px auto;
-            overflow: hidden;
-            border-radius: 8px;
-            will-change: transform; /* 提前优化渲染 */
-        }
-
-        .carousel-track {
-            display: flex;
-            height: 100%;
-            transition: transform 0.3s linear; /* 简化动画 */
-            transform: translateZ(0); /* 硬件加速 */
-            backface-visibility: hidden; /* 避免背面渲染 */
-        }
-
-        .carousel-track img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            flex-shrink: 0;
-        }
-
-        .carousel-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 40px;
-            height: 40px;
-            background-color: rgba(255, 255, 255, 0.7);
-            border: none;
-            border-radius: 50%;
-            font-size: 20px;
-            cursor: pointer;
-            z-index: 10;
-            transition: background-color 0.3s ease;
-        }
-
-        .carousel-btn:hover {
-            background-color: rgba(255, 255, 255, 1);
-        }
-
-        .prev-btn { left: 20px; }
-        .next-btn { right: 20px; }
-
-        .carousel-dots {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 10px;
-        }
-
-        .dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.5);
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .dot.active {
-            background-color: rgba(255, 255, 255, 1);
-        }
-
-    /* 模态框 */
-    .excel-iframe { border: none; width: 900px; height: 700px; overflow: hidden; margin:0 auto; display:block }
-  </style>
-</head>
-
-<body>
-  <div class="loading-overlay" id="loadingOverlay">
-    <div class="loading-text">
-      <span>加载中...</span>
-    </div>
-  </div>
-  <div class="upload-toast" id="uploadToast"></div>
-
-  <header>
-    <h1>遗传改良信息服务平台</h1>
-  </header>
-
-  <nav>
-    <div class="nav-left">
-      <a href="index.html" class="home-btn" title="返回首页">首页</a>
-      <a id="navPhenotype" onclick="checkLoginBeforeOpen('phenotypeModal')">表型数据上传</a>
-      <a id="navGenotype" onclick="checkLoginBeforeOpen('genotypeModal')">基因型数据上传</a>
-      <a id="navKinship" onclick="checkLoginBeforeOpen('kinshipMatrixModal')">系谱上传</a>
-      <a href="介绍.html">介绍</a>
-    </div>
-
-    <div class="nav-right">
-      <div class="user-info" id="userInfo" style="display: none;">
-        欢迎，<span id="usernameDisplay"></span>
-      </div>
-      <button class="nav-btn login-btn" id="loginBtn" onclick="openModal('loginModal')">登录</button>
-      <button class="nav-btn logout-btn" id="logoutBtn" onclick="logout()" style="display: none;">退出登录</button>
-      <button class="nav-btn view-results-btn" id="viewResultsBtn" onclick="toggleSearchBox()" style="display: none;">遗传评估结果查看</button>
-    </div>
-
-    <div class="search-box" id="searchBox">
-      <input type="text" placeholder="输入关键词搜索">
-      <button onclick="searchResults()">搜索</button>
-    </div>
-  </nav>
-
-  <main>
-     <!-- ===== 新增：网站详情介绍区块 ===== -->
-    <div class="platform-intro" style="margin-bottom: 40px; line-height: 1.8;">
-      <h2 style="font-size: 26px; color: #2c3e50; margin-bottom: 20px; text-align: center;">平台介绍</h2>
-      <div style="background-color: #f8f9fa; padding: 25px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
-        <p style="font-size: 16px; color: #333; margin-bottom: 15px;">
-          <strong>动物遗传改良信息服务平台:</strong>一、平台定位:
-动物遗传改良信息服务平台（sdauanimal.com） 是面向畜牧育种领域构建的专业信息与技术服务平台，重点服务于猪等重要经济动物的遗传改良工作。平台以表型数据、基因型数据和群体系谱信息为核心数据基础，集成传统遗传评估与基因组选择方法，为科研机构、育种企业和规模化养殖场提供规范、高效的遗传评估与育种决策支持，推动畜禽育种向数字化、精准化和智能化方向发展。
-<p>二、核心功能模块:
-（一）表型数据管理
-表型数据是遗传评估与育种决策的基础。平台支持猪重要经济性状表型数据的标准化上传与管理，包括生长性状、繁殖性状、肉质性状及健康相关性状等。系统兼容 CSV、Excel、TXT 等常用数据格式，并提供基础数据校验与整理功能，确保表型数据质量，为后续遗传分析与育种值评估提供可靠输入。
-<p>（二）基因型数据管理
-平台支持多类型基因型数据的规范化上传与存储，包括 SNP 芯片数据和全基因组测序数据，兼容 VCF、PLINK（.bed/.bim/.fam）、PED/MAP 等主流格式。通过将基因型数据与表型及系谱信息进行深度整合，平台可开展基因组选择分析和分子育种相关研究，显著提升育种值预测准确性和早期选择效率。
-<p>（三）系谱数据管理
-系谱信息是构建育种群体遗传结构的重要基础。平台支持群体系谱数据的标准化上传、自动校验与结构构建，可完整反映群体个体间的亲缘关系。结合表型和基因型数据，系谱信息可用于遗传参数估计以及基于BLUP方法的遗传评估等分析任务。
-<p>（四）遗传评估与结果展示
-平台基于多种成熟、稳定的遗传评估模型，包括单性状与多性状 BLUP、GBLUP等方法，可系统评估个体育种值（EBV/GEBV）、遗传力、评估准确度和群体遗传进展。评估结果支持在线查看、可视化展示及标准格式导出，可直接服务于种猪选留、配种设计和育种方案制定。
-
-      </div>
-    </div>
-    <h2>遗传结果展示</h2>
-    <iframe class="excel-iframe" src="show.html" scrolling="no"></iframe>
-
-        <div class="carousel">
-        <div class="carousel-track">
-            <!-- 替换为你优化后的图片（压缩+适配尺寸） -->
-
-            <img src="asset/images/DDtop10.jpg" alt="轮播图2">
-            <img src="asset/images/GEBVDDtop10.jpg" alt="轮播图3">
-            <img src="asset/images/indexavg.png" alt="轮播图4">
-            <img src="asset/images/Yearly_GEBV_Average.png" alt="轮播图5">
-            <img src="asset/images/YYGEBVAGE.jpg" alt="轮播图6">
-        </div>
-        <button class="carousel-btn prev-btn">&lt;</button>
-        <button class="carousel-btn next-btn">&gt;</button>
-        <div class="carousel-dots"></div>
-    </div>
-
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>遗传改良信息服务平台</title>
+    <!-- Tailwind CSS v3 -->
+    <script src="assets/js/saved_resource"></script>
+    <!-- Font Awesome -->
+    <link href="assets/css/common.css" rel="stylesheet" />
+    <!-- Chart.js -->
+    <script src="assets/js/chart.umd.min.js"></script>
+    <!-- ECharts -->
+    <script src="assets/js/echarts.min.js"></script>
+    <!-- 统一的 Tailwind 配置 -->
     <script>
-        const track = document.querySelector('.carousel-track');
-        const slides = Array.from(track.children);
-        const nextBtn = document.querySelector('.next-btn');
-        const prevBtn = document.querySelector('.prev-btn');
-        const dotsContainer = document.querySelector('.carousel-dots');
-        const carousel = document.querySelector('.carousel');
-
-        let currentIndex = 0;
-        const slideWidth = slides[0].getBoundingClientRect().width;
-        const slideCount = slides.length;
-        let autoPlay;
-
-        // 初始化轮播
-        function initCarousel() {
-            slides.forEach((slide, index) => {
-                slide.style.left = `${slideWidth * index}px`;
-            });
-            slides.forEach((_, index) => {
-                const dot = document.createElement('div');
-                dot.classList.add('dot');
-                if (index === currentIndex) dot.classList.add('active');
-                dot.addEventListener('click', () => goToSlide(index));
-                dotsContainer.appendChild(dot);
-            });
-        }
-
-        // 优化后的切换函数
-        function goToSlide(index) {
-            currentIndex = (index + slideCount) % slideCount;
-            track.style.transform = `translateX(-${slideWidth * currentIndex}px)`;
-            updateDots();
-        }
-
-        // 更新指示器
-        function updateDots() {
-            const dots = Array.from(dotsContainer.children);
-            dots.forEach((dot, index) => {
-                dot.classList.toggle('active', index === currentIndex);
-            });
-        }
-
-        // 自动轮播控制
-        function startAutoPlay() {
-            autoPlay = setInterval(() => goToSlide(currentIndex + 1), 3000);
-        }
-        function stopAutoPlay() {
-            clearInterval(autoPlay);
-        }
-
-        // 绑定事件
-        nextBtn.addEventListener('click', () => goToSlide(currentIndex + 1));
-        prevBtn.addEventListener('click', () => goToSlide(currentIndex - 1));
-        carousel.addEventListener('mouseenter', stopAutoPlay);
-        carousel.addEventListener('mouseleave', startAutoPlay);
-
-        // 初始化并启动自动轮播
-        initCarousel();
-        startAutoPlay();
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#2C3E4E",
+              secondary: "#1a56db",
+              light: "#fafafa",
+              dark: "#7F8C8D",
+              success: "#27AE60",
+              warning: "#E67E22",
+              purple: "#9B59B6",
+            },
+            fontFamily: {
+              sans: ["思源黑体", "微软雅黑", "Inter", "Roboto", "sans-serif"],
+            },
+          },
+        },
+      };
+	  
     </script>
-
-    <h2>优良猪种展览</h2>
-    <div class="img-text-cards">
-      <div class="img-text-card">
-        <div class="card-img">
-          <img src="asset/images/du.png" alt="杜洛克猪">
-        </div>
-        <div class="card-text">
-          <h4>杜洛克猪</h4>
-          <p>杜洛克猪(Duroc)原产于美国东北部,是我国引进的优良瘦肉型猪种之一。我国早在1936年就由许振英引入脂肪型杜洛克猪,尼克松总统1972年访华时第一次送给我国肉
-用型杜洛克猪,1978年和1982年我国又从美国、日本、匈牙利等国引人数百头杜洛克猪,形成了"美系"和"匈系"杜洛克猪。杜浴克猪全身被毛棕色,允许体侧或腹下有少量小暗证点。头中等大,嘴短直,耳中等大、略向前倾。背腰平直,腹线平直,体躯较宽,肌肉丰满,后躯发达,四肢粗壮结实。杜洛克猪的适应性强，分布广，具有生长速度快、饲料利用率高、胴体瘦肉率高、肌内脂肪含量较高等特点，是优秀的父系品种。
-</p>
-          <a href="https://baike.baidu.com/item/杜洛克猪/3891314" target="_blank" rel="noopener noreferrer">了解详情</a>
-        </div>
-      </div>
-
-      <div class="img-text-card">
-        <div class="card-img">
-          <img src="asset/images/chang.png" alt="长白猪">
-        </div>
-        <div class="card-text">
-          <h4>长白猪</h4>
-          <p>长白猪(Landrace)又称兰德瑞斯猪,因体躯瘦长,皮肤、被毛呈白色,故俗称长白猪,原产于丹麦,是我国引进的优良瘦肉型猪种之一。长白猪是1887年起用大约克夏猪与丹麦土种猪杂交经长期选育而成。1961年为丹麦全国唯一推广品种,是目前世界分布很广的瘦肉型猪品种。长白猪体躯长,被毛白色,允许偶有少量暗黑斑点。头小颈轻,鼻喘巽长,耳较大、向前倾或下垂。背腰平直,后躯发达,腿臀丰满,整体呈前轻后重,体驱至或线型,外观清秀美观,体质结实,四肢坚实。乳头数7~8对,排列整齐。长白猪具有生长快、饲料利用率高、瘦肉率高，母猪产仔多、泌乳性能较好等优点。</p>
-          <a href="https://baike.baidu.com/item/%E9%95%BF%E7%99%BD%E7%8C%AA/2642264" target="_blank" rel="noopener noreferrer">了解详情</a>
-        </div>
-      </div>
-
-      <div class="img-text-card">
-        <div class="card-img">
-          <img src="asset/images/da.png" alt="约克夏猪">
-        </div>
-        <div class="card-text">
-          <h4>大白猪</h4>
-          <p>大白猪 (LargeWhite) 又称大约克夏猪 (Large Yorkshire), 原产于英国约克郡及其英格兰北部的邻近地区，是我国引进的优良瘦肉型猪种之一。该品种是以当地的猪种为母本，引入中国广东猪种和本国莱塞斯特猪杂交育成，1852 年正式确定为新品种。约克夏猪分为大、中、小三型。目前世界分布最广的是大约克夏猪，因其体型大、毛色全白，故又名大白猪，是世界著名的瘦肉型猪种，在全世界猪种中占有重要地位。
-大白猪全身被毛白色，允许偶有少量暗黑斑点。头大小适中，鼻面直或微凹，耳
-竖立。前胛宽，背腰平直，背阔，后躯丰满，体躯呈长方形。肢蹄健壮，乳头数 7 对。大白猪的适应性强，分布广泛，具有产仔多、母性好、生长速度快、饲料利用率高、胴体瘦肉率高等特点。
- </p>
-          <a href="https://baike.baidu.com/item/%E7%BA%A6%E5%85%8B%E5%A4%8F%E7%8C%AA?fromModule=lemma_search-box" target="_blank" rel="noopener noreferrer">了解详情</a>
-        </div>
-      </div>
-    </div>
-  </main>
-
-  <footer>
-    <div class="footer-buttons">
-      <button>Update</button>
-      <button>Citation</button>
-      <button>Manual</button>
-    </div>
-    <p>如果发现bug，请联系我们。邮箱为ningchao@sdau.edu.cn</p>
-  </footer>
-
-  <!-- 登录模态框 -->
-  <div class="modal" id="loginModal">
-    <div class="modal-content">
-      <span class="close-btn" onclick="closeModal('loginModal')">&times;</span>
-      <h2 style="text-align: center;">用户登录</h2>
-      <form class="login-form" id="loginForm">
-        <label for="username">邮箱</label>
-        <input type="email" id="username" placeholder="请输入注册邮箱" required>
-
-        <label for="password">密码</label>
-        <input type="password" id="password" placeholder="请输入密码" required>
-
-        <button type="submit">登录</button>
-        <div class="form-footer">
-          <a href="#" onclick="switchModal('registerModal')">注册账号</a>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- 注册模态框 -->
-  <div class="modal" id="registerModal">
-    <div class="modal-content">
-      <span class="close-btn" onclick="closeModal('registerModal')">&times;</span>
-      <h2 style="text-align: center;">用户注册</h2>
-      <form class="login-form" id="registerForm">
-        <label for="regUsername">用户名</label>
-        <input type="text" id="regUsername" placeholder="请输入用户名（3-20位）" required>
-
-        <label for="regEmail">邮箱</label>
-        <input type="email" id="regEmail" placeholder="请输入用于注册的邮箱" required>
-
-        <label for="regPassword">密码</label>
-        <input type="password" id="regPassword" placeholder="请输入密码（至少6位）" required>
-
-        <label for="regConfirmPassword">确认密码</label>
-        <input type="password" id="regConfirmPassword" placeholder="请再次输入密码" required>
-
-        <button type="submit">注册</button>
-        <div class="form-footer">
-          <a href="#" onclick="switchModal('loginModal')">已有账号？去登录</a>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- 表型数据处理模态框（新增multiple属性+清空按钮） -->
-  <div class="modal" id="phenotypeModal">
-    <div class="modal-content">
-      <span class="close-btn" onclick="closeModal('phenotypeModal'); clearAllFiles('phenotype')">&times;</span>
-      <h2>表型数据处理</h2>
-      <div class="publish-form" id="phenotypeForm">
-        <div class="form-group">
-          <label for="phenotype-file">上传表型数据文件（支持多选/多次追加）</label>
-          <div class="file-upload" onclick="document.getElementById('phenotype-file').click()">
-            <input type="file" id="phenotype-file" accept=".csv, .xlsx, .txt" multiple>
-            <p>点击或拖拽文件到此处（可多选/多次追加）</p>
-            <p>支持格式: CSV, Excel, TXT</p>
-            <div class="file-preview" id="phenotype-file-preview"></div><!--预览框-->
-          </div>
-          <button class="clear-files-btn" onclick="clearAllFiles('phenotype')">清空已选文件</button>
-        </div>
-        <div class="form-group">
-          <label for="phenotype-name">数据集名称</label>
-          <input type="text" id="phenotype-name" placeholder="输入数据集名称" required>
-        </div>
-        <button onclick="uploadData('phenotype')">上传表型数据</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 基因型数据处理模态框（新增multiple属性+清空按钮） -->
-  <div class="modal" id="genotypeModal">
-    <div class="modal-content">
-      <span class="close-btn" onclick="closeModal('genotypeModal'); clearAllFiles('genotype')">&times;</span>
-      <h2>基因型数据处理</h2>
-      <div class="publish-form" id="genotypeForm">
-        <div class="form-group">
-          <label for="genotype-file">上传基因型数据文件（支持多选/多次追加）</label>
-          <div class="file-upload" onclick="document.getElementById('genotype-file').click()">
-            <input type="file" id="genotype-file" accept=".vcf, .ped, .map, .bed" multiple>
-            <p>点击或拖拽文件到此处（可多选/多次追加）</p>
-            <p>支持格式: VCF, PED/MAP, BED/BIM/FAM</p>
-            <div class="file-preview" id="genotype-file-preview"></div><!--预览框-->
-          </div>
-          <button class="clear-files-btn" onclick="clearAllFiles('genotype')">清空已选文件</button>
-        </div>
-        <div class="form-group">
-          <label for="genotype-name">数据集名称</label>
-          <input type="text" id="genotype-name" placeholder="输入数据集名称" required>
-        </div>
-        <button onclick="uploadData('genotype')">上传基因型数据</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 亲缘关系矩阵计算模态框（新增multiple属性+清空按钮） -->
-  <div class="modal" id="kinshipMatrixModal">
-    <div class="modal-content">
-      <span class="close-btn" onclick="closeModal('kinshipMatrixModal'); clearAllFiles('kinship')">&times;</span>
-      <h2>亲缘关系数据上传</h2>
-      <div class="publish-form" id="kinshipForm">
-        <div class="form-group">
-          <label for="kinship-file">上传亲缘关系文件（支持多选/多次追加）</label>
-          <div class="file-upload" onclick="document.getElementById('kinship-file').click()">
-            <input type="file" id="kinship-file" accept=".csv, .txt, .matrix" multiple>
-            <p>点击或拖拽文件到此处（可多选/多次追加）</p>
-            <p>支持格式: CSV, TXT, MATRIX</p>
-            <div class="file-preview" id="kinship-file-preview"></div><!--预览框-->
-          </div>
-          <button class="clear-files-btn" onclick="clearAllFiles('kinship')">清空已选文件</button>
-        </div>
-        <div class="form-group">
-          <label for="kinship-name">文件名称</label>
-          <input type="text" id="kinship-name" placeholder="输入文件名称" required>
-        </div>
-        <button onclick="uploadData('kinship')">上传亲缘关系数据</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 遗传评估模态框 -->
-  <div class="modal" id="geneticEvaluationModal">
-    <div class="modal-content">
-      <span class="close-btn" onclick="closeModal('geneticEvaluationModal')">&times;</span>
-      <h2>遗传评估结果查看</h2>
-
-      <div class="publish-form" style="margin-bottom: 20px;">
-        <div class="form-row">
-          <div class="form-col">
-            <label for="eval-species">物种筛选</label>
-            <select id="eval-species" onchange="filterEvalResults()">
-              <option value="all">全部</option>
-              <option value="猪" selected>猪</option>
-              <option value="牛">牛</option>
-              <option value="羊">羊</option>
-            </select>
-          </div>
-          <div class="form-col">
-            <label for="eval-trait">性状类型</label>
-            <select id="eval-trait" onchange="filterEvalResults()">
-              <option value="all">全部</option>
-              <option value="生长性状">生长性状</option>
-              <option value="繁殖性状">繁殖性状</option>
-              <option value="肉质性状">肉质性状</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="eval-search">关键词搜索</label>
-          <input type="text" id="eval-search" placeholder="输入评估名称/猪种名" oninput="filterEvalResults()">
-        </div>
-      </div>
-
-      <div style="max-height: 400px; overflow-y: auto;">
-        <table class="data-table" id="eval-results-table">
-          <thead>
-            <tr>
-              <th>评估名称</th>
-              <th>猪种/物种</th>
-              <th>性状类型</th>
-              <th>评估时间</th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody id="eval-results-body">
-          </tbody>
-        </table>
-        <div id="eval-no-result" style="text-align: center; padding: 20px; display: none;">
-          未找到匹配的遗传评估结果～
-        </div>
-      </div>
-
-      <div id="eval-detail-modal" style="display: none; margin-top: 20px; padding: 15px; border: 1px solid #eee; border-radius: 8px; background: #f9f9f9;">
-        <h4 style="margin-top: 0;" id="detail-title">评估详情</h4>
-        <div id="detail-content">
-        </div>
-        <button onclick="closeEvalDetail()" style="margin-top: 10px; padding: 8px 15px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer;">关闭详情</button>
-      </div>
-    </div>
-  </div>
-
-<script>
-  // 1. 初始化Supabase客户端（使用官方SDK，支持Auth、Storage、Database）
-  const supabaseUrl = "https://cwpdenrqhipxgkcwewtv.supabase.co";
-  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3cGRlbnJxaGlweGdrY3dld3R2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU5NDM5MzUsImV4cCI6MjA4MTUxOTkzNX0.qLvLmBeu00kCZ7rvQUd4iBQFxR4lDkRLqIRM44JZ3i4";
-  const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
-
-  // 2. 全局变量
-  let currentUser = null; // 当前登录用户
-  let evalResults = [];//存储当前用户的所有遗传评估结果
-  // ===== 新增：多文件追加缓存数组 =====
-  let phenotypeFilesCache = []; // 表型文件缓存
-  let genotypeFilesCache = [];  // 基因型文件缓存
-  let kinshipFilesCache = [];   // 亲缘关系文件缓存
-
-  // 3. 页面加载时初始化
-  window.onload = async function() {
-    try {
-      // 检查用户是否已登录（持久化登录状态）
-      const { data: { session }, error } = await supabaseClient.auth.getSession();
-      if (error) throw error;
-
-      if (session) {
-        currentUser = session.user;
-      }
-
-      // 更新登录状态UI
-      updateLoginStatus();
-      // 绑定文件选择事件
-      bindFileChangeEvents();
-
-      console.log("Supabase初始化完成，当前用户：", currentUser?.email || "未登录");
-    } catch (e) {
-      console.error("初始化失败:", e);
-      showToast("系统初始化失败，请刷新页面重试！", false);
-    }
-  };
-
-  // ===== 重写：绑定文件选择事件（支持追加） =====
-  function bindFileChangeEvents() {
-    // 阻止拖拽默认行为
-    function preventDefaults(e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-
-    // 表型文件 - 支持追加
-    const phenotypeFile = document.getElementById('phenotype-file');
-    phenotypeFile.addEventListener('change', (e) => {
-      handleFileAdd('phenotype', e.target.files);
-      e.target.value = ''; // 清空input值，避免相同文件不触发change
-    });
-
-    // 基因型文件 - 支持追加
-    const genotypeFile = document.getElementById('genotype-file');
-    genotypeFile.addEventListener('change', (e) => {
-      handleFileAdd('genotype', e.target.files);
-      e.target.value = '';
-    });
-
-    // 亲缘关系文件 - 支持追加
-    const kinshipFile = document.getElementById('kinship-file');
-    kinshipFile.addEventListener('change', (e) => {
-      handleFileAdd('kinship', e.target.files);
-      e.target.value = '';
-    });
-
-    // 拖拽上传支持（同步修改为追加逻辑）
-    const fileUploadAreas = document.querySelectorAll('.file-upload');
-    fileUploadAreas.forEach(area => {
-      // 阻止默认拖拽行为
-      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        area.addEventListener(eventName, preventDefaults, false);
-      });
-
-      // 拖拽高亮
-      ['dragenter', 'dragover'].forEach(eventName => {
-        area.addEventListener(eventName, () => area.classList.add('drag-over'), false);
-      });
-
-      ['dragleave', 'drop'].forEach(eventName => {
-        area.addEventListener(eventName, () => area.classList.remove('drag-over'), false);
-      });
-
-      // 处理文件拖放（追加逻辑）
-      area.addEventListener('drop', (e) => {
-        const dt = e.dataTransfer;
-        const files = dt.files;
-        if (files.length === 0) return;
-
-        // 找到对应的文件类型
-        const fileInput = area.querySelector('input[type="file"]');
-        if (fileInput.id === 'phenotype-file') handleFileAdd('phenotype', files);
-        if (fileInput.id === 'genotype-file') handleFileAdd('genotype', files);
-        if (fileInput.id === 'kinship-file') handleFileAdd('kinship', files);
-      }, false);
-    });
-  }
-
-  // ===== 新增：处理文件追加核心函数 =====
-  function handleFileAdd(fileType, newFiles) {
-    // 1. 确定缓存数组和预览ID
-    let cacheArray, previewId;
-    switch(fileType) {
-      case 'phenotype':
-        cacheArray = phenotypeFilesCache;
-        previewId = 'phenotype-file-preview';
-        break;
-      case 'genotype':
-        cacheArray = genotypeFilesCache;
-        previewId = 'genotype-file-preview';
-        break;
-      case 'kinship':
-        cacheArray = kinshipFilesCache;
-        previewId = 'kinship-file-preview';
-        break;
-      default: return;
-    }
-
-    // 2. 把新选的文件追加到缓存（去重：避免重复选同一个文件）
-    const newFilesArray = Array.from(newFiles);
-    newFilesArray.forEach(newFile => {
-      // 按文件名+大小去重（避免重复添加）
-      const isDuplicate = cacheArray.some(oldFile =>
-        oldFile.name === newFile.name && oldFile.size === newFile.size
-      );
-      if (!isDuplicate) {
-        cacheArray.push(newFile);
-      }
-    });
-
-    // 3. 重新渲染预览（基于缓存数组）
-    renderFilePreview(cacheArray, previewId);
-  }
-
-  // ===== 重写：基于缓存数组渲染预览 =====
-  function renderFilePreview(fileArray, previewId) {
-    const previewContainer = document.getElementById(previewId);
-
-    if (!fileArray || fileArray.length === 0) {
-      previewContainer.style.display = 'none';
-      return;
-    }
-
-    // 构建多文件预览HTML
-    let previewHtml = '';
-    fileArray.forEach((file, index) => {
-      const iconClass = getFileIconClass(file.name);
-      const fileSize = formatFileSize(file.size);
-      previewHtml += `
-        <div class="file-item" data-index="${index}">
-          <div class="file-icon ${iconClass}">📄</div>
-          <div class="file-info">
-            <div class="file-name" title="${file.name}">${file.name}</div>
-            <div class="file-size">${fileSize}</div>
-          </div>
-          <button class="file-remove" onclick="removeCachedFile(this, ${index})">移除</button>
-        </div>
-      `;
-    });
-
-    previewContainer.innerHTML = previewHtml;
-    previewContainer.style.display = 'flex';
-  }
-
-  // ===== 新增：移除缓存中的单个文件 =====
-  function removeCachedFile(btn, index) {
-    // 1. 找到对应的缓存数组（通过预览容器的ID）
-    let cacheArray;
-    const previewContainer = btn.closest('.file-preview');
-    if (previewContainer.id === 'phenotype-file-preview') {
-      cacheArray = phenotypeFilesCache;
-    } else if (previewContainer.id === 'genotype-file-preview') {
-      cacheArray = genotypeFilesCache;
-    } else if (previewContainer.id === 'kinship-file-preview') {
-      cacheArray = kinshipFilesCache;
-    } else {
-      return;
-    }
-
-    // 2. 删除指定索引的文件
-    cacheArray.splice(index, 1);
-
-    // 3. 重新渲染预览
-    renderFilePreview(cacheArray, previewContainer.id);
-  }
-
-  // ===== 新增：清空指定类型的所有缓存文件 =====
-  function clearAllFiles(fileType) {
-    let cacheArray, previewId;
-    switch(fileType) {
-      case 'phenotype':
-        cacheArray = phenotypeFilesCache;
-        previewId = 'phenotype-file-preview';
-        break;
-      case 'genotype':
-        cacheArray = genotypeFilesCache;
-        previewId = 'genotype-file-preview';
-        break;
-      case 'kinship':
-        cacheArray = kinshipFilesCache;
-        previewId = 'kinship-file-preview';
-        break;
-      default: return;
-    }
-    // 清空缓存
-    cacheArray.length = 0;
-    // 清空预览
-    renderFilePreview([], previewId);
-  }
-
-  // 5. 显示/隐藏加载提示
-  function showLoading(text = "上传中...") {
-    const loading = document.getElementById('loadingOverlay');
-    loading.querySelector('.loading-text span').textContent = text;
-    loading.style.display = 'flex';
-  }
-
-  function hideLoading() {
-    document.getElementById('loadingOverlay').style.display = 'none';
-  }
-
-  // 6. 显示上传提示
-  function showToast(message, isSuccess = true) {
-    const toast = document.getElementById('uploadToast');
-    toast.textContent = message;
-    toast.className = 'upload-toast ' + (isSuccess ? 'toast-success' : 'toast-error');
-    toast.style.display = 'block';
-    setTimeout(() => {
-      toast.style.display = 'none';
-    }, 3000);
-  }
-
-  // 7. 核心上传函数（修改为从缓存读取文件）
-  async function uploadData(dataType) {
-    // 检查登录状态
-    if (!currentUser) {
-      showToast('请先登录后再上传数据！', false);
-      openModal('loginModal');
-      return;
-    }
-
-    // 获取DOM元素
-    let dataNameDomId = '';
-    let cacheArray = []; // 读取对应的缓存数组
-    let typeName = '';
-    switch(dataType) {
-      case 'phenotype':
-        dataNameDomId = 'phenotype-name';
-        cacheArray = phenotypeFilesCache; // 从缓存读取
-        typeName = '表型';
-        break;
-      case 'genotype':
-        dataNameDomId = 'genotype-name';
-        cacheArray = genotypeFilesCache;  // 从缓存读取
-        typeName = '基因型';
-        break;
-      case 'kinship':
-        dataNameDomId = 'kinship-name';
-        cacheArray = kinshipFilesCache;   // 从缓存读取
-        typeName = '亲缘关系';
-        break;
-      default:
-        showToast('未知的上传类型！', false);
-        return;
-    }
-
-    // 获取输入值
-    const dataName = document.getElementById(dataNameDomId).value.trim();
-
-    // 基础校验
-    if (!dataName) {
-      showToast(`请输入${typeName}数据集名称！`, false);
-      return;
-    }
-    if (!cacheArray || cacheArray.length === 0) {
-      showToast(`请选择${typeName}上传文件！`, false);
-      return;
-    }
-
-    // 校验每个文件大小
-    const maxSize = 5 * 1024 * 1024; // 5MB
-    for (const file of cacheArray) {
-      if (file.size > maxSize) {
-        showToast(`文件【${file.name}】大小超过5MB！`, false);
-        return;
-      }
-    }
-
-    try {
-      showLoading(`正在上传${typeName}数据（共${cacheArray.length}个文件）...`);
-
-      // 循环上传每个文件（从缓存数组读取）
-      const uploadResults = [];
-      for (const file of cacheArray) {
-        // 生成安全文件名
-        const safeFileName = file.name.replace(/[^a-zA-Z0-9_\-\.]/g, '_');
-        const fileName = `${Date.now()}_${safeFileName}`;
-        const filePath = `${dataType}/${currentUser.id}/${fileName}`;
-
-        // 步骤1：上传文件到Supabase Storage
-        const { data: uploadData, error: uploadError } = await supabaseClient
-          .storage
-          .from('genetic-data')
-          .upload(filePath, file, {
-            cacheControl: '3600',
-            upsert: false
-          });
-
-        if (uploadError) throw new Error(`文件【${file.name}】上传失败：${uploadError.message}`);
-
-        // 步骤2：获取签名URL
-        const { data: signedUrlData, error: signedUrlError } = await supabaseClient
-          .storage
-          .from('genetic-data')
-          .createSignedUrl(filePath, 60 * 60 * 24); // 24小时有效期
-
-        if (signedUrlError) throw new Error(`文件【${file.name}】获取URL失败：${signedUrlError.message}`);
-
-        // 步骤3：写入数据库（每个文件一条记录）
-        const { error: dbError } = await supabaseClient
-          .from('uploaded_data') // 请确保Supabase中已创建此表
-          .insert([
-            {
-              user_id: currentUser.id,          // 用户ID
-              data_type: dataType,              // 数据类型
-              data_name: dataName,              // 数据集名称
-              file_name: file.name,             // 原始文件名
-              file_path: filePath,              // 存储路径
-              file_url: signedUrlData.signedUrl,// 访问URL
-              file_size: file.size,             // 文件大小
-              upload_time: new Date().toISOString(), // 上传时间
-              file_type: dataType               //文件类型（基因型、表型、系谱）
-            }
-          ]);
-
-        if (dbError) throw new Error(`文件【${file.name}】写入数据库失败：${dbError.message}`);
-
-        uploadResults.push(file.name);
-      }
-
-      // 所有文件上传成功
-      hideLoading();
-      showToast(`${typeName}数据集上传成功！共上传${uploadResults.length}个文件`, true);
-      alert(`✅ ${typeName}数据集上传成功！
-      名称：${dataName}
-      用户ID：${currentUser.id}
-      上传文件：${uploadResults.join('\n- ')}`);
-
-      // 重置表单（清空输入框+缓存+预览）
-      document.getElementById(dataNameDomId).value = '';
-      // 清空对应缓存
-      if (dataType === 'phenotype') phenotypeFilesCache = [];
-      if (dataType === 'genotype') genotypeFilesCache = [];
-      if (dataType === 'kinship') kinshipFilesCache = [];
-      // 清空预览
-      const previewId = dataNameDomId.replace('-name', '-file-preview');
-      const previewContainer = document.getElementById(previewId);
-      if (previewContainer) {
-        previewContainer.style.display = 'none';
-        previewContainer.innerHTML = '';
-      }
-
-      // 关闭模态框
-      closeModal(`${dataType}Modal`);
-
-    } catch (e) {
-      hideLoading();
-      console.error(`${typeName}上传失败:`, e);
-      showToast(`${typeName}上传失败：${e.message}`, false);
-      alert(`❌ ${typeName}上传失败：${e.message}
-      请检查：
-      1. 所有文件大小是否<5MB
-      2. 网络是否正常
-      3. 数据集名称是否填写`);
-    }
-  }
-
-  // 8. 模态框操作函数（保持不变）
-  function openModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (!modal) {
-      console.error('未找到模态框：', modalId);
-      showToast('功能暂不可用，请检查页面！', false);
-      return;
-    }
-    modal.style.display = 'flex';
-    // 打开模态框时清空缓存和预览
-    if (modalId === 'phenotypeModal') clearAllFiles('phenotype');
-    if (modalId === 'genotypeModal') clearAllFiles('genotype');
-    if (modalId === 'kinshipMatrixModal') clearAllFiles('kinship');
-  }
-
-  function closeModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) {
-      modal.style.display = 'none';
-    }
-  }
-
-  function switchModal(targetModalId) {
-    const modals = document.querySelectorAll('.modal');
-    modals.forEach(modal => {
-      if (modal.style.display === 'flex') {
-        modal.style.display = 'none';
-      }
-    });
-    openModal(targetModalId);
-  }
-
-  // 9. 登录状态相关函数（保持不变）
-  function checkLoginBeforeOpen(modalId) {
-    if (!currentUser) {
-      showToast('请先登录后使用此功能！', false);
-      openModal('loginModal');
-      return;
-    }
-    openModal(modalId);
-  }
-
-  function updateLoginStatus() {
-    // 更新导航栏和按钮状态
-    document.getElementById('userInfo').style.display = currentUser ? 'block' : 'none';
-    document.getElementById('loginBtn').style.display = currentUser ? 'none' : 'inline-block';
-    document.getElementById('logoutBtn').style.display = currentUser ? 'inline-block' : 'none';
-    document.getElementById('viewResultsBtn').style.display = currentUser ? 'inline-block' : 'none';
-
-    // 更新导航链接状态（未登录时禁用上传功能）
-    const navLinks = ['navPhenotype', 'navGenotype', 'navKinship'];
-    navLinks.forEach(id => {
-      const link = document.getElementById(id);
-      if (link) {
-        link.classList.toggle('disabled', !currentUser);
-        link.classList.toggle('enabled', currentUser);
-      }
-    });
-
-    // 显示用户名
-    if (currentUser) {
-      document.getElementById('usernameDisplay').textContent = currentUser.email.split('@')[0];
-    }
-  }
-
-  // 10. 真实的登录功能（保持不变）
-  document.getElementById('loginForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const email = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value.trim();
-
-    if (!email || !password) {
-      showToast('请输入邮箱和密码！', false);
-      return;
-    }
-
-    try {
-      showLoading("登录中...");
-      // 调用Supabase Auth登录
-      const { data, error } = await supabaseClient.auth.signInWithPassword({
-        email: email,
-        password: password,
-      });
-
-      if (error) throw error;
-
-      // 登录成功，更新用户信息
-      currentUser = data.user;
-      showToast('登录成功！');
-      updateLoginStatus();
-      closeModal('loginModal');
-      this.reset();
-
-      console.log("用户登录成功：", currentUser.email);
-    } catch (e) {
-      hideLoading();
-      console.error("登录失败：", e);
-      // 友好的错误提示
-      if (e.message.includes('Invalid login credentials')) {
-        showToast('邮箱或密码错误！', false);
-      } else {
-        showToast(`登录失败：${e.message}`, false);
-      }
-    } finally {
-      hideLoading();
-    }
-  });
-
-  // 11. 真实的注册功能（保持不变）
-  document.getElementById('registerForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const username = document.getElementById('regUsername').value.trim();
-    const email = document.getElementById('regEmail').value.trim();
-    const password = document.getElementById('regPassword').value.trim();
-    const confirmPassword = document.getElementById('regConfirmPassword').value.trim();
-
-    // 表单验证
-    if (!username || username.length < 3) {
-      showToast('用户名至少3位！', false);
-      return;
-    }
-    if (!email) {
-      showToast('请输入有效的邮箱！', false);
-      return;
-    }
-    if (password.length < 6) {
-      showToast('密码至少6位！', false);
-      return;
-    }
-    if (password !== confirmPassword) {
-      showToast('两次输入的密码不一致！', false);
-      return;
-    }
-
-    try {
-      showLoading("注册中...");
-      // 调用Supabase Auth注册
-      const { data, error } = await supabaseClient.auth.signUp({
-        email: email,
-        password: password,
-        options: {
-          data: {
-            username: username // 额外的用户信息
-          }
+    <style type="text/tailwindcss">
+      @layer utilities {
+        .content-auto {
+          content-visibility: auto;
         }
-      });
-
-      if (error) throw error;
-
-      // 注册成功
-      showToast('注册成功！请查收验证邮件后登录', true);
-      switchModal('loginModal');
-      this.reset();
-
-      console.log("用户注册成功：", email);
-    } catch (e) {
-      hideLoading();
-      console.error("注册失败：", e);
-      // 友好的错误提示
-      if (e.message.includes('Email already registered')) {
-        showToast('该邮箱已被注册！', false);
-      } else {
-        showToast(`注册失败：${e.message}`, false);
+        .transition-all {
+          transition-property: all;
+          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+          transition-duration: 300ms;
+        }
+        .shadow-hover:hover {
+          box-shadow:
+            0 10px 15px -3px rgba(0, 0, 0, 0.1),
+            0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
       }
-    } finally {
-      hideLoading();
-    }
-  });
-
-  // 12. 退出登录功能（保持不变）
-  async function logout() {
-    try {
-      showLoading("退出登录中...");
-      // 调用Supabase Auth退出登录
-      const { error } = await supabaseClient.auth.signOut();
-
-      if (error) throw error;
-
-      // 重置用户状态
-      currentUser = null;
-      showToast('退出登录成功！');
-      updateLoginStatus();
-
-      // 清空文件缓存
-      phenotypeFilesCache = [];
-      genotypeFilesCache = [];
-      kinshipFilesCache = [];
-
-      console.log("用户已退出登录");
-    } catch (e) {
-      hideLoading();
-      console.error("退出登录失败：", e);
-      showToast(`退出登录失败：${e.message}`, false);
-    } finally {
-      hideLoading();
-    }
-  }
-
-  // 13. 其他辅助函数（保持不变）
-  function toggleSearchBox() {
-    const searchBox = document.getElementById('searchBox');
-    searchBox.style.display = 'none'; // 隐藏旧的简单搜索框
-    openModal('geneticEvaluationModal'); // 打开遗传评估结果模态框
-    loadEvalResults(); // 加载评估结果数据
-  }
-
-  // ========== 新增：渲染评估结果表格 ==========
-  function renderEvalResultsTable(data) {
-    const tableBody = document.getElementById('eval-results-body');
-    const noResultDiv = document.getElementById('eval-no-result');
-
-    // 清空表格
-    tableBody.innerHTML = '';
-
-    // 无数据时显示提示
-    if (data.length === 0) {
-      noResultDiv.style.display = 'block';
-      return;
-    }
-    noResultDiv.style.display = 'none';
-
-    // 渲染每一行数据
-    data.forEach(item => {
-      const tr = document.createElement('tr');
-
-      // 格式化时间（本地时间）
-      const evalTime = new Date(item.eval_time);
-      const formattedTime = evalTime.toLocaleString('zh-CN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-
-      tr.innerHTML = `
-        <td>${item.eval_name || '未命名评估'}</td>
-        <td>${item.species || '未知'}</td>
-        <td>${item.trait_type || '未知'}</td>
-        <td>${formattedTime}</td>
-        <td>
-          <button onclick="viewEvalDetail('${item.id}')" style="padding: 5px 10px; background: #27ae60; color: white; border: none; border-radius: 4px; cursor: pointer;">查看详情</button>
-          <button onclick="downloadEvalResult('${item.id}')" style="margin-left: 5px; padding: 5px 10px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">下载结果</button>
-        </td>
-      `;
-      tableBody.appendChild(tr);
-    });
-  }
-
-  // ========== 新增：加载遗传评估结果（核心函数） ==========
-  async function loadEvalResults() {
-    if (!currentUser) {
-      showToast('请先登录后查看评估结果！', false);
-      return;
-    }
-
-    try {
-      showLoading('正在加载评估结果...');
-
-      // 从Supabase获取当前用户的遗传评估数据
-      const { data, error } = await supabaseClient
-        .from('genetic_evaluation')
-        .select('*')
-        .eq('user_id', currentUser.id)
-        .order('eval_time', { ascending: false }); // 按评估时间倒序
-
-      if (error) throw error;
-
-      evalResults = data || [];
-      renderEvalResultsTable(evalResults); // 渲染表格
-      hideLoading();
-
-    } catch (e) {
-      hideLoading();
-      console.error('加载评估结果失败：', e);
-      showToast(`加载失败：${e.message}`, false);
-      renderEvalResultsTable([]); // 清空表格
-    }
-  }
-
-  // ========== 新增：查看评估详情 ==========
-  async function viewEvalDetail(evalId) {
-    try {
-      showLoading('加载详情...');
-
-      // 从数据库获取详情
-      const { data, error } = await supabaseClient
-        .from('genetic_evaluation')
-        .select('*')
-        .eq('id', evalId)
-        .single();
-
-      if (error) throw error;
-
-      const detailModal = document.getElementById('eval-detail-modal');
-      const detailTitle = document.getElementById('detail-title');
-      const detailContent = document.getElementById('detail-content');
-
-      // 设置标题
-      detailTitle.textContent = `评估详情：${data.eval_name || '未命名评估'}`;
-
-      // 渲染详情内容（适配JSON格式的详情数据）
-      let detailsHtml = `
-        <div style="line-height: 1.8;">
-          <p><strong>物种：</strong>${data.species || '未知'}</p>
-          <p><strong>性状类型：</strong>${data.trait_type || '未知'}</p>
-          <p><strong>评估时间：</strong>${new Date(data.eval_time).toLocaleString('zh-CN')}</p>
-          <p><strong>关联数据ID：</strong>${data.data_id || '无'}</p>
-          <hr>
-          <p><strong>评估结果详情：</strong></p>
-      `;
-
-      // 解析JSON格式的评估详情
-      if (typeof data.eval_details === 'object' && data.eval_details !== null) {
-        detailsHtml += '<ul style="padding-left: 20px;">';
-        Object.entries(data.eval_details).forEach(([key, value]) => {
-          detailsHtml += `<li><strong>${key}：</strong>${JSON.stringify(value, null, 2)}</li>`;
-        });
-        detailsHtml += '</ul>';
-      } else {
-        detailsHtml += `<p>${data.eval_details || '无详情数据'}</p>`;
+    </style>
+    <style>
+      /* 自定义样式 */
+      .nav-link {
+        position: relative;
       }
-
-      detailsHtml += '</div>';
-      detailContent.innerHTML = detailsHtml;
-
-      // 显示详情模态框
-      detailModal.style.display = 'block';
-      hideLoading();
-
-    } catch (e) {
-      hideLoading();
-      console.error('加载详情失败：', e);
-      showToast(`加载详情失败：${e.message}`, false);
-    }
-  }
-
-  // ========== 新增：下载评估结果 ==========
-  async function downloadEvalResult(evalId) {
-    try {
-      showLoading('准备下载文件...');
-
-      // 1. 获取评估数据
-      const { data: evalData, error: evalError } = await supabaseClient
-        .from('genetic_evaluation')
-        .select('*')
-        .eq('id', evalId)
-        .single();
-
-      if (evalError) throw evalError;
-
-      // 2. 构造下载内容（可以是JSON/CSV格式）
-      const downloadContent = JSON.stringify({
-        评估名称: evalData.eval_name,
-        物种: evalData.species,
-        性状类型: evalData.trait_type,
-        评估时间: new Date(evalData.eval_time).toLocaleString('zh-CN'),
-        评估详情: evalData.eval_details
-      }, null, 2);
-
-      // 3. 创建下载链接
-      const blob = new Blob([downloadContent], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${evalData.eval_name || '遗传评估结果'}_${new Date().getTime()}.json`;
-      document.body.appendChild(a);
-      a.click();
-
-      // 4. 清理
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      hideLoading();
-      showToast('下载成功！');
-
-    } catch (e) {
-      hideLoading();
-      console.error('下载失败：', e);
-      showToast(`下载失败：${e.message}`, false);
-    }
-  }
-
-  function searchResults() {
-    const searchInput = document.querySelector('.search-box input').value.trim();
-    if (!searchInput) {
-      showToast('请输入搜索关键词！', false);
-      return;
-    }
-    alert(`搜索关键词：${searchInput}\n（模拟搜索功能，暂无真实数据）`);
-  }
-
-  function closeEvalDetail() {
-    document.getElementById('eval-detail-modal').style.display = 'none';
-  }
-
-  // ========== 修改：实现筛选功能 ==========
-  function filterEvalResults() {
-    if (evalResults.length === 0) {
-      showToast('暂无数据可筛选', false);
-      return;
-    }
-
-    // 获取筛选条件
-    const species = document.getElementById('eval-species').value;
-    const trait = document.getElementById('eval-trait').value;
-    const keyword = document.getElementById('eval-search').value.trim().toLowerCase();
-
-    // 执行筛选
-    const filteredData = evalResults.filter(item => {
-      // 物种筛选
-      const matchSpecies = species === 'all' || item.species === species;
-      // 性状类型筛选
-      const matchTrait = trait === 'all' || item.trait_type === trait;
-      // 关键词筛选（匹配评估名称、物种、性状类型）
-      const matchKeyword = keyword === ''
-        ? true
-        : (item.eval_name?.toLowerCase().includes(keyword) ||
-           item.species?.toLowerCase().includes(keyword) ||
-           item.trait_type?.toLowerCase().includes(keyword));
-        return matchSpecies && matchTrait && matchKeyword;
-    });
-
-    // 渲染筛选后的结果
-    renderEvalResultsTable(filteredData);
-  }
-
-  // 点击模态框外部关闭
-  document.addEventListener('click', function(e) {
-    const modals = document.querySelectorAll('.modal');
-    modals.forEach(modal => {
-      if (e.target === modal) {
-        modal.style.display = 'none';
+      .nav-link::after {
+        content: "";
+        position: absolute;
+        width: 0;
+        height: 2px;
+        bottom: -2px;
+        left: 0;
+        background-color: #2980b9;
+        transition: width 0.3s ease;
       }
-    });
-  });
-
-  // 按ESC键关闭模态框
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-      const modals = document.querySelectorAll('.modal');
-      modals.forEach(modal => {
-        modal.style.display = 'none';
-      });
-    }
-  });
-
-  // ===== 新增：辅助函数 - 获取文件类型对应的图标类 =====
-  function getFileIconClass(fileName) {
-    const ext = fileName.split('.').pop().toLowerCase();
-    switch(ext) {
-      case 'csv': return 'icon-csv';
-      case 'xlsx': return 'icon-xlsx';
-      case 'txt': return 'icon-txt';
-      case 'matrix': return 'icon-matrix';
-      case 'vcf': return 'icon-vcf';
-      case 'ped': return 'icon-ped';
-      case 'map': return 'icon-map';
-      case 'bed': return 'icon-bed';
-      case 'bim': return 'icon-bim';
-      case 'fam': return 'icon-fam';
-      default: return 'icon-csv'; // 默认图标
-    }
-  }
-
-  // ===== 新增：辅助函数 - 格式化文件大小（字节转KB/MB） =====
-  function formatFileSize(bytes) {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
-  }
-
-  // ===== 修改：支持多文件预览 =====
-  function showFilePreview(fileInputId, previewId) {
-    const fileInput = document.getElementById(fileInputId);
-    const previewContainer = document.getElementById(previewId);
-    const files = fileInput.files; // 现在是 FileList（多文件）
-
-    if (!files || files.length === 0) {
-      previewContainer.style.display = 'none';
-      return;
-    }
-
-    // 构建多文件预览HTML
-    let previewHtml = '';
-    Array.from(files).forEach((file, index) => {
-      const iconClass = getFileIconClass(file.name);
-      const fileSize = formatFileSize(file.size);
-      // 每个文件项加索引，方便移除
-      previewHtml += `
-        <div class="file-item" data-index="${index}">
-          <div class="file-icon ${iconClass}">📄</div>
-          <div class="file-info">
-            <div class="file-name" title="${file.name}">${file.name}</div>
-            <div class="file-size">${fileSize}</div>
+      .nav-link:hover::after,
+      .nav-link.active::after {
+        width: 100%;
+      }
+      .mobile-menu {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out;
+      }
+      .mobile-menu.open {
+        transform: translateX(0);
+      }
+      .hero-section {
+        background: linear-gradient(135deg, #2c3e4e 0%, #2980b9 100%);
+      }
+      .stat-card {
+        transition: transform 0.3s ease;
+      }
+      .stat-card:hover {
+        transform: translateY(-5px);
+      }
+      /* 图表容器统一高度 */
+      .chart-container {
+        height: 320px;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body class="bg-light text-primary">
+    <!-- 顶部导航栏 -->
+    <header class="bg-primary text-white shadow-md">
+      <div class="container mx-auto px-4 py-3">
+        <div class="flex justify-between items-center">
+          <!-- Logo -->
+          <div class="flex items-center space-x-2">
+            <i class="fa fa-dna text-2xl text-secondary"></i>
+            <span class="text-xl font-bold">遗传改良信息服务平台</span>
           </div>
-          <button class="file-remove" onclick="removeSingleFile('${fileInputId}', '${previewId}', ${index})">移除</button>
+
+          <!-- 桌面端导航 -->
+          <nav class="hidden md:flex space-x-8">
+            <a href="index.html" class="nav-link active py-2" target="geneticInfo">首页</a>
+            <a href="data.html" class="nav-link py-2" target="geneticInfo">遗传评估数据</a>
+            <a href="achievements.html" class="nav-link py-2" target="geneticInfo">优良猪种展示</a>
+            <a href="team.html" class="nav-link py-2" target="geneticInfo">科研团队</a>
+            <a href="upload.html" class="nav-link py-2" target="geneticInfo">数据上传</a>
+          </nav>
+
+          <!-- 移动端菜单按钮 -->
+          <button id="mobile-menu-button" class="md:hidden text-white focus:outline-none">
+            <i class="fa fa-bars text-xl"></i>
+          </button>
         </div>
-      `;
-    });
+      </div>
 
-    previewContainer.innerHTML = previewHtml;
-    previewContainer.style.display = 'flex'; // 显示多文件列表
-  }
+      <!-- 移动端导航菜单 -->
+      <div id="mobile-menu" class="mobile-menu fixed top-0 left-0 h-full w-64 bg-primary z-50 md:hidden">
+        <div class="p-4 border-b border-gray-700">
+          <div class="flex justify-between items-center">
+            <span class="text-lg font-bold">菜单导航</span>
+            <button id="close-menu-button" class="text-white focus:outline-none">
+              <i class="fa fa-times"></i>
+            </button>
+          </div>
+        </div>
+        <nav class="p-4">
+          <ul class="space-y-4">
+            <li><a href="index.html" class="block py-2 hover:text-secondary">首页</a></li>
+            <li><a href="data.html" class="block py-2 hover:text-secondary">遗传评估数据</a></li>
+            <li><a href="achievements.html" class="block py-2 hover:text-secondary">优良猪种展示</a></li>
+            <li><a href="team.html" class="block py-2 hover:text-secondary">科研团队</a></li>
+            <li><a href="upload.html" class="block py-2 hover:text-secondary">数据上传</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
 
-  // ===== 新增：移除单个文件（多文件场景） =====
-  function removeSingleFile(fileInputId, previewId, removeIndex) {
-    const fileInput = document.getElementById(fileInputId);
-    const previewContainer = document.getElementById(previewId);
-    const files = fileInput.files;
+    <!-- 主内容区 -->
+    <main>
+      <!-- 首页横幅 -->
+      <section class="hero-section text-white py-16 md:py-24" style="background-image: url('assets/image/main.png')">
+        <div class="container mx-auto px-4" >
+          <div class="flex flex-col md:flex-row items-center">
+            <div class="md:w-1/2 mb-8 md:mb-0">
+              <h1 class="text-4xl md:text-5xl font-bold mb-4">遗传改良信息服务平台</h1>
+              <p class="text-lg mb-6">面向科研项目的专业数据平台，提供动物遗传育种领域一体化服务</p>
+              <div class="flex flex-wrap gap-4">
+                <a href="data.html" class="bg-white text-primary hover:bg-light px-6 py-3 rounded-lg font-bold transition-all"> 查看数据 </a>
+                <a href="upload.html" class="bg-transparent border-2 border-white text-white hover:bg-white hover:text-primary px-6 py-3 rounded-lg font-bold transition-all"> 上传数据 </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-    // FileList 是只读的，需要转成数组处理
-    const fileArray = Array.from(files);
-    // 删除指定索引的文件
-    fileArray.splice(removeIndex, 1);
+      <!-- 平台统计 -->
+      <section class="py-12 bg-white">
+        <div class="container mx-auto px-4">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div class="stat-card bg-light rounded-lg p-6 shadow-md text-center">
+              <div class="text-4xl font-bold text-secondary mb-2">16,374</div>
+              <div class="text-dark">样本数据</div>
+            </div>
+            <div class="stat-card bg-light rounded-lg p-6 shadow-md text-center">
+              <div class="text-4xl font-bold text-secondary mb-2">5,117</div>
+              <div class="text-dark">杜洛克</div>
+            </div>
+            <div class="stat-card bg-light rounded-lg p-6 shadow-md text-center">
+              <div class="text-4xl font-bold text-secondary mb-2">5,365</div>
+              <div class="text-dark">长白</div>
+            </div>
+            <div class="stat-card bg-light rounded-lg p-6 shadow-md text-center">
+              <div class="text-4xl font-bold text-secondary mb-2">5,892</div>
+              <div class="text-dark">大白</div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-    // 重新构建 FileList（通过 DataTransfer）
-    const dt = new DataTransfer();
-    fileArray.forEach(file => dt.items.add(file));
-    fileInput.files = dt.files;
+      <!-- 平台功能 -->
+      <section class="py-12 bg-light">
+        <div class="container mx-auto px-4">
+          <h2 class="text-3xl font-bold mb-8 text-center">平台功能</h2>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- 功能1 -->
+            <div class="bg-white rounded-lg shadow-md p-6 transition-all shadow-hover">
+              <div class="w-16 h-16 bg-secondary bg-opacity-20 rounded-lg flex items-center justify-center mb-4">
+                <i class="fa fa-database text-3xl text-secondary"></i>
+              </div>
+              <h3 class="text-xl font-bold mb-2">数据管理</h3>
+              <p class="text-dark mb-4">提供表型数据、基因型数据、系谱数据等多种数据类型的存储、管理和查询功能，支持数据导入导出和格式转换。</p>
+              <a href="data.html" class="text-secondary hover:underline flex items-center"> 了解更多 <i class="fa fa-arrow-right ml-2"></i> </a>
+            </div>
 
-    // 重新渲染预览
-    showFilePreview(fileInputId, previewId);
-  }
+            <!-- 功能2 -->
+            <div class="bg-white rounded-lg shadow-md p-6 transition-all shadow-hover">
+              <div class="w-16 h-16 bg-secondary bg-opacity-20 rounded-lg flex items-center justify-center mb-4">
+                <i class="fa fa-line-chart text-3xl text-secondary"></i>
+              </div>
+              <h3 class="text-xl font-bold mb-2">遗传评估</h3>
+              <p class="text-dark mb-4">集成多种遗传评估模型和算法，提供育种值计算、遗传参数估计、遗传进展分析等功能，支持基因组选择。</p>
+              <a href="data.html" class="text-secondary hover:underline flex items-center"> 了解更多 <i class="fa fa-arrow-right ml-2"></i> </a>
+            </div>
 
-  // ===== 修改：批量清空文件 =====
-  function removeFile(fileInputId, previewId) {
-    const fileInput = document.getElementById(fileInputId);
-    const previewContainer = document.getElementById(previewId);
+            <!-- 功能3 -->
+            <div class="bg-white rounded-lg shadow-md p-6 transition-all shadow-hover">
+              <div class="w-16 h-16 bg-secondary bg-opacity-20 rounded-lg flex items-center justify-center mb-4">
+                <i class="fa fa-cloud-upload text-3xl text-secondary"></i>
+              </div>
+              <h3 class="text-xl font-bold mb-2">数据上传</h3>
+              <p class="text-dark mb-4">支持用户上传自己的研究数据，经过审核后可以在平台上进行管理和分析，也可以选择与其他用户共享。</p>
+              <a href="upload.html" class="text-secondary hover:underline flex items-center"> 了解更多 <i class="fa fa-arrow-right ml-2"></i> </a>
+            </div>
+          </div>
+        </div>
+      </section>
 
-    // 清空所有文件
-    fileInput.value = '';
-    previewContainer.style.display = 'none';
-    previewContainer.innerHTML = '';
-  }
-</script>
+      <!-- 最新数据 -->
+      <section class="py-12 bg-white">
+        <div class="container mx-auto px-4">
+          <div class="flex justify-between items-center mb-8">
+            <h2 class="text-3xl font-bold">最新数据</h2>
+            <a href="data.html" class="text-secondary hover:underline flex items-center"> 查看全部 <i class="fa fa-arrow-right ml-2"></i> </a>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="min-w-full bg-white">
+              <thead class="bg-gray-100">
+                <tr class="bg-primary text-white">
+                  <th class="px-4 py-3 text-left">数据名称</th>
+                  <th class="px-4 py-3 text-left">数据类型</th>
+                  <th class="px-4 py-3 text-left">猪种</th>
+                  <th class="px-4 py-3 text-left">样本数量</th>
+                  <th class="px-4 py-3 text-left">上传时间</th>
+                  <th class="px-4 py-3 text-left">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="border-b hover:bg-white transition-all">
+                  <td class="px-4 py-3">杜洛克猪生长性能数据</td>
+                  <td class="px-4 py-3">表型数据</td>
+                  <td class="px-4 py-3">杜洛克</td>
+                  <td class="px-4 py-3">1,250</td>
+                  <td class="px-4 py-3">2025-03-15</td>
+                  <td class="px-4 py-3">
+                    <a href="data.html" class="text-secondary hover:underline">查看</a>
+                  </td>
+                </tr>
+                <tr class="border-b bg-gray-50">
+                  <td class="px-4 py-3">长白猪基因组测序数据</td>
+                  <td class="px-4 py-3">基因型数据</td>
+                  <td class="px-4 py-3">长白猪</td>
+                  <td class="px-4 py-3">500</td>
+                  <td class="px-4 py-3">2025-03-10</td>
+                  <td class="px-4 py-3">
+                    <a href="data.html" class="text-secondary hover:underline">查看</a>
+                  </td>
+                </tr>
+                <tr class="border-b hover:bg-white transition-all">
+                  <td class="px-4 py-3">大白猪繁殖性能数据</td>
+                  <td class="px-4 py-3">表型数据</td>
+                  <td class="px-4 py-3">大白猪</td>
+                  <td class="px-4 py-3">850</td>
+                  <td class="px-4 py-3">2025-03-05</td>
+                  <td class="px-4 py-3">
+                    <a href="data.html" class="text-secondary hover:underline">查看</a>
+                  </td>
+                </tr>
+                <tr class="border-b bg-gray-50">
+                  <td class="px-4 py-3">地方猪种系谱数据</td>
+                  <td class="px-4 py-3">系谱数据</td>
+                  <td class="px-4 py-3">地方猪种</td>
+                  <td class="px-4 py-3">2,000</td>
+                  <td class="px-4 py-3">2025-02-28</td>
+                  <td class="px-4 py-3">
+                    <a href="data.html" class="text-secondary hover:underline">查看</a>
+                  </td>
+                </tr>
+                <tr class="border-b hover:bg-white transition-all">
+                  <td class="px-4 py-3">杜洛克猪肉质性状数据</td>
+                  <td class="px-4 py-3">表型数据</td>
+                  <td class="px-4 py-3">杜洛克</td>
+                  <td class="px-4 py-3">620</td>
+                  <td class="px-4 py-3">2025-02-20</td>
+                  <td class="px-4 py-3">
+                    <a href="data.html" class="text-secondary hover:underline">查看</a>
+                  </td>
+                </tr>
+                <tr class="border-b bg-gray-50">
+                  <td class="px-4 py-3">长白猪繁殖性能数据</td>
+                  <td class="px-4 py-3">表型数据</td>
+                  <td class="px-4 py-3">长白猪</td>
+                  <td class="px-4 py-3">780</td>
+                  <td class="px-4 py-3">2025-02-15</td>
+                  <td class="px-4 py-3">
+                    <a href="data.html" class="text-secondary hover:underline">查看</a>
+                  </td>
+                </tr>
+                <tr class="border-b hover:bg-white transition-all">
+                  <td class="px-4 py-3">大白猪生长性能数据</td>
+                  <td class="px-4 py-3">表型数据</td>
+                  <td class="px-4 py-3">大白猪</td>
+                  <td class="px-4 py-3">920</td>
+                  <td class="px-4 py-3">2025-02-10</td>
+                  <td class="px-4 py-3">
+                    <a href="data.html" class="text-secondary hover:underline">查看</a>
+                  </td>
+                </tr>
+                <tr class="border-b bg-gray-50">
+                  <td class="px-4 py-3">地方猪种肉质数据</td>
+                  <td class="px-4 py-3">表型数据</td>
+                  <td class="px-4 py-3">地方猪种</td>
+                  <td class="px-4 py-3">450</td>
+                  <td class="px-4 py-3">2025-02-05</td>
+                  <td class="px-4 py-3">
+                    <a href="data.html" class="text-secondary hover:underline">查看</a>
+                  </td>
+                </tr>
+                <tr class="border-b hover:bg-white transition-all">
+                  <td class="px-4 py-3">杜洛克猪基因组数据</td>
+                  <td class="px-4 py-3">基因型数据</td>
+                  <td class="px-4 py-3">杜洛克</td>
+                  <td class="px-4 py-3">320</td>
+                  <td class="px-4 py-3">2025-01-28</td>
+                  <td class="px-4 py-3">
+                    <a href="data.html" class="text-secondary hover:underline">查看</a>
+                  </td>
+                </tr>
+                <tr class="border-b bg-gray-50">
+                  <td class="px-4 py-3">长白猪系谱数据</td>
+                  <td class="px-4 py-3">系谱数据</td>
+                  <td class="px-4 py-3">长白猪</td>
+                  <td class="px-4 py-3">1,500</td>
+                  <td class="px-4 py-3">2025-01-20</td>
+                  <td class="px-4 py-3">
+                    <a href="data.html" class="text-secondary hover:underline">查看</a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
 
-</body>
+      <!-- 优良猪种展示 -->
+      <section class="py-12 bg-light">
+        <div class="container mx-auto px-4">
+          <div class="flex justify-between items-center mb-8">
+            <h2 class="text-3xl font-bold">优良猪种展示</h2>
+            <a href="achievements.html" class="text-secondary hover:underline flex items-center"> 查看全部 <i class="fa fa-arrow-right ml-2"></i> </a>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- 杜洛克猪 -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden transition-all shadow-hover">
+              <img src="assets/image/du.png" alt="杜洛克猪" class="w-full h-72 object-cover" />
+              <div class="p-4">
+                <h3 class="text-xl font-bold mb-3">杜洛克猪</h3>
+                <p class="text-darkgray mb-4">杜洛克是原产于美国的著名瘦肉型猪种，毛色多为棕红色，半垂耳，体躯深长、后躯肌肉发达、四肢粗壮。该品种生长速度快、饲料转化率高、瘦肉率高且肉质优良，适应性与抗病力较强，繁殖性能中等、母性一般，常作为三元杂交商品猪的终端父本，是目前国内外广泛应用的优良猪种。</p>
+                <div class="flex justify-end">
+                  <a href="achievements.html" class="text-secondary hover:underline text-sm">查看详情</a>
+                </div>
+              </div>
+            </div>
+
+            <!-- 长白猪 -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden transition-all shadow-hover">
+              <img src="assets/image/chang.png" alt="长白猪" class="w-full h-72 object-cover" />
+              <div class="p-4">
+                <h3 class="text-xl font-bold mb-3">长白猪</h3>
+                <p class="text-darkgray mb-4">长白猪原产于丹麦，毛色全白，头小颈轻，耳大向前平伸下垂，体躯修长呈流线型。该品种生长发育快、饲料利用率高、瘦肉率突出，繁殖性能优良，在杂交配套系中常作为第一父本或母本使用，适合规模化瘦肉型商品猪生产，但对饲养管理条件要求相对较高。</p>
+                <div class="flex justify-end">
+                  <a href="achievements.html" class="text-secondary hover:underline text-sm">查看详情</a>
+                </div>
+              </div>
+            </div>
+
+            <!-- 大白猪 -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden transition-all shadow-hover">
+              <img src="assets/image/da.png" alt="大白猪" class="w-full h-72 object-cover" />
+              <div class="p-4">
+                <h3 class="text-xl font-bold mb-3">大白猪</h3>
+                <p class="text-darkgray mb-4">大白猪原产于英国，全身被毛白色，耳大直立，体型匀称、背腰平直，后躯丰满。它繁殖性能突出，产仔数多、母性好，同时生长速度快、瘦肉率高、适应性强，是三元杂交体系中理想的母本品种，也是世界上饲养最广泛的瘦肉型猪种。</p>
+                <div class="flex justify-end">
+                  <a href="achievements.html" class="text-secondary hover:underline text-sm">查看详情</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 数据可视化 -->
+      <section class="py-12 bg-white">
+        <div class="container mx-auto px-4">
+          <h2 class="text-3xl font-bold mb-8 text-center">数据可视化</h2>
+          <!-- 布局调整为2列 -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- 新增图表1：BF_Phe 年度平均值（背膘厚表型值） -->
+            <div class="bg-light rounded-lg shadow-md p-6">
+              <h3 class="text-lg font-bold mb-4 text-center">各猪种BF_Phe年度平均值（2017-2025）</h3>
+              <div id="bf-phe-chart" class="chart-container"></div>
+            </div>
+
+            <!-- 新增图表2：AGE_Phe 年度平均值（达上市体重日龄表型值） -->
+            <div class="bg-light rounded-lg shadow-md p-6">
+              <h3 class="text-lg font-bold mb-4 text-center">各猪种AGE_Phe年度平均值（2017-2025）</h3>
+              <div id="age-phe-chart" class="chart-container"></div>
+            </div>
+
+            <!-- 新增图表3：各猪种性状GEBV年度平均值 -->
+            <div class="bg-light rounded-lg shadow-md p-6">
+              <h3 class="text-lg font-bold mb-4 text-center">各猪种性状GEBV年度平均值（2017-2026）</h3>
+              <div id="gebv-trend-chart" class="chart-container"></div>
+            </div>
+
+            <!-- 新增图表4：TNB_Phe 年度平均值（总产仔数表型值） -->
+            <div class="bg-light rounded-lg shadow-md p-6">
+              <h3 class="text-lg font-bold mb-4 text-center">各猪种TNB_Phe年度平均值（2017-2025）</h3>
+              <div id="tnb-phe-chart" class="chart-container"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <!-- 页脚 -->
+    <footer class="bg-primary text-white py-8">
+      <div class="container mx-auto px-4">
+        <div class="flex flex-col md:flex-row justify-between">
+          <div class="mb-6 md:mb-0">
+            <div class="flex items-center space-x-2 mb-4">
+              <i class="fa fa-dna text-2xl text-secondary"></i>
+              <span class="text-xl font-bold">遗传改良信息服务平台</span>
+            </div>
+            <p class="text-gray-300 mb-4">面向科研项目的专业数据平台，提供动物遗传育种领域一体化服务</p>
+            <div class="flex space-x-4">
+              <a href="#" class="text-white hover:text-secondary">
+                <i class="fa fa-weixin text-xl"></i>
+              </a>
+              <a href="#" class="text-white hover:text-secondary">
+                <i class="fa fa-weibo text-xl"></i>
+              </a>
+              <a href="#" class="text-white hover:text-secondary">
+                <i class="fa fa-envelope text-xl"></i>
+              </a>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-8">
+            <div>
+              <h3 class="text-lg font-bold mb-4">快速链接</h3>
+              <ul class="space-y-2">
+                <li><a href="index.html" class="text-gray-300 hover:text-white">首页</a></li>
+                <li><a href="data.html" class="text-gray-300 hover:text-white">遗传评估数据</a></li>
+                <li><a href="achievements.html" class="text-gray-300 hover:text-white">优良猪种展览</a></li>
+                <li><a href="team.html" class="text-gray-300 hover:text-white">科研团队</a></li>
+                <li><a href="upload.html" class="text-gray-300 hover:text-white">数据上传</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 class="text-lg font-bold mb-4">相关资源</h3>
+              <ul class="space-y-2">
+                <li><a href="#" class="text-gray-300 hover:text-white">技术文档</a></li>
+                <li><a href="#" class="text-gray-300 hover:text-white">API接口</a></li>
+                <li><a href="#" class="text-gray-300 hover:text-white">数据标准</a></li>
+                <li><a href="#" class="text-gray-300 hover:text-white">常见问题</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 class="text-lg font-bold mb-4">联系我们</h3>
+              <ul class="space-y-2">
+                <li class="flex items-center">
+                  <i class="fa fa-map-marker w-5 text-secondary"></i>
+                  <span class="text-gray-300">山东农业大学动物科技学院</span>
+                </li>
+                <li class="flex items-center">
+                  <i class="fa fa-phone w-5 text-secondary"></i>
+                  <span class="text-gray-300">010-12345678</span>
+                </li>
+                <li class="flex items-center">
+                  <i class="fa fa-envelope w-5 text-secondary"></i>
+                  <span class="text-gray-300">ningchao@sdau.edu.cn</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </footer>
+
+    <!-- 底部脚本（ECharts初始化） -->
+    <script>
+      // 移动端菜单交互
+      document.addEventListener("DOMContentLoaded", function () {
+        const mobileMenuBtn = document.getElementById("mobile-menu-button");
+        const closeMenuBtn = document.getElementById("close-menu-button");
+        const mobileMenu = document.getElementById("mobile-menu");
+
+        mobileMenuBtn.addEventListener("click", () => {
+          mobileMenu.classList.add("open");
+        });
+
+        closeMenuBtn.addEventListener("click", () => {
+          mobileMenu.classList.remove("open");
+        });
+
+        // 初始化所有图表
+        initAllCharts();
+
+        // 窗口resize时适配所有图表
+        window.addEventListener("resize", function () {
+          const charts = [bfPheChart, agePheChart, gebvChart, tnbPheChart];
+          charts.forEach((chart) => chart && chart.resize());
+        });
+      });
+
+      // 全局图表实例
+      let bfPheChart, agePheChart, gebvChart, tnbPheChart;
+
+      // 初始化所有图表
+      function initAllCharts() {
+        // 1. 新增图表1：BF_Phe 年度平均值（背膘厚表型值）
+        bfPheChart = echarts.init(document.getElementById("bf-phe-chart"));
+        bfPheChart.setOption({
+          tooltip: { trigger: "axis" },
+          legend: {
+            data: ["LL", "DD", "YY"],
+            bottom: 0,
+            formatter: function (name) {
+              const breedMap = {
+                LL: "长白猪",
+                DD: "杜洛克",
+                YY: "大白猪",
+              };
+              return breedMap[name] || name;
+            },
+          },
+          grid: {
+            left: "3%",
+            right: "4%",
+            bottom: "15%",
+            top: "10%",
+            containLabel: true,
+          },
+          xAxis: {
+            type: "category",
+            data: ["2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025"],
+          },
+          yAxis: {
+            type: "value",
+            name: "Average Phe",
+            min: 7.5,
+            max: 13.5,
+          },
+          series: [
+            {
+              name: "LL",
+              type: "line",
+              data: [null, 13.4, 12.4, 10.5, 10.8, 11.7, 10.5, 8.7, 7.8],
+              itemStyle: { color: "#008000" },
+              symbol: "circle",
+              symbolSize: 8,
+              smooth: false,
+            },
+            {
+              name: "DD",
+              type: "line",
+              data: [null, null, 12.3, 10.8, 10.8, 9.8, 10.9, 10.8, 8.7],
+              itemStyle: { color: "#FF0000" },
+              symbol: "circle",
+              symbolSize: 8,
+              smooth: false,
+            },
+            {
+              name: "YY",
+              type: "line",
+              data: [10.7, 10.7, 10.3, 10.5, 11.1, 11.1, 8.8, 9.8, null],
+              itemStyle: { color: "#0000FF" },
+              symbol: "circle",
+              symbolSize: 8,
+              smooth: false,
+            },
+          ],
+        });
+
+        // 4. 新增图表2：AGE_Phe 年度平均值（达上市体重日龄表型值）
+        agePheChart = echarts.init(document.getElementById("age-phe-chart"));
+        agePheChart.setOption({
+          tooltip: { trigger: "axis" },
+          legend: {
+            data: ["LL", "DD", "YY"],
+            bottom: 0,
+            formatter: function (name) {
+              const breedMap = {
+                LL: "长白猪",
+                DD: "杜洛克",
+                YY: "大白猪",
+              };
+              return breedMap[name] || name;
+            },
+          },
+          grid: {
+            left: "3%",
+            right: "4%",
+            bottom: "15%",
+            top: "10%",
+            containLabel: true,
+          },
+          xAxis: {
+            type: "category",
+            data: ["2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025"],
+          },
+          yAxis: {
+            type: "value",
+            name: "Average Phe",
+            min: 135,
+            max: 165,
+          },
+          series: [
+            {
+              name: "LL",
+              type: "line",
+              data: [null, 158, 149, 157, 155, 154, 156, 162, 153],
+              itemStyle: { color: "#008000" },
+              symbol: "circle",
+              symbolSize: 8,
+              smooth: false,
+            },
+            {
+              name: "DD",
+              type: "line",
+              data: [null, null, 139, 157, 155, 165, 157, 149, 161],
+              itemStyle: { color: "#FF0000" },
+              symbol: "circle",
+              symbolSize: 8,
+              smooth: false,
+            },
+            {
+              name: "YY",
+              type: "line",
+              data: [152, 155, 158, 154, 155, 155, 164, 160, null],
+              itemStyle: { color: "#0000FF" },
+              symbol: "circle",
+              symbolSize: 8,
+              smooth: false,
+            },
+          ],
+        });
+
+        // 5. 新增图表3：各猪种性状GEBV年度平均值
+        gebvChart = echarts.init(document.getElementById("gebv-trend-chart"));
+        gebvChart.setOption({
+          tooltip: { trigger: "axis" },
+          legend: {
+            data: ["LL-AGE", "LL-BF", "LL-TNB", "DD-AGE", "DD-BF", "YY-AGE", "YY-BF", "YY-TNB"],
+            bottom: 0,
+            orient: "horizontal",
+            formatter: function (name) {
+              const nameMap = {
+                "LL-AGE": "长白-日龄",
+                "LL-BF": "长白-背膘",
+                "LL-TNB": "长白-产仔数",
+                "DD-AGE": "杜洛克-日龄",
+                "DD-BF": "杜洛克-背膘",
+                "YY-AGE": "大白-日龄",
+                "YY-BF": "大白-背膘",
+                "YY-TNB": "大白-产仔数",
+              };
+              return nameMap[name] || name;
+            },
+          },
+          grid: {
+            left: "3%",
+            right: "4%",
+            bottom: "20%",
+            top: "10%",
+            containLabel: true,
+          },
+          xAxis: {
+            type: "category",
+            data: ["2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025", "2026"],
+          },
+          yAxis: {
+            type: "value",
+            name: "Average GEBV",
+            min: -10,
+            max: 30,
+          },
+          series: [
+            { name: "LL-AGE", type: "line", data: [0, 0, -5, -3, 13, 5, 14, 25, 27, 8], itemStyle: { color: "#008000" }, symbol: "circle", symbolSize: 6 },
+            { name: "LL-BF", type: "line", data: [0, 0, 0, 0, 0, 1, 1, 2, 1, 0], itemStyle: { color: "#00A000" }, symbol: "circle", symbolSize: 6 },
+            { name: "LL-TNB", type: "line", data: [0, 0, 0, 0, 0, 1, 1, 1, 1, 0], itemStyle: { color: "#00C000" }, symbol: "circle", symbolSize: 6 },
+            { name: "DD-AGE", type: "line", data: [-5, -8, -7, -3, -1, 0, 2, 6, 5, 4], itemStyle: { color: "#FF0000" }, symbol: "circle", symbolSize: 6 },
+            { name: "DD-BF", type: "line", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], itemStyle: { color: "#FF4000" }, symbol: "circle", symbolSize: 6 },
+            { name: "YY-AGE", type: "line", data: [0, 0, 0, -2, 2, 2, 1, 1, 0, 0], itemStyle: { color: "#0000FF" }, symbol: "circle", symbolSize: 6 },
+            { name: "YY-BF", type: "line", data: [0, 0, 0, 0, 1, 1, 1, 1, 0, 0], itemStyle: { color: "#4040FF" }, symbol: "circle", symbolSize: 6 },
+            { name: "YY-TNB", type: "line", data: [0, 0, 0, 0, 1, 1, 1, 1, 0, 0], itemStyle: { color: "#8080FF" }, symbol: "circle", symbolSize: 6 },
+          ],
+        });
+
+        // 6. 新增图表4：TNB_Phe 年度平均值（总产仔数表型值）
+        tnbPheChart = echarts.init(document.getElementById("tnb-phe-chart"));
+        tnbPheChart.setOption({
+          tooltip: { trigger: "axis" },
+          legend: {
+            data: ["LL", "YY"],
+            bottom: 0,
+            formatter: function (name) {
+              const breedMap = {
+                LL: "长白猪",
+                YY: "大白猪",
+              };
+              return breedMap[name] || name;
+            },
+          },
+          grid: {
+            left: "3%",
+            right: "4%",
+            bottom: "15%",
+            top: "10%",
+            containLabel: true,
+          },
+          xAxis: {
+            type: "category",
+            data: ["2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025"],
+          },
+          yAxis: {
+            type: "value",
+            name: "Average Phe",
+            min: 10,
+            max: 18,
+          },
+          series: [
+            {
+              name: "LL",
+              type: "line",
+              data: [null, 14.0, 12.9, 12.9, 13.3, 11.0, 15.4, 16.3, 16.9],
+              itemStyle: { color: "#008000" },
+              symbol: "circle",
+              symbolSize: 8,
+              smooth: false,
+            },
+            {
+              name: "YY",
+              type: "line",
+              data: [11.5, 13.0, 15.3, 13.8, 13.4, 13.9, 14.4, 15.1, 15.2],
+              itemStyle: { color: "#0000FF" },
+              symbol: "circle",
+              symbolSize: 8,
+              smooth: false,
+            },
+          ],
+        });
+      }
+    </script>
+  </body>
 </html>

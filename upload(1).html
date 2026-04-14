@@ -1,0 +1,1859 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>数据上传 - 遗传改良信息服务平台</title>
+    <!-- Tailwind CSS v3 -->
+    <script src="assets/js/saved_resource"></script>
+    <!-- Font Awesome -->
+    <link href="assets/css/common.css" rel="stylesheet" />
+    <!-- 统一的 Tailwind 配置 -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#2C3E4E",
+              secondary: "#1a56db",
+              light: "#fafafa",
+              dark: "#7F8C8D",
+              success: "#27AE60",
+              warning: "#E67E22",
+              purple: "#9B59B6",
+            },
+            fontFamily: {
+              sans: ["思源黑体", "微软雅黑", "Inter", "Roboto", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <style type="text/tailwindcss">
+      @layer utilities {
+        .content-auto {
+          content-visibility: auto;
+        }
+        .transition-all {
+          transition-property: all;
+          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+          transition-duration: 300ms;
+        }
+        .shadow-hover:hover {
+          box-shadow:
+            0 10px 15px -3px rgba(0, 0, 0, 0.1),
+            0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+      }
+    </style>
+    <style>
+      /* 自定义样式 */
+      .nav-link {
+        position: relative;
+      }
+      .nav-link::after {
+        content: "";
+        position: absolute;
+        width: 0;
+        height: 2px;
+        bottom: -2px;
+        left: 0;
+        background-color: #2980b9;
+        transition: width 0.3s ease;
+      }
+      .nav-link:hover::after,
+      .nav-link.active::after {
+        width: 100%;
+      }
+      .mobile-menu {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out;
+      }
+      .mobile-menu.open {
+        transform: translateX(0);
+      }
+      .progress-bar {
+        transition: width 0.3s ease;
+      }
+      .tab-content {
+        display: none;
+      }
+      .tab-content.active {
+        display: block;
+      }
+      /* 登录模态框样式 */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.5);
+      }
+      .modal-content {
+        background-color: #fefefe;
+        margin: 5% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 500px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+        animation-name: animatetop;
+        animation-duration: 0.4s
+      }
+      @keyframes animatetop {
+        from {top: -300px; opacity: 0}
+        to {top: 0; opacity: 1}
+      }
+      .close,.close-forgot,.close-register {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+      }
+      .close:hover,
+      .close:focus,.close-register:hover,
+      .close-register:focus,.close-forgot:hover,
+      .close-forgot:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      .form-input:focus {
+        border-color: #2980b9;
+        box-shadow: 0 0 0 2px rgba(41, 128, 185, 0.2);
+      }
+      .form-button {
+        background-color: #2980b9;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s;
+      }
+      .form-button:hover {
+        background-color: #21618c;
+      }
+      .alert {
+        padding: 15px;
+        margin-bottom: 20px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+      }
+      .alert-danger {
+        color: #721c24;
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+      }
+      .alert-success {
+        color: #155724;
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+      }
+      .nav-link {
+        position: relative;
+      }
+      .nav-link::after {
+        content: "";
+        position: absolute;
+        width: 0;
+        height: 2px;
+        bottom: -2px;
+        left: 0;
+        background-color: #2980b9;
+        transition: width 0.3s ease;
+      }
+      .nav-link:hover::after,
+      .nav-link.active::after {
+        width: 100%;
+      }
+      .mobile-menu {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out;
+      }
+      .mobile-menu.open {
+        transform: translateX(0);
+      }
+      .progress-bar {
+        transition: width 0.3s ease;
+      }
+      .tab-content {
+        display: none;
+      }
+      .tab-content.active {
+        display: block;
+      }
+      /* 登录模态框样式 */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.5);
+      }
+      .modal-content {
+        background-color: #fefefe;
+        margin: 5% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 500px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+        animation-name: animatetop;
+        animation-duration: 0.4s
+      }
+      @keyframes animatetop {
+        from {top: -300px; opacity: 0}
+        to {top: 0; opacity: 1}
+      }
+      .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+      }
+      .close:hover,
+      .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      .form-input:focus {
+        border-color: #2980b9;
+        box-shadow: 0 0 0 2px rgba(41, 128, 185, 0.2);
+      }
+      .form-button {
+        background-color: #2980b9;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s;
+      }
+      .form-button:hover {
+        background-color: #21618c;
+      }
+      .alert {
+        padding: 15px;
+        margin-bottom: 20px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+      }
+      .alert-danger {
+        color: #721c24;
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+      }
+      .alert-success {
+        color: #155724;
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+      }
+    </style>
+  </head>
+  <body class="bg-light text-primary">
+    <!-- 顶部导航栏 -->
+    <header class="bg-primary text-white shadow-md">
+      <div class="container mx-auto px-4 py-3">
+        <div class="flex justify-between items-center">
+          <!-- Logo -->
+          <div class="flex items-center space-x-2">
+            <i class="fa fa-dna text-2xl text-secondary"></i>
+            <span class="text-xl font-bold">遗传改良信息服务平台</span>
+          </div>
+
+          <!-- 桌面端导航 -->
+          <nav class="hidden md:flex space-x-8">
+            <a href="index.html" class="nav-link py-2" target="geneticInfo">首页</a>
+            <a href="data.html" class="nav-link py-2" target="geneticInfo">遗传评估数据</a>
+            <a href="achievements.html" class="nav-link py-2" target="geneticInfo">优良猪种展览</a>
+            <a href="team.html" class="nav-link py-2" target="geneticInfo">科研团队</a>
+            <a href="upload.html" class="nav-link active py-2" target="geneticInfo">数据上传</a>
+          </nav>
+ 
+          <!-- 用户信息/登录按钮 -->
+          <div class="hidden md:flex items-center space-x-4">
+            <div id="user-info" class="hidden">
+              <span class="text-white mr-2">欢迎，<span id="username-display"></span></span>
+              <button id="logout-button" class="text-white hover:text-secondary focus:outline-none">
+                <i class="fa fa-sign-out"></i> 退出
+              </button>
+            </div>
+            <button id="login-button-header" class="bg-secondary hover:bg-blue-600 text-white px-4 py-2 rounded transition-all">
+              <i class="fa fa-sign-in"></i> 登录
+            </button>
+          </div>
+
+          <!-- 移动端菜单按钮 -->
+          <button id="mobile-menu-button" class="md:hidden text-white focus:outline-none">
+            <i class="fa fa-bars text-xl"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- 移动端导航菜单 -->
+      <div id="mobile-menu" class="mobile-menu fixed top-0 left-0 h-full w-64 bg-primary z-50 md:hidden">
+        <div class="p-4 border-b border-gray-700">
+          <div class="flex justify-between items-center">
+            <span class="text-lg font-bold">菜单导航</span>
+            <button id="close-menu-button" class="text-white focus:outline-none">
+              <i class="fa fa-times"></i>
+            </button>
+          </div>
+        </div>
+        <nav class="p-4">
+          <ul class="space-y-4">
+            <li><a href="index.html" class="block py-2 hover:text-secondary">首页</a></li>
+            <li><a href="data.html" class="block py-2 hover:text-secondary">遗传评估数据</a></li>
+            <li><a href="achievements.html" class="block py-2 hover:text-secondary">优良猪种展览</a></li>
+            <li><a href="team.html" class="block py-2 hover:text-secondary">科研团队</a></li>
+            <li><a href="upload.html" class="block py-2 hover:text-secondary">数据上传</a></li>
+            <li class="border-t border-gray-700 pt-4 mt-4">
+              <div id="mobile-user-info" class="hidden">
+                <p class="text-white mb-2">欢迎，<span id="mobile-username-display"></span></p>
+                <button id="mobile-logout-button" class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded transition-all">
+                  <i class="fa fa-sign-out"></i> 退出登录
+                </button>
+              </div>
+              <button id="mobile-login-button" class="w-full bg-secondary hover:bg-blue-600 text-white px-4 py-2 rounded transition-all hidden">
+                <i class="fa fa-sign-in"></i> 登录
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <!-- 登录模态框 -->
+    <div id="login-modal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2 class="text-2xl font-bold mb-6 text-center text-primary">用户登录</h2>
+        <div id="login-alert" class="hidden"></div>
+        <form id="login-form">
+          <div class="mb-4">
+            <label for="username" class="block text-dark mb-2">用户名 <span class="text-red-500">*</span></label>
+            <input type="text" id="username" class="form-input w-full border border-gray-300 rounded px-3 py-2 focus:outline-none" placeholder="请输入用户名" required />
+          </div>
+          <div class="mb-6">
+            <label for="password" class="block text-dark mb-2">密码 <span class="text-red-500">*</span></label>
+            <input type="password" id="password" class="form-input w-full border border-gray-300 rounded px-3 py-2 focus:outline-none" placeholder="请输入密码" required />
+          </div>
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center">
+              <a href="#" id="forgot-password-link" class="text-secondary hover:underline text-sm">忘记密码？</a>
+            </div>
+            <a href="#" id="register-link" class="text-secondary hover:underline text-sm">注册账号</a>
+          </div>
+          <button type="submit" class="form-button w-full">登录</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 注册模态框 -->
+    <div id="register-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-register">&times;</span>
+        <h2 class="text-2xl font-bold mb-6 text-center text-primary">用户注册</h2>
+        <div id="register-alert" class="hidden"></div>
+        <form id="register-form">
+          <div class="mb-4">
+            <label for="register-username" class="block text-dark mb-2">用户名 <span class="text-red-500">*</span></label>
+            <input type="text" id="register-username" class="form-input w-full border border-gray-300 rounded px-3 py-2 focus:outline-none" placeholder="请设置用户名" required />
+          </div>
+          <div class="mb-4">
+            <label for="register-password" class="block text-dark mb-2">密码 <span class="text-red-500">*</span></label>
+            <input type="password" id="register-password" class="form-input w-full border border-gray-300 rounded px-3 py-2 focus:outline-none" placeholder="请设置密码（至少6位）" required minlength="6" />
+          </div>
+          <div class="mb-4">
+            <label for="register-confirm-password" class="block text-dark mb-2">确认密码 <span class="text-red-500">*</span></label>
+            <input type="password" id="register-confirm-password" class="form-input w-full border border-gray-300 rounded px-3 py-2 focus:outline-none" placeholder="请再次输入密码" required minlength="6" />
+          </div>
+          <div class="mb-4">
+            <label for="register-email" class="block text-dark mb-2">邮箱 <span class="text-red-500">*</span></label>
+            <input type="email" id="register-email" class="form-input w-full border border-gray-300 rounded px-3 py-2 focus:outline-none" placeholder="请输入邮箱地址" required />
+          </div>
+          <div class="mb-4">
+            <label for="register-institution" class="block text-dark mb-2">单位/机构</label>
+            <input type="text" id="register-institution" class="form-input w-full border border-gray-300 rounded px-3 py-2 focus:outline-none" placeholder="请输入单位或机构名称" />
+          </div>
+          <div class="flex items-center mb-6">
+            <input type="checkbox" id="agree-terms" class="w-4 h-4 text-secondary focus:ring-secondary border-gray-300 rounded" required />
+            <label for="agree-terms" class="ml-2 text-sm text-dark">我已阅读并同意 <a href="#" class="text-secondary hover:underline">用户协议</a> 和 <a href="#" class="text-secondary hover:underline">隐私政策</a></label>
+          </div>
+          <button type="submit" class="form-button w-full">注册</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 忘记密码模态框 -->
+    <div id="forgot-password-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-forgot">&times;</span>
+        <h2 class="text-2xl font-bold mb-6 text-center text-primary">找回密码</h2>
+        <div id="forgot-alert" class="hidden"></div>
+        <form id="forgot-password-form">
+          <div class="mb-4">
+            <label for="forgot-email" class="block text-dark mb-2">邮箱 <span class="text-red-500">*</span></label>
+            <input type="email" id="forgot-email" class="form-input w-full border border-gray-300 rounded px-3 py-2 focus:outline-none" placeholder="请输入您的注册邮箱" required />
+          </div>
+          <div class="mb-6">
+            <label for="forgot-username" class="block text-dark mb-2">用户名 <span class="text-red-500">*</span></label>
+            <input type="text" id="forgot-username" class="form-input w-full border border-gray-300 rounded px-3 py-2 focus:outline-none" placeholder="请输入您的用户名" required />
+          </div>
+          <button type="submit" class="form-button w-full">发送重置链接</button>
+        </form>
+        <div class="mt-6 text-center text-sm text-dark">
+          <p>我们将向您的邮箱发送密码重置链接</p>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- 未登录提示 -->
+    <div id="not-logged-in" class="min-h-screen bg-white py-6">
+      <div class="container mx-auto px-4">
+        <div class="bg-light rounded-lg shadow-md p-8 text-center">
+          <i class="fa fa-lock text-5xl text-dark mb-4"></i>
+          <h2 class="text-2xl font-bold mb-4">请先登录</h2>
+          <p class="mb-6">数据上传功能需要登录后才能使用，请使用您的账号登录系统。</p>
+          <button id="login-button-main" class="bg-secondary hover:bg-blue-600 text-white px-6 py-3 rounded transition-all text-lg">
+            <i class="fa fa-sign-in mr-2"></i> 立即登录
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 注册模态框 -->
+    <div id="register-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-register">&times;</span>
+        <h2 class="text-2xl font-bold mb-6 text-center text-primary">用户注册</h2>
+        <div id="register-alert" class="hidden"></div>
+        <form id="register-form">
+          <div class="mb-4">
+            <label for="register-username" class="block text-dark mb-2">用户名 <span class="text-red-500">*</span></label>
+            <input type="text" id="register-username" class="form-input w-full border border-gray-300 rounded px-3 py-2 focus:outline-none" placeholder="请设置用户名" required />
+          </div>
+          <div class="mb-4">
+            <label for="register-password" class="block text-dark mb-2">密码 <span class="text-red-500">*</span></label>
+            <input type="password" id="register-password" class="form-input w-full border border-gray-300 rounded px-3 py-2 focus:outline-none" placeholder="请设置密码（至少6位）" required minlength="6" />
+          </div>
+          <div class="mb-4">
+            <label for="register-confirm-password" class="block text-dark mb-2">确认密码 <span class="text-red-500">*</span></label>
+            <input type="password" id="register-confirm-password" class="form-input w-full border border-gray-300 rounded px-3 py-2 focus:outline-none" placeholder="请再次输入密码" required minlength="6" />
+          </div>
+          <div class="mb-4">
+            <label for="register-email" class="block text-dark mb-2">邮箱 <span class="text-red-500">*</span></label>
+            <input type="email" id="register-email" class="form-input w-full border border-gray-300 rounded px-3 py-2 focus:outline-none" placeholder="请输入邮箱地址" required />
+          </div>
+          <div class="mb-4">
+            <label for="register-institution" class="block text-dark mb-2">单位/机构</label>
+            <input type="text" id="register-institution" class="form-input w-full border border-gray-300 rounded px-3 py-2 focus:outline-none" placeholder="请输入单位或机构名称" />
+          </div>
+          <div class="flex items-center mb-6">
+            <input type="checkbox" id="agree-terms" class="w-4 h-4 text-secondary focus:ring-secondary border-gray-300 rounded" required />
+            <label for="agree-terms" class="ml-2 text-sm text-dark">我已阅读并同意 <a href="#" class="text-secondary hover:underline">用户协议</a> 和 <a href="#" class="text-secondary hover:underline">隐私政策</a></label>
+          </div>
+          <button type="submit" class="form-button w-full">注册</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 忘记密码模态框 -->
+    <div id="forgot-password-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-forgot">&times;</span>
+        <h2 class="text-2xl font-bold mb-6 text-center text-primary">找回密码</h2>
+        <div id="forgot-alert" class="hidden"></div>
+        <form id="forgot-password-form">
+          <div class="mb-4">
+            <label for="forgot-email" class="block text-dark mb-2">邮箱 <span class="text-red-500">*</span></label>
+            <input type="email" id="forgot-email" class="form-input w-full border border-gray-300 rounded px-3 py-2 focus:outline-none" placeholder="请输入您的注册邮箱" required />
+          </div>
+          <div class="mb-6">
+            <label for="forgot-username" class="block text-dark mb-2">用户名 <span class="text-red-500">*</span></label>
+            <input type="text" id="forgot-username" class="form-input w-full border border-gray-300 rounded px-3 py-2 focus:outline-none" placeholder="请输入您的用户名" required />
+          </div>
+          <button type="submit" class="form-button w-full">发送重置链接</button>
+        </form>
+        <div class="mt-6 text-center text-sm text-dark">
+          <p>我们将向您的邮箱发送密码重置链接</p>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- 主内容区 -->
+    <main id="main-content" class="hidden">
+      <!-- 数据上传 -->
+      <section id="upload" class="min-h-screen bg-white py-6">
+        <div class="container mx-auto px-4">
+          <!-- 面包屑导航 -->
+          <div class="mb-6 flex items-center text-sx">
+            <a href="index.html" class="text-dark hover:text-secondary">首页</a>
+            <i class="fa fa-angle-right mx-2 text-dark"></i>
+            <span class="text-secondary">数据上传</span>
+          </div>
+ 
+          <!-- 数据上传流程 -->
+          <div class="bg-light rounded-lg shadow-md p-6 mb-8">
+            <h3 class="text-xl font-bold mb-4">上传流程</h3>
+            <div class="flex flex-col md:flex-row justify-between">
+              <div class="flex items-center mb-4 md:mb-0">
+                <div class="w-10 h-10 rounded-full bg-secondary text-white flex items-center justify-center font-bold mr-3">1</div>
+                <span>准备数据</span>
+              </div>
+              <div class="hidden md:block text-dark">
+                <i class="fa fa-long-arrow-right"></i>
+              </div>
+              <div class="md:hidden text-dark mb-4">
+                <i class="fa fa-long-arrow-down"></i>
+              </div>
+              <div class="flex items-center mb-4 md:mb-0">
+                <div class="w-10 h-10 rounded-full bg-secondary text-white flex items-center justify-center font-bold mr-3">2</div>
+                <span>填写信息</span>
+              </div>
+              <div class="hidden md:block text-dark">
+                <i class="fa fa-long-arrow-right"></i>
+              </div>
+              <div class="md:hidden text-dark mb-4">
+                <i class="fa fa-long-arrow-down"></i>
+              </div>
+              <div class="flex items-center mb-4 md:mb-0">
+                <div class="w-10 h-10 rounded-full bg-secondary text-white flex items-center justify-center font-bold mr-3">3</div>
+                <span>上传文件</span>
+              </div>
+              <div class="hidden md:block text-dark">
+                <i class="fa fa-long-arrow-right"></i>
+              </div>
+              <div class="md:hidden text-dark mb-4">
+                <i class="fa fa-long-arrow-down"></i>
+              </div>
+              <div class="flex items-center">
+                <div class="w-10 h-10 rounded-full bg-secondary text-white flex items-center justify-center font-bold mr-3">4</div>
+                <span>提交审核</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 数据上传表单 -->
+          <div class="bg-light rounded-lg shadow-md p-6 mb-8">
+            <h3 class="text-xl font-bold mb-4">数据上传表单</h3>
+
+            <!-- 表单选项卡 -->
+            <div class="mb-6 border-b border-gray-300">
+              <ul class="flex flex-wrap -mb-px">
+                <li class="mr-2">
+                  <a href="#" class="tab-link inline-block py-2 px-4 border-b-2 border-secondary text-secondary font-medium" data-tab="phenotype">表型数据</a>
+                </li>
+                <li class="mr-2">
+                  <a href="#" class="tab-link inline-block py-2 px-4 border-b-2 border-transparent hover:text-secondary hover:border-secondary" data-tab="genotype">基因型数据</a>
+                </li>
+                <li class="mr-2">
+                  <a href="#" class="tab-link inline-block py-2 px-4 border-b-2 border-transparent hover:text-secondary hover:border-secondary" data-tab="pedigree">系谱数据</a>
+                </li>
+                <li>
+                  <a href="#" class="tab-link inline-block py-2 px-4 border-b-2 border-transparent hover:text-secondary hover:border-secondary" data-tab="other">其他数据</a>
+                </li>
+              </ul>
+            </div>
+
+            <!-- 表型数据表单 -->
+            <div id="phenotype-form" class="tab-content active">
+              <form id="data-upload-form" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label class="block text-dark mb-2">数据名称 <span class="text-red-500">*</span></label>
+                    <input type="text" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" placeholder="请输入数据名称" required />
+                  </div>
+                  <div>
+                    <label class="block text-dark mb-2">数据类型 <span class="text-red-500">*</span></label>
+                    <select class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" required>
+                      <option value="">请选择</option>
+                      <option value="growth">生长性能</option>
+                      <option value="meat">肉质性状</option>
+                      <option value="reproduction">繁殖性能</option>
+                      <option value="disease">抗病性能</option>
+                      <option value="other">其他</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-dark mb-2">猪种 <span class="text-red-500">*</span></label>
+                    <select class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" required>
+                      <option value="">请选择</option>
+                      <option value="duroc">杜洛克</option>
+                      <option value="landrace">长白猪</option>
+                      <option value="yorkshire">大白猪</option>
+                      <option value="local">地方猪种</option>
+                      <option value="other">其他</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-dark mb-2">数据来源 <span class="text-red-500">*</span></label>
+                    <input type="text" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" placeholder="请输入数据来源" required />
+                  </div>
+                  <div>
+                    <label class="block text-dark mb-2">采集时间范围 <span class="text-red-500">*</span></label>
+                    <div class="flex items-center space-x-2">
+                      <input type="date" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" required />
+                      <span>至</span>
+                      <input type="date" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" required />
+                    </div>
+                  </div>
+                  <div>
+                    <label class="block text-dark mb-2">样本数量 <span class="text-red-500">*</span></label>
+                    <input type="number" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" placeholder="请输入样本数量" required />
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-dark mb-2">数据描述 <span class="text-red-500">*</span></label>
+                  <textarea class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" rows="4" placeholder="请详细描述数据的采集方法、处理过程、包含的指标等信息" required></textarea>
+                </div>
+
+                <div>
+                  <label class="block text-dark mb-2">数据文件 <span class="text-red-500">*</span></label>
+                  <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                    <i class="fa fa-cloud-upload text-4xl text-dark mb-2"></i>
+                    <p class="mb-2">点击或拖拽文件到此处上传</p>
+                    <p class="text-sm text-dark mb-4">支持 Excel、CSV、TXT 格式，单个文件不超过 100MB</p>
+                    <input type="file" id="file-upload" class="hidden" accept=".xlsx,.xls,.csv,.txt" required />
+                    <button type="button" id="upload-button" class="bg-secondary hover:bg-blue-600 text-white px-4 py-2 rounded transition-all">选择文件</button>
+                  </div>
+                  <div id="upload-progress" class="mt-4 hidden">
+                    <div class="flex justify-between mb-1">
+                      <span class="text-sm font-medium">上传进度</span>
+                      <span id="progress-percentage" class="text-sm font-medium">0%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                      <div id="progress-bar" class="bg-secondary h-2.5 rounded-full progress-bar" style="width: 0%"></div>
+                    </div>
+                  </div>
+                  <div id="file-info" class="mt-4 hidden">
+                    <div class="flex items-center">
+                      <i class="fa fa-file-text-o text-dark mr-2"></i>
+                      <span id="file-name" class="text-sm"></span>
+                      <button type="button" id="remove-file" class="ml-auto text-red-500 hover:text-red-700">
+                        <i class="fa fa-times"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-dark mb-2">数据标准</label>
+                  <div class="bg-white rounded-lg p-4 border border-gray-300">
+                    <p class="mb-2">请确保您的数据符合以下标准格式：</p>
+                    <ul class="list-disc pl-5 space-y-1 text-sm">
+                      <li>第一行为表头，包含个体ID、性别、日龄、性状值等字段</li>
+                      <li>个体ID格式：品种代码+数字，如 D1001（杜洛克）、L2001（长白猪）、Y3001（大白猪）</li>
+                      <li>性别代码：公猪（M）、母猪（F）</li>
+                      <li>日期格式：YYYY-MM-DD</li>
+                      <li>数值型数据保留两位小数</li>
+                    </ul>
+                    <div class="mt-4">
+                      <a href="#" class="text-secondary hover:underline flex items-center" target="_blank"> 下载数据模板 <i class="fa fa-download ml-1"></i> </a>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex justify-between">
+                  <div class="flex items-center">
+                    <input type="checkbox" id="agree-terms" class="w-4 h-4 text-secondary focus:ring-secondary border-gray-300 rounded" required />
+                    <label for="agree-terms" class="ml-2 text-sm text-dark">我已阅读并同意 <a href="#" class="text-secondary hover:underline">数据上传协议</a></label>
+                  </div>
+                  <button type="submit" class="bg-success hover:bg-green-600 text-white px-6 py-2 rounded transition-all">提交审核</button>
+                </div>
+              </form>
+            </div>
+
+            <!-- 基因型数据表单 -->
+            <div id="genotype-form" class="tab-content">
+              <form class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label class="block text-dark mb-2">数据名称 <span class="text-red-500">*</span></label>
+                    <input type="text" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" placeholder="请输入数据名称" required />
+                  </div>
+                  <div>
+                    <label class="block text-dark mb-2">芯片类型 <span class="text-red-500">*</span></label>
+                    <select class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" required>
+                      <option value="">请选择</option>
+                      <option value="illumina">Illumina PorcineSNP60</option>
+                      <option value="affymetrix">Affymetrix Axiom Porcine</option>
+                      <option value="custom">定制芯片</option>
+                      <option value="sequencing">全基因组测序</option>
+                      <option value="other">其他</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-dark mb-2">猪种 <span class="text-red-500">*</span></label>
+                    <select class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" required>
+                      <option value="">请选择</option>
+                      <option value="duroc">杜洛克</option>
+                      <option value="landrace">长白猪</option>
+                      <option value="yorkshire">大白猪</option>
+                      <option value="local">地方猪种</option>
+                      <option value="other">其他</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-dark mb-2">数据来源 <span class="text-red-500">*</span></label>
+                    <input type="text" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" placeholder="请输入数据来源" required />
+                  </div>
+                  <div>
+                    <label class="block text-dark mb-2">检测时间 <span class="text-red-500">*</span></label>
+                    <input type="date" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" required />
+                  </div>
+                  <div>
+                    <label class="block text-dark mb-2">样本数量 <span class="text-red-500">*</span></label>
+                    <input type="number" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" placeholder="请输入样本数量" required />
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-dark mb-2">数据描述 <span class="text-red-500">*</span></label>
+                  <textarea class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" rows="4" placeholder="请详细描述数据的检测方法、处理过程、包含的SNP数量等信息" required></textarea>
+                </div>
+
+                <div>
+                  <label class="block text-dark mb-2">数据文件 <span class="text-red-500">*</span></label>
+                  <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                    <i class="fa fa-cloud-upload text-4xl text-dark mb-2"></i>
+                    <p class="mb-2">点击或拖拽文件到此处上传</p>
+                    <p class="text-sm text-dark mb-4">支持 PLINK、VCF、HAPMAP 格式，单个文件不超过 500MB</p>
+                    <input type="file" class="hidden" accept=".bed,.bim,.fam,.vcf,.vcf.gz,.hapmap" />
+                    <button type="button" class="bg-secondary hover:bg-blue-600 text-white px-4 py-2 rounded transition-all">选择文件</button>
+                  </div>
+                </div>
+
+                <div class="flex justify-between">
+                  <div class="flex items-center">
+                    <input type="checkbox" class="w-4 h-4 text-secondary focus:ring-secondary border-gray-300 rounded" required />
+                    <label class="ml-2 text-sm text-dark">我已阅读并同意 <a href="#" class="text-secondary hover:underline">数据上传协议</a></label>
+                  </div>
+                  <button type="submit" class="bg-success hover:bg-green-600 text-white px-6 py-2 rounded transition-all">提交审核</button>
+                </div>
+              </form>
+            </div>
+
+            <!-- 系谱数据表单 -->
+            <div id="pedigree-form" class="tab-content">
+              <form class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label class="block text-dark mb-2">数据名称 <span class="text-red-500">*</span></label>
+                    <input type="text" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" placeholder="请输入数据名称" required />
+                  </div>
+                  <div>
+                    <label class="block text-dark mb-2">猪种 <span class="text-red-500">*</span></label>
+                    <select class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" required>
+                      <option value="">请选择</option>
+                      <option value="duroc">杜洛克</option>
+                      <option value="landrace">长白猪</option>
+                      <option value="yorkshire">大白猪</option>
+                      <option value="local">地方猪种</option>
+                      <option value="other">其他</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-dark mb-2">数据来源 <span class="text-red-500">*</span></label>
+                    <input type="text" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" placeholder="请输入数据来源" required />
+                  </div>
+                  <div>
+                    <label class="block text-dark mb-2">系谱深度 <span class="text-red-500">*</span></label>
+                    <input type="number" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" placeholder="请输入系谱深度" required />
+                  </div>
+                  <div>
+                    <label class="block text-dark mb-2">个体数量 <span class="text-red-500">*</span></label>
+                    <input type="number" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" placeholder="请输入个体数量" required />
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-dark mb-2">数据描述 <span class="text-red-500">*</span></label>
+                  <textarea class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" rows="4" placeholder="请详细描述系谱数据的收集方法、处理过程等信息" required></textarea>
+                </div>
+
+                <div>
+                  <label class="block text-dark mb-2">数据文件 <span class="text-red-500">*</span></label>
+                  <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                    <i class="fa fa-cloud-upload text-4xl text-dark mb-2"></i>
+                    <p class="mb-2">点击或拖拽文件到此处上传</p>
+                    <p class="text-sm text-dark mb-4">支持 Excel、CSV、TXT 格式，单个文件不超过 50MB</p>
+                    <input type="file" class="hidden" accept=".xlsx,.xls,.csv,.txt" />
+                    <button type="button" class="bg-secondary hover:bg-blue-600 text-white px-4 py-2 rounded transition-all">选择文件</button>
+                  </div>
+                </div>
+
+                <div class="flex justify-between">
+                  <div class="flex items-center">
+                    <input type="checkbox" class="w-4 h-4 text-secondary focus:ring-secondary border-gray-300 rounded" required />
+                    <label class="ml-2 text-sm text-dark">我已阅读并同意 <a href="#" class="text-secondary hover:underline">数据上传协议</a></label>
+                  </div>
+                  <button type="submit" class="bg-success hover:bg-green-600 text-white px-6 py-2 rounded transition-all">提交审核</button>
+                </div>
+              </form>
+            </div>
+
+            <!-- 其他数据表单 -->
+            <div id="other-form" class="tab-content">
+              <form class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label class="block text-dark mb-2">数据名称 <span class="text-red-500">*</span></label>
+                    <input type="text" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" placeholder="请输入数据名称" required />
+                  </div>
+                  <div>
+                    <label class="block text-dark mb-2">数据类型 <span class="text-red-500">*</span></label>
+                    <select class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" required>
+                      <option value="">请选择</option>
+                      <option value="image">图像数据</option>
+                      <option value="video">视频数据</option>
+                      <option value="sensor">传感器数据</option>
+                      <option value="climate">环境气候数据</option>
+                      <option value="other">其他</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-dark mb-2">猪种</label>
+                    <select class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary">
+                      <option value="">请选择</option>
+                      <option value="duroc">杜洛克</option>
+                      <option value="landrace">长白猪</option>
+                      <option value="yorkshire">大白猪</option>
+                      <option value="local">地方猪种</option>
+                      <option value="other">其他</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-dark mb-2">数据来源 <span class="text-red-500">*</span></label>
+                    <input type="text" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" placeholder="请输入数据来源" required />
+                  </div>
+                  <div>
+                    <label class="block text-dark mb-2">数据时间范围</label>
+                    <div class="flex items-center space-x-2">
+                      <input type="date" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" />
+                      <span>至</span>
+                      <input type="date" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" />
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-dark mb-2">数据描述 <span class="text-red-500">*</span></label>
+                  <textarea class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" rows="4" placeholder="请详细描述数据的类型、收集方法、处理过程等信息" required></textarea>
+                </div>
+
+                <div>
+                  <label class="block text-dark mb-2">数据文件 <span class="text-red-500">*</span></label>
+                  <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                    <i class="fa fa-cloud-upload text-4xl text-dark mb-2"></i>
+                    <p class="mb-2">点击或拖拽文件到此处上传</p>
+                    <p class="text-sm text-dark mb-4">支持多种格式，单个文件不超过 200MB</p>
+                    <input type="file" class="hidden" />
+                    <button type="button" class="bg-secondary hover:bg-blue-600 text-white px-4 py-2 rounded transition-all">选择文件</button>
+                  </div>
+                </div>
+
+                <div class="flex justify-between">
+                  <div class="flex items-center">
+                    <input type="checkbox" class="w-4 h-4 text-secondary focus:ring-secondary border-gray-300 rounded" required />
+                    <label class="ml-2 text-sm text-dark">我已阅读并同意 <a href="#" class="text-secondary hover:underline">数据上传协议</a></label>
+                  </div>
+                  <button type="submit" class="bg-success hover:bg-green-600 text-white px-6 py-2 rounded transition-all">提交审核</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- 数据标准说明 -->
+          <div class="bg-light rounded-lg shadow-md p-6 mb-8">
+            <h3 class="text-xl font-bold mb-4">数据标准说明</h3>
+
+            <!-- 数据标准选项卡 -->
+            <div class="mb-6 border-b border-gray-300">
+              <ul class="flex flex-wrap -mb-px">
+                <li class="mr-2">
+                  <a href="#" class="standard-tab-link inline-block py-2 px-4 border-b-2 border-secondary text-secondary font-medium" data-tab="phenotype-standard">表型数据标准</a>
+                </li>
+                <li class="mr-2">
+                  <a href="#" class="standard-tab-link inline-block py-2 px-4 border-b-2 border-transparent hover:text-secondary hover:border-secondary" data-tab="genotype-standard">基因型数据标准</a>
+                </li>
+                <li>
+                  <a href="#" class="standard-tab-link inline-block py-2 px-4 border-b-2 border-transparent hover:text-secondary hover:border-secondary" data-tab="pedigree-standard">系谱数据标准</a>
+                </li>
+              </ul>
+            </div>
+
+            <!-- 表型数据标准 -->
+            <div id="phenotype-standard" class="standard-tab-content active">
+              <div class="space-y-4">
+                <div>
+                  <h4 class="font-bold mb-2">数据格式</h4>
+                  <p>表型数据支持 Excel（.xlsx, .xls）、CSV（.csv）和 TXT（.txt）格式。</p>
+                </div>
+
+                <div>
+                  <h4 class="font-bold mb-2">字段说明</h4>
+                  <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white border border-gray-300">
+                      <thead>
+                        <tr class="bg-gray-100">
+                          <th class="px-4 py-2 border">字段名</th>
+                          <th class="px-4 py-2 border">数据类型</th>
+                          <th class="px-4 py-2 border">说明</th>
+                          <th class="px-4 py-2 border">示例</th>
+                          <th class="px-4 py-2 border">是否必填</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td class="px-4 py-2 border">individual_id</td>
+                          <td class="px-4 py-2 border">字符串</td>
+                          <td class="px-4 py-2 border">个体ID，格式为品种代码+数字</td>
+                          <td class="px-4 py-2 border">D1001</td>
+                          <td class="px-4 py-2 border">是</td>
+                        </tr>
+                        <tr>
+                          <td class="px-4 py-2 border">sex</td>
+                          <td class="px-4 py-2 border">字符串</td>
+                          <td class="px-4 py-2 border">性别，M为公猪，F为母猪</td>
+                          <td class="px-4 py-2 border">M</td>
+                          <td class="px-4 py-2 border">是</td>
+                        </tr>
+                        <tr>
+                          <td class="px-4 py-2 border">birth_date</td>
+                          <td class="px-4 py-2 border">日期</td>
+                          <td class="px-4 py-2 border">出生日期，格式为YYYY-MM-DD</td>
+                          <td class="px-4 py-2 border">2024-01-15</td>
+                          <td class="px-4 py-2 border">是</td>
+                        </tr>
+                        <tr>
+                          <td class="px-4 py-2 border">breed</td>
+                          <td class="px-4 py-2 border">字符串</td>
+                          <td class="px-4 py-2 border">品种</td>
+                          <td class="px-4 py-2 border">杜洛克</td>
+                          <td class="px-4 py-2 border">是</td>
+                        </tr>
+                        <tr>
+                          <td class="px-4 py-2 border">trait_name</td>
+                          <td class="px-4 py-2 border">字符串</td>
+                          <td class="px-4 py-2 border">性状名称</td>
+                          <td class="px-4 py-2 border">日增重</td>
+                          <td class="px-4 py-2 border">是</td>
+                        </tr>
+                        <tr>
+                          <td class="px-4 py-2 border">trait_value</td>
+                          <td class="px-4 py-2 border">数值</td>
+                          <td class="px-4 py-2 border">性状值，保留两位小数</td>
+                          <td class="px-4 py-2 border">856.50</td>
+                          <td class="px-4 py-2 border">是</td>
+                        </tr>
+                        <tr>
+                          <td class="px-4 py-2 border">unit</td>
+                          <td class="px-4 py-2 border">字符串</td>
+                          <td class="px-4 py-2 border">单位</td>
+                          <td class="px-4 py-2 border">g</td>
+                          <td class="px-4 py-2 border">是</td>
+                        </tr>
+                        <tr>
+                          <td class="px-4 py-2 border">measurement_date</td>
+                          <td class="px-4 py-2 border">日期</td>
+                          <td class="px-4 py-2 border">测量日期，格式为YYYY-MM-DD</td>
+                          <td class="px-4 py-2 border">2024-06-15</td>
+                          <td class="px-4 py-2 border">是</td>
+                        </tr>
+                        <tr>
+                          <td class="px-4 py-2 border">age_days</td>
+                          <td class="px-4 py-2 border">数值</td>
+                          <td class="px-4 py-2 border">测量时日龄</td>
+                          <td class="px-4 py-2 border">180</td>
+                          <td class="px-4 py-2 border">否</td>
+                        </tr>
+                        <tr>
+                          <td class="px-4 py-2 border">location</td>
+                          <td class="px-4 py-2 border">字符串</td>
+                          <td class="px-4 py-2 border">测量地点</td>
+                          <td class="px-4 py-2 border">北京</td>
+                          <td class="px-4 py-2 border">否</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 class="font-bold mb-2">示例数据</h4>
+                  <div class="bg-white p-4 border border-gray-300 rounded-lg">
+                    <pre class="text-sm overflow-x-auto">
+individual_id,sex,birth_date,breed,trait_name,trait_value,unit,measurement_date,age_days,location
+D1001,M,2024-01-15,杜洛克,日增重,856.50,g,2024-06-15,150,北京
+D1002,F,2024-01-20,杜洛克,日增重,823.75,g,2024-06-20,152,北京
+L2001,M,2024-01-18,长白猪,日增重,792.20,g,2024-06-18,151,上海
+L2002,F,2024-01-22,长白猪,日增重,785.40,g,2024-06-22,152,上海
+Y3001,M,2024-01-16,大白猪,日增重,823.00,g,2024-06-16,151,广州
+Y3002,F,2024-01-21,大白猪,日增重,812.50,g,2024-06-21,152,广州
+                                    </pre
+                    >
+                  </div>
+                </div>
+
+                <div>
+                  <a href="#" class="text-secondary hover:underline flex items-center" target="_blank"> 下载表型数据模板 <i class="fa fa-download ml-1"></i> </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- 基因型数据标准 -->
+            <div id="genotype-standard" class="standard-tab-content">
+              <div class="space-y-4">
+                <div>
+                  <h4 class="font-bold mb-2">数据格式</h4>
+                  <p>基因型数据支持 PLINK（.bed/.bim/.fam）、VCF（.vcf/.vcf.gz）和 HAPMAP 格式。</p>
+                </div>
+
+                <div>
+                  <h4 class="font-bold mb-2">PLINK 格式说明</h4>
+                  <p>PLINK 格式是最常用的基因型数据格式，包含三个文件：</p>
+                  <ul class="list-disc pl-5 space-y-1">
+                    <li><strong>.bed</strong>：二进制基因型数据文件</li>
+                    <li><strong>.bim</strong>：SNP 信息文件，包含 SNP ID、染色体位置等信息</li>
+                    <li><strong>.fam</strong>：样本信息文件，包含个体 ID、家系信息、性别等</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h4 class="font-bold mb-2">VCF 格式说明</h4>
+                  <p>VCF（Variant Call Format）是一种用于存储基因变异信息的标准格式，包含样本的基因型信息。</p>
+                </div>
+
+                <div>
+                  <h4 class="font-bold mb-2">样本信息文件要求</h4>
+                  <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white border border-gray-300">
+                      <thead>
+                        <tr class="bg-gray-100">
+                          <th class="px-4 py-2 border">字段名</th>
+                          <th class="px-4 py-2 border">数据类型</th>
+                          <th class="px-4 py-2 border">说明</th>
+                          <th class="px-4 py-2 border">示例</th>
+                          <th class="px-4 py-2 border">是否必填</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td class="px-4 py-2 border">individual_id</td>
+                          <td class="px-4 py-2 border">字符串</td>
+                          <td class="px-4 py-2 border">个体ID，格式为品种代码+数字</td>
+                          <td class="px-4 py-2 border">D1001</td>
+                          <td class="px-4 py-2 border">是</td>
+                        </tr>
+                        <tr>
+                          <td class="px-4 py-2 border">sex</td>
+                          <td class="px-4 py-2 border">字符串</td>
+                          <td class="px-4 py-2 border">性别，M为公猪，F为母猪</td>
+                          <td class="px-4 py-2 border">M</td>
+                          <td class="px-4 py-2 border">是</td>
+                        </tr>
+                        <tr>
+                          <td class="px-4 py-2 border">birth_date</td>
+                          <td class="px-4 py-2 border">日期</td>
+                          <td class="px-4 py-2 border">出生日期，格式为YYYY-MM-DD</td>
+                          <td class="px-4 py-2 border">2024-01-15</td>
+                          <td class="px-4 py-2 border">否</td>
+                        </tr>
+                        <tr>
+                          <td class="px-4 py-2 border">breed</td>
+                          <td class="px-4 py-2 border">字符串</td>
+                          <td class="px-4 py-2 border">品种</td>
+                          <td class="px-4 py-2 border">杜洛克</td>
+                          <td class="px-4 py-2 border">是</td>
+                        </tr>
+                        <tr>
+                          <td class="px-4 py-2 border">sire_id</td>
+                          <td class="px-4 py-2 border">字符串</td>
+                          <td class="px-4 py-2 border">父本ID</td>
+                          <td class="px-4 py-2 border">D0501</td>
+                          <td class="px-4 py-2 border">否</td>
+                        </tr>
+                        <tr>
+                          <td class="px-4 py-2 border">dam_id</td>
+                          <td class="px-4 py-2 border">字符串</td>
+                          <td class="px-4 py-2 border">母本ID</td>
+                          <td class="px-4 py-2 border">D0502</td>
+                          <td class="px-4 py-2 border">否</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div>
+                  <a href="#" class="text-secondary hover:underline flex items-center" target="_blank"> 下载基因型数据模板 <i class="fa fa-download ml-1"></i> </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- 系谱数据标准 -->
+            <div id="pedigree-standard" class="standard-tab-content">
+              <div class="space-y-4">
+                <div>
+                  <h4 class="font-bold mb-2">数据格式</h4>
+                  <p>系谱数据支持 Excel（.xlsx, .xls）、CSV（.csv）和 TXT（.txt）格式。</p>
+                </div>
+
+                <div>
+                  <h4 class="font-bold mb-2">字段说明</h4>
+                  <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white border border-gray-300">
+                      <thead>
+                        <tr class="bg-gray-100">
+                          <th class="px-4 py-2 border">字段名</th>
+                          <th class="px-4 py-2 border">数据类型</th>
+                          <th class="px-4 py-2 border">说明</th>
+                          <th class="px-4 py-2 border">示例</th>
+                          <th class="px-4 py-2 border">是否必填</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td class="px-4 py-2 border">individual_id</td>
+                          <td class="px-4 py-2 border">字符串</td>
+                          <td class="px-4 py-2 border">个体ID，格式为品种代码+数字</td>
+                          <td class="px-4 py-2 border">D1001</td>
+                          <td class="px-4 py-2 border">是</td>
+                        </tr>
+                        <tr>
+                          <td class="px-4 py-2 border">sire_id</td>
+                          <td class="px-4 py-2 border">字符串</td>
+                          <td class="px-4 py-2 border">父本ID，未知用0表示</td>
+                          <td class="px-4 py-2 border">D0501</td>
+                          <td class="px-4 py-2 border">是</td>
+                        </tr>
+                        <tr>
+                          <td class="px-4 py-2 border">dam_id</td>
+                          <td class="px-4 py-2 border">字符串</td>
+                          <td class="px-4 py-2 border">母本ID，未知用0表示</td>
+                          <td class="px-4 py-2 border">D0502</td>
+                          <td class="px-4 py-2 border">是</td>
+                        </tr>
+                        <tr>
+                          <td class="px-4 py-2 border">sex</td>
+                          <td class="px-4 py-2 border">字符串</td>
+                          <td class="px-4 py-2 border">性别，M为公猪，F为母猪</td>
+                          <td class="px-4 py-2 border">M</td>
+                          <td class="px-4 py-2 border">是</td>
+                        </tr>
+                        <tr>
+                          <td class="px-4 py-2 border">birth_date</td>
+                          <td class="px-4 py-2 border">日期</td>
+                          <td class="px-4 py-2 border">出生日期，格式为YYYY-MM-DD</td>
+                          <td class="px-4 py-2 border">2024-01-15</td>
+                          <td class="px-4 py-2 border">否</td>
+                        </tr>
+                        <tr>
+                          <td class="px-4 py-2 border">breed</td>
+                          <td class="px-4 py-2 border">字符串</td>
+                          <td class="px-4 py-2 border">品种</td>
+                          <td class="px-4 py-2 border">杜洛克</td>
+                          <td class="px-4 py-2 border">是</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 class="font-bold mb-2">示例数据</h4>
+                  <div class="bg-white p-4 border border-gray-300 rounded-lg">
+                    <pre class="text-sm overflow-x-auto">
+individual_id,sire_id,dam_id,sex,birth_date,breed
+D1001,D0501,D0502,M,2024-01-15,杜洛克
+D1002,D0501,D0503,F,2024-01-20,杜洛克
+D0501,D0201,D0202,M,2023-01-15,杜洛克
+D0502,D0203,D0204,F,2023-01-20,杜洛克
+D0503,D0201,D0205,F,2023-01-25,杜洛克
+L2001,L0501,L0502,M,2024-01-18,长白猪
+L2002,L0501,L0503,F,2024-01-22,长白猪
+                                    </pre
+                    >
+                  </div>
+                </div>
+
+                <div>
+                  <a href="#" class="text-secondary hover:underline flex items-center" target="_blank"> 下载系谱数据模板 <i class="fa fa-download ml-1"></i> </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 常见问题 -->
+          <div class="bg-light rounded-lg shadow-md p-6">
+            <h3 class="text-xl font-bold mb-4">常见问题</h3>
+            <div class="space-y-4">
+              <div class="bg-white p-4 rounded-lg border border-gray-300">
+                <h4 class="font-bold mb-2">如何选择数据类型？</h4>
+                <p>根据您要上传的数据内容选择相应的数据类型：</p>
+                <ul class="list-disc pl-5 space-y-1 mt-2">
+                  <li><strong>表型数据</strong>：包括生长性能、肉质性状、繁殖性能等测量数据</li>
+                  <li><strong>基因型数据</strong>：包括芯片检测或测序得到的基因分型数据</li>
+                  <li><strong>系谱数据</strong>：包括个体的父母信息、出生日期等系谱信息</li>
+                  <li><strong>其他数据</strong>：包括图像、视频、传感器等其他类型的数据</li>
+                </ul>
+              </div>
+
+              <div class="bg-white p-4 rounded-lg border border-gray-300">
+                <h4 class="font-bold mb-2">数据上传后多久能审核完成？</h4>
+                <p>一般情况下，数据审核会在1-3个工作日内完成。审核完成后，系统会通过邮件通知您审核结果。</p>
+              </div>
+
+              <div class="bg-white p-4 rounded-lg border border-gray-300">
+                <h4 class="font-bold mb-2">数据上传失败怎么办？</h4>
+                <p>如果数据上传失败，请检查以下几点：</p>
+                <ul class="list-disc pl-5 space-y-1 mt-2">
+                  <li>文件格式是否符合要求</li>
+                  <li>文件大小是否超过限制</li>
+                  <li>网络连接是否稳定</li>
+                  <li>数据格式是否符合标准</li>
+                </ul>
+                <p class="mt-2">如果问题仍然存在，请联系我们的技术支持：<a href="mailto:support@example.com" class="text-secondary hover:underline">support@example.com</a></p>
+              </div>
+
+              <div class="bg-white p-4 rounded-lg border border-gray-300">
+                <h4 class="font-bold mb-2">上传的数据会被公开吗？</h4>
+                <p>您上传的数据默认是私有的，只有您和被授权的用户可以访问。如果您希望将数据公开共享，请在上传时选择"公开共享"选项。</p>
+              </div>
+
+              <div class="bg-white p-4 rounded-lg border border-gray-300">
+                <h4 class="font-bold mb-2">如何获取数据上传模板？</h4>
+                <p>您可以在数据上传表单和数据标准说明部分下载相应的数据模板。模板中包含了示例数据和字段说明，请按照模板格式准备您的数据。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-primary text-white py-8">
+      <div class="container mx-auto px-4">
+        <div class="flex flex-col md:flex-row justify-between">
+          <div class="mb-6 md:mb-0">
+            <div class="flex items-center space-x-2 mb-4">
+              <i class="fa fa-dna text-2xl text-secondary"></i>
+              <span class="text-xl font-bold">遗传改良信息服务平台</span>
+            </div>
+            <p class="text-gray-300 mb-4">面向科研项目的专业数据平台，提供动物遗传育种领域一体化服务</p>
+            <div class="flex space-x-4">
+              <a href="#" class="text-white hover:text-secondary">
+                <i class="fa fa-weixin text-xl"></i>
+              </a>
+              <a href="#" class="text-white hover:text-secondary">
+                <i class="fa fa-weibo text-xl"></i>
+              </a>
+              <a href="#" class="text-white hover:text-secondary">
+                <i class="fa fa-envelope text-xl"></i>
+              </a>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-8">
+            <div>
+              <h3 class="text-lg font-bold mb-4">快速链接</h3>
+              <ul class="space-y-2">
+                <li><a href="index.html" class="text-gray-300 hover:text-white">首页</a></li>
+                <li><a href="data.html" class="text-gray-300 hover:text-white">遗传评估数据</a></li>
+                <li><a href="achievements.html" class="text-gray-300 hover:text-white">优良猪种展览</a></li>
+                <li><a href="team.html" class="text-gray-300 hover:text-white">科研团队</a></li>
+                <li><a href="upload.html" class="text-gray-300 hover:text-white">数据上传</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 class="text-lg font-bold mb-4">相关资源</h3>
+              <ul class="space-y-2">
+                <li><a href="#" class="text-gray-300 hover:text-white">技术文档</a></li>
+                <li><a href="#" class="text-gray-300 hover:text-white">API接口</a></li>
+                <li><a href="#" class="text-gray-300 hover:text-white">数据标准</a></li>
+                <li><a href="#" class="text-gray-300 hover:text-white">常见问题</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 class="text-lg font-bold mb-4">联系我们</h3>
+              <ul class="space-y-2">
+                <li class="flex items-center">
+                  <i class="fa fa-map-marker w-5 text-secondary"></i>
+                  <span class="text-gray-300">山东农业大学动物科技学院</span>
+                </li>
+                <li class="flex items-center">
+                  <i class="fa fa-phone w-5 text-secondary"></i>
+                  <span class="text-gray-300">010-12345678</span>
+                </li>
+                <li class="flex items-center">
+                  <i class="fa fa-envelope w-5 text-secondary"></i>
+                  <span class="text-gray-300">ningchao@sdau.edu.cn</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- 模态框 -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+      <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+        <div class="flex justify-between items-center border-b p-4">
+          <h3 id="modal-title" class="text-xl font-bold">提交成功</h3>
+          <button id="close-modal" class="text-dark hover:text-primary focus:outline-none">
+            <i class="fa fa-times"></i>
+          </button>
+        </div>
+        <div id="modal-content" class="p-6 text-center">
+          <div class="w-16 h-16 bg-success bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fa fa-check text-3xl text-success"></i>
+          </div>
+          <h4 class="text-lg font-bold mb-2">数据上传成功！</h4>
+          <p class="text-dark mb-4">您的数据已成功上传，我们将在1-3个工作日内完成审核。</p>
+          <p class="text-dark">审核结果将通过邮件通知您，请保持邮箱畅通。</p>
+        </div>
+        <div class="border-t p-4 flex justify-center">
+          <button id="modal-close-button" class="bg-secondary hover:bg-blue-600 text-white px-6 py-2 rounded transition-all">确定</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 注册模态框 -->
+    <div id="register-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-register">&times;</span>
+        <h2 class="text-2xl font-bold mb-6 text-center text-primary">用户注册</h2>
+        <div id="register-alert" class="hidden"></div>
+        <form id="register-form">
+          <div class="mb-4">
+            <label for="register-username" class="block text-dark mb-2">用户名 <span class="text-red-500">*</span></label>
+            <input type="text" id="register-username" class="form-input w-full border border-gray-300 rounded px-3 py-2 focus:outline-none" placeholder="请设置用户名" required />
+          </div>
+          <div class="mb-4">
+            <label for="register-password" class="block text-dark mb-2">密码 <span class="text-red-500">*</span></label>
+            <input type="password" id="register-password" class="form-input w-full border border-gray-300 rounded px-3 py-2 focus:outline-none" placeholder="请设置密码（至少6位）" required minlength="6" />
+          </div>
+          <div class="mb-4">
+            <label for="register-confirm-password" class="block text-dark mb-2">确认密码 <span class="text-red-500">*</span></label>
+            <input type="password" id="register-confirm-password" class="form-input w-full border border-gray-300 rounded px-3 py-2 focus:outline-none" placeholder="请再次输入密码" required minlength="6" />
+          </div>
+          <div class="mb-4">
+            <label for="register-email" class="block text-dark mb-2">邮箱 <span class="text-red-500">*</span></label>
+            <input type="email" id="register-email" class="form-input w-full border border-gray-300 rounded px-3 py-2 focus:outline-none" placeholder="请输入邮箱地址" required />
+          </div>
+          <div class="mb-4">
+            <label for="register-institution" class="block text-dark mb-2">单位/机构</label>
+            <input type="text" id="register-institution" class="form-input w-full border border-gray-300 rounded px-3 py-2 focus:outline-none" placeholder="请输入单位或机构名称" />
+          </div>
+          <div class="flex items-center mb-6">
+            <input type="checkbox" id="agree-terms" class="w-4 h-4 text-secondary focus:ring-secondary border-gray-300 rounded" required />
+            <label for="agree-terms" class="ml-2 text-sm text-dark">我已阅读并同意 <a href="#" class="text-secondary hover:underline">用户协议</a> 和 <a href="#" class="text-secondary hover:underline">隐私政策</a></label>
+          </div>
+          <button type="submit" class="form-button w-full">注册</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 忘记密码模态框 -->
+    <div id="forgot-password-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-forgot">&times;</span>
+        <h2 class="text-2xl font-bold mb-6 text-center text-primary">找回密码</h2>
+        <div id="forgot-alert" class="hidden"></div>
+        <form id="forgot-password-form">
+          <div class="mb-4">
+            <label for="forgot-email" class="block text-dark mb-2">邮箱 <span class="text-red-500">*</span></label>
+            <input type="email" id="forgot-email" class="form-input w-full border border-gray-300 rounded px-3 py-2 focus:outline-none" placeholder="请输入您的注册邮箱" required />
+          </div>
+          <div class="mb-6">
+            <label for="forgot-username" class="block text-dark mb-2">用户名 <span class="text-red-500">*</span></label>
+            <input type="text" id="forgot-username" class="form-input w-full border border-gray-300 rounded px-3 py-2 focus:outline-none" placeholder="请输入您的用户名" required />
+          </div>
+          <button type="submit" class="form-button w-full">发送重置链接</button>
+        </form>
+        <div class="mt-6 text-center text-sm text-dark">
+          <p>我们将向您的邮箱发送密码重置链接</p>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- JavaScript -->
+    <script>
+      // 等待DOM加载完成
+      document.addEventListener('DOMContentLoaded', function() {
+        
+        // 登录模态框相关元素
+        const loginModal = document.getElementById('login-modal');
+        const loginForm = document.getElementById('login-form');
+        const loginAlert = document.getElementById('login-alert');
+        const closeModal = document.querySelector('.close');
+        
+        // 登录按钮
+        const loginButtonHeader = document.getElementById('login-button-header');
+        const mobileLoginButton = document.getElementById('mobile-login-button');
+        const loginButtonMain = document.getElementById('login-button-main');
+        
+        // 注册模态框相关元素
+        const registerModal = document.getElementById('register-modal');
+        const registerForm = document.getElementById('register-form');
+        const registerAlert = document.getElementById('register-alert');
+        const closeRegisterModal = document.querySelector('.close-register');
+        const registerLink = document.getElementById('register-link');
+         
+        
+        // 忘记密码模态框相关元素
+        const forgotPasswordModal = document.getElementById('forgot-password-modal');
+        const forgotPasswordForm = document.getElementById('forgot-password-form');
+        const forgotAlert = document.getElementById('forgot-alert');
+        const closeForgotModal = document.querySelector('.close-forgot');
+        const forgotPasswordLink = document.getElementById('forgot-password-link');
+        
+        // 打开注册模态框
+        function openRegisterModal() {
+          loginModal.style.display = 'none';
+          registerModal.style.display = 'block';
+          document.getElementById('register-username').focus();
+        }
+        
+        // 关闭注册模态框
+        function closeRegisterModalFunc() {
+          registerModal.style.display = 'none';
+          registerForm.reset();
+          registerAlert.classList.add('hidden');
+        }
+        
+        // 显示注册提示信息
+        function showRegisterAlert(message, type) {
+          registerAlert.textContent = message;
+          registerAlert.className = `alert alert-${type}`;
+          registerAlert.classList.remove('hidden');
+        }
+        
+        // 打开忘记密码模态框
+        function openForgotPasswordModal() {
+          loginModal.style.display = 'none';
+          forgotPasswordModal.style.display = 'block';
+          document.getElementById('forgot-email').focus();
+        }
+        
+        // 关闭忘记密码模态框
+        function closeForgotPasswordModalFunc() {
+          forgotPasswordModal.style.display = 'none';
+          forgotPasswordForm.reset();
+          forgotAlert.classList.add('hidden');
+        }
+        
+        // 显示忘记密码提示信息
+        function showForgotAlert(message, type) {
+          forgotAlert.textContent = message;
+          forgotAlert.className = `alert alert-${type}`;
+          forgotAlert.classList.remove('hidden');
+        }
+        
+        // 打开忘记密码模态框
+        function openForgotPasswordModal() {
+          loginModal.style.display = 'none';
+          forgotPasswordModal.style.display = 'block';
+          document.getElementById('forgot-email').focus();
+        }
+        
+        // 关闭忘记密码模态框
+        function closeForgotPasswordModalFunc() {
+          forgotPasswordModal.style.display = 'none';
+          forgotPasswordForm.reset();
+          forgotAlert.classList.add('hidden');
+        }
+        
+        // 显示忘记密码提示信息
+        function showForgotAlert(message, type) {
+          forgotAlert.textContent = message;
+          forgotAlert.className = `alert alert-${type}`;
+          forgotAlert.classList.remove('hidden');
+        }
+        
+        // 退出按钮
+        const logoutButton = document.getElementById('logout-button');
+        const mobileLogoutButton = document.getElementById('mobile-logout-button');
+        
+        // 用户信息显示
+        const userInfo = document.getElementById('user-info');
+        const mobileUserInfo = document.getElementById('mobile-user-info');
+        const usernameDisplay = document.getElementById('username-display');
+        const mobileUsernameDisplay = document.getElementById('mobile-username-display');
+        
+        // 内容区域
+        const notLoggedIn = document.getElementById('not-logged-in');
+        const mainContent = document.getElementById('main-content');
+        // 检查用户是否已登录
+        checkLoginStatus();
+        
+        // 打开登录模态框
+        function openLoginModal() {
+          loginModal.style.display = 'block';
+          document.getElementById('username').focus();
+        }
+        
+        // 关闭登录模态框
+        function closeLoginModal() {
+          loginModal.style.display = 'none';
+          loginForm.reset();
+          loginAlert.classList.add('hidden');
+        }
+        
+        // 显示提示信息
+        function showAlert(message, type) {
+          loginAlert.textContent = message;
+          loginAlert.className = `alert alert-${type}`;
+          loginAlert.classList.remove('hidden');
+        }
+        
+        // 检查登录状态
+        function checkLoginStatus() {
+          const username = localStorage.getItem('username');
+          if (username) {
+            // 用户已登录
+            userInfo.classList.remove('hidden');
+            mobileUserInfo.classList.remove('hidden');
+            usernameDisplay.textContent = username;
+            mobileUsernameDisplay.textContent = username;
+            loginButtonHeader.classList.add('hidden');
+            mobileLoginButton.classList.remove('hidden');
+            notLoggedIn.classList.add('hidden');
+            mainContent.classList.remove('hidden');
+          } else {
+            // 用户未登录
+            userInfo.classList.add('hidden');
+            mobileUserInfo.classList.add('hidden');
+            loginButtonHeader.classList.remove('hidden');
+            mobileLoginButton.classList.remove('hidden');
+            notLoggedIn.classList.remove('hidden');
+            mainContent.classList.add('hidden');
+          }
+        }
+        
+        // 登录处理
+        loginForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          const username = document.getElementById('username').value;
+          const password = document.getElementById('password').value;
+          
+          // 简单的登录验证（实际应用中应该使用后端验证）
+          if (username === '992844278@qq.com' && password === '404sdausdau') {
+            // 登录成功
+            localStorage.setItem('username', username);
+            showAlert('登录成功！', 'success');
+            setTimeout(() => {
+              closeLoginModal();
+              checkLoginStatus();
+            }, 1000);
+          } else {
+            // 登录失败
+            showAlert('用户名或密码错误！', 'danger');
+          }
+        });
+        
+        // 退出登录
+        function logout() {
+          localStorage.removeItem('username');
+          document.cookie = 'username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+          checkLoginStatus();
+        }
+        
+        // 注册处理
+        registerForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          const username = document.getElementById('register-username').value;
+          const password = document.getElementById('register-password').value;
+          const confirmPassword = document.getElementById('register-confirm-password').value;
+          const email = document.getElementById('register-email').value;
+          const institution = document.getElementById('register-institution').value;
+          
+          // 表单验证
+          if (password !== confirmPassword) {
+            showRegisterAlert('两次输入的密码不一致！', 'danger');
+            return;
+          }
+          
+          if (password.length < 6) {
+            showRegisterAlert('密码长度至少为6位！', 'danger');
+            return;
+          }
+          
+          // 模拟注册过程
+          showRegisterAlert('正在注册，请稍候...', 'success');
+          
+          // 模拟异步注册
+          setTimeout(() => {
+            // 注册成功后自动登录
+            localStorage.setItem('username', username);
+            showRegisterAlert('注册成功！正在登录...', 'success');
+            
+            setTimeout(() => {
+              closeRegisterModalFunc();
+              checkLoginStatus();
+            }, 1000);
+          }, 2000);
+        });
+        
+        // 忘记密码处理
+        forgotPasswordForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          const email = document.getElementById('forgot-email').value;
+          const username = document.getElementById('forgot-username').value;
+          
+          // 模拟发送重置链接
+          showForgotAlert('正在发送重置链接，请稍候...', 'success');
+          
+          // 模拟异步处理
+          setTimeout(() => {
+            showForgotAlert('重置链接已发送到您的邮箱，请查收！', 'success');
+            
+            setTimeout(() => {
+              closeForgotPasswordModalFunc();
+              // 可以选择是否自动打开登录模态框
+              // openLoginModal();
+            }, 2000);
+          }, 2000);
+        });
+        
+        // 忘记密码处理
+        forgotPasswordForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          const email = document.getElementById('forgot-email').value;
+          const username = document.getElementById('forgot-username').value;
+          
+          // 模拟发送重置链接
+          showForgotAlert('正在发送重置链接，请稍候...', 'success');
+          
+          // 模拟异步处理
+          setTimeout(() => {
+            showForgotAlert('重置链接已发送到您的邮箱，请查收！', 'success');
+            
+            setTimeout(() => {
+              closeForgotPasswordModalFunc();
+              // 可以选择是否自动打开登录模态框
+              // openLoginModal();
+            }, 2000);
+          }, 2000);
+        });
+        
+        // 事件监听
+        loginButtonHeader.addEventListener('click', openLoginModal);
+        mobileLoginButton.addEventListener('click', openLoginModal);
+        loginButtonMain.addEventListener('click', openLoginModal);
+        logoutButton.addEventListener('click', logout);
+        mobileLogoutButton.addEventListener('click', logout);
+        closeModal.addEventListener('click', closeLoginModal);
+        registerLink.addEventListener('click', function(e) {
+          e.preventDefault();
+          openRegisterModal();
+        });
+        closeRegisterModal.addEventListener('click', closeRegisterModalFunc);
+        forgotPasswordLink.addEventListener('click', function(e) {
+          e.preventDefault();
+          openForgotPasswordModal();
+        });
+        closeForgotModal.addEventListener('click', closeForgotPasswordModalFunc);
+        forgotPasswordLink.addEventListener('click', function(e) {
+          e.preventDefault();
+          openForgotPasswordModal();
+        });
+        closeForgotModal.addEventListener('click', closeForgotPasswordModalFunc);
+        
+        // 点击模态框外部关闭
+        window.addEventListener('click', function(e) {
+          if (e.target === loginModal) {
+            closeLoginModal();
+          } else if (e.target === registerModal) {
+            closeRegisterModalFunc();
+          } else if (e.target === forgotPasswordModal) {
+            closeForgotPasswordModalFunc();
+          }
+        });
+        
+        // 移动端菜单
+        const mobileMenuButton = document.getElementById("mobile-menu-button");
+        const closeMenuButton = document.getElementById("close-menu-button");
+        const mobileMenu = document.getElementById("mobile-menu");
+
+        mobileMenuButton.addEventListener("click", function () {
+          mobileMenu.classList.add("open");
+        });
+
+        closeMenuButton.addEventListener("click", function () {
+          mobileMenu.classList.remove("open");
+        });
+
+        // 导航链接激活状态
+        const navLinks = document.querySelectorAll(".nav-link");
+        navLinks.forEach((link) => {
+          if (link.getAttribute("href") === window.location.pathname) {
+            link.classList.add("active");
+          }
+          link.addEventListener("click", function () {
+            navLinks.forEach((item) => item.classList.remove("active"));
+            this.classList.add("active");
+          });
+        });
+
+        // 数据上传表单选项卡
+        const tabLinks = document.querySelectorAll(".tab-link");
+        const tabContents = document.querySelectorAll(".tab-content");
+
+        tabLinks.forEach((link) => {
+          link.addEventListener("click", function (e) {
+            e.preventDefault();
+
+            // 移除所有选项卡的active状态
+            tabLinks.forEach((item) => {
+              item.classList.remove("border-secondary", "text-secondary");
+              item.classList.add("border-transparent");
+            });
+
+            // 添加当前选项卡的active状态
+            this.classList.remove("border-transparent");
+            this.classList.add("border-secondary", "text-secondary");
+
+            // 隐藏所有内容
+            tabContents.forEach((item) => {
+              item.classList.remove("active");
+            });
+
+            // 显示当前内容
+            const tabId = this.getAttribute("data-tab");
+            document.getElementById(tabId + "-form").classList.add("active");
+          });
+        });
+
+        // 数据标准选项卡
+        const standardTabLinks = document.querySelectorAll(".standard-tab-link");
+        const standardTabContents = document.querySelectorAll(".standard-tab-content");
+
+        standardTabLinks.forEach((link) => {
+          link.addEventListener("click", function (e) {
+            e.preventDefault();
+
+            // 移除所有选项卡的active状态
+            standardTabLinks.forEach((item) => {
+              item.classList.remove("border-secondary", "text-secondary");
+              item.classList.add("border-transparent");
+            });
+
+            // 添加当前选项卡的active状态
+            this.classList.remove("border-transparent");
+            this.classList.add("border-secondary", "text-secondary");
+
+            // 隐藏所有内容
+            standardTabContents.forEach((item) => {
+              item.classList.remove("active");
+            });
+
+            // 显示当前内容
+            const tabId = this.getAttribute("data-tab");
+            document.getElementById(tabId).classList.add("active");
+          });
+        });
+
+        // 文件上传
+        const uploadButton = document.getElementById("upload-button");
+        const fileUpload = document.getElementById("file-upload");
+        const uploadProgress = document.getElementById("upload-progress");
+        const progressBar = document.getElementById("progress-bar");
+        const progressPercentage = document.getElementById("progress-percentage");
+        const fileInfo = document.getElementById("file-info");
+        const fileName = document.getElementById("file-name");
+        const removeFile = document.getElementById("remove-file");
+
+        uploadButton.addEventListener("click", function () {
+          fileUpload.click();
+        });
+
+        fileUpload.addEventListener("change", function () {
+          if (this.files.length > 0) {
+            const file = this.files[0];
+            fileName.textContent = file.name;
+
+            // 显示上传进度条
+            uploadProgress.classList.remove("hidden");
+
+            // 模拟上传进度
+            let progress = 0;
+            const interval = setInterval(function () {
+              progress += 5;
+              progressBar.style.width = progress + "%";
+              progressPercentage.textContent = progress + "%";
+
+              if (progress >= 100) {
+                clearInterval(interval);
+                setTimeout(function () {
+                  uploadProgress.classList.add("hidden");
+                  fileInfo.classList.remove("hidden");
+                }, 500);
+              }
+            }, 100);
+          }
+        });
+
+        removeFile.addEventListener("click", function () {
+          fileUpload.value = "";
+          fileInfo.classList.add("hidden");
+          fileName.textContent = "";
+        });
+
+        // 模态框
+        const modal = document.getElementById("modal");
+        const closeModalBtn = document.getElementById("close-modal");
+        const modalCloseButton = document.getElementById("modal-close-button");
+
+        function openModal() {
+          modal.classList.remove("hidden");
+        }
+
+        function closeModalFunc() {
+          modal.classList.add("hidden");
+        }
+
+        closeModalBtn.addEventListener("click", closeModalFunc);
+        modalCloseButton.addEventListener("click", closeModalFunc);
+
+        // 点击模态框外部关闭
+        modal.addEventListener("click", function (e) {
+          if (e.target === modal) {
+            closeModalFunc();
+          }
+        });
+
+        // 表单提交
+        const dataUploadForm = document.getElementById("data-upload-form");
+        dataUploadForm.addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          // 显示提交成功模态框
+          openModal();
+        });
+      });
+    </script>
+  </body>
+</html>

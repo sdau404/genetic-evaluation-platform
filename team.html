@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>科研团队 - 遗传改良信息服务平台</title>
+    <!-- Tailwind CSS v3 -->
+    <script src="assets/js/saved_resource"></script>
+    <!-- Font Awesome -->
+    <link href="assets/css/common.css" rel="stylesheet" />
+    <!-- 统一的 Tailwind 配置 -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#2C3E4E",
+              secondary: "#1a56db",
+              light: "#fafafa",
+              dark: "#7F8C8D",
+              success: "#27AE60",
+              warning: "#E67E22",
+              purple: "#9B59B6",
+            },
+            fontFamily: {
+              sans: ["思源黑体", "微软雅黑", "Inter", "Roboto", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <style type="text/tailwindcss">
+      @layer utilities {
+        .content-auto {
+          content-visibility: auto;
+        }
+        .transition-all {
+          transition-property: all;
+          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+          transition-duration: 300ms;
+        }
+        .shadow-hover:hover {
+          box-shadow:
+            0 10px 15px -3px rgba(0, 0, 0, 0.1),
+            0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+      }
+    </style>
+    <style>
+      /* 自定义样式 */
+      .nav-link {
+        position: relative;
+      }
+      .nav-link::after {
+        content: "";
+        position: absolute;
+        width: 0;
+        height: 2px;
+        bottom: -2px;
+        left: 0;
+        background-color: #2980b9;
+        transition: width 0.3s ease;
+      }
+      .nav-link:hover::after,
+      .nav-link.active::after {
+        width: 100%;
+      }
+      .mobile-menu {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out;
+      }
+      .mobile-menu.open {
+        transform: translateX(0);
+      }
+      .team-card {
+        transition: all 0.3s ease;
+      }
+      .team-card:hover {
+        transform: translateY(-5px);
+      }
+      .team-card:hover .card-overlay {
+        opacity: 1;
+      }
+      .card-overlay {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+    </style>
+  </head>
+  <body class="bg-light text-primary">
+    <!-- 顶部导航栏 -->
+    <header class="bg-primary text-white shadow-md">
+      <div class="container mx-auto px-4 py-3">
+        <div class="flex justify-between items-center">
+          <!-- Logo -->
+          <div class="flex items-center space-x-2">
+            <i class="fa fa-dna text-2xl text-secondary"></i>
+            <span class="text-xl font-bold">遗传改良信息服务平台</span>
+          </div>
+
+          <!-- 桌面端导航 -->
+          <nav class="hidden md:flex space-x-8">
+            <a href="index.html" class="nav-link py-2" target="geneticInfo">首页</a>
+            <a href="data.html" class="nav-link py-2" target="geneticInfo">遗传评估数据</a>
+            <a href="achievements.html" class="nav-link py-2" target="geneticInfo">优良猪种展览</a>
+            <a href="team.html" class="nav-link active py-2" target="geneticInfo">科研团队</a>
+            <a href="upload.html" class="nav-link py-2" target="geneticInfo">数据上传</a>
+          </nav>
+
+          <!-- 移动端菜单按钮 -->
+          <button id="mobile-menu-button" class="md:hidden text-white focus:outline-none">
+            <i class="fa fa-bars text-xl"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- 移动端导航菜单 -->
+      <div id="mobile-menu" class="mobile-menu fixed top-0 left-0 h-full w-64 bg-primary z-50 md:hidden">
+        <div class="p-4 border-b border-gray-700">
+          <div class="flex justify-between items-center">
+            <span class="text-lg font-bold">菜单导航</span>
+            <button id="close-menu-button" class="text-white focus:outline-none">
+              <i class="fa fa-times"></i>
+            </button>
+          </div>
+        </div>
+        <nav class="p-4">
+          <ul class="space-y-4">
+            <li><a href="index.html" class="block py-2 hover:text-secondary">首页</a></li>
+            <li><a href="data.html" class="block py-2 hover:text-secondary">遗传评估数据</a></li>
+            <li><a href="achievements.html" class="block py-2 hover:text-secondary">优良猪种展览</a></li>
+            <li><a href="team.html" class="block py-2 hover:text-secondary">科研团队</a></li>
+            <li><a href="upload.html" class="block py-2 hover:text-secondary">数据上传</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main>
+      <!-- 科研团队 -->
+      <section id="team" class="min-h-screen bg-white py-6">
+        <div class="container mx-auto px-4">
+          <!-- 面包屑导航 -->
+          <div class="mb-6 flex items-center text-sx">
+            <a href="index.html" class="text-dark hover:text-secondary">首页</a>
+            <i class="fa fa-angle-right mx-2 text-dark"></i>
+            <span class="text-secondary">科研团队</span>
+          </div>
+ 
+          <!-- 团队介绍 -->
+          <div class="bg-light rounded-lg shadow-md p-6 mb-8">
+            <h3 class="text-xl font-bold mb-4">团队介绍</h3>
+            <p class="mb-4">动物遗传改良信息服务平台（sdauanimal.com）由山东农业大学动物科技学院张勤教授团队研发。平台依托高校在动物遗传育种领域的学科优势，紧密对接畜牧产业实际需求，形成产学研深度融合的专业技术平台，致力于打造兼具科学性、实用性与可扩展性的遗传评估与基因组选择工具体系。</p>
+            <p class="mb-4">学术带头人：张勤 教授</p>
+            <p class="mb-4">张勤教授是我国动物遗传育种领域的知名专家，长期从事畜禽基因组选择、遗传评估模型与育种方法优化等研究工作，在基因组预测与复杂性状遗传解析方面取得了一系列具有国际影响力的研究成果。相关研究发表于 Communications Biology 等国际高水平学术期刊，为平台核心算法与模型体系提供了坚实的理论基础。</p>
+            <p class="mb-4">团队构成</p>
+            <p class="mb-4">平台核心团队由动物遗传育种与繁殖学、生物信息学、分子遗传学等多学科成员组成，涵盖教授、副教授、博士后及博士研究生，形成了集理论研究、算法开发与工程实现于一体的人才梯队，能够支撑平台的持续研发与技术迭代。</p>
+            <p class="mb-4">依托单位</p>
+            <p class="mb-4">平台依托单位为山东农业大学动物科技学院。该学院是国内畜牧兽医领域的重要科研与教学基地，拥有畜牧学和兽医学两个博士后科研流动站，科研条件完备、学术积累深厚，为平台建设与长期发展提供了稳定、可靠的学术与技术支撑。</p>
+
+            <p>团队与国内外多家科研机构、企业建立了长期合作关系，共同开展动物遗传改良技术研究和应用，为我国动物种业的发展提供技术支撑。</p>
+          </div>
+
+
+          <!-- 团队人员 -->
+          <div class="mb-12">
+            <h3 class="text-lg font-bold mb-4">团队人员</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+              <!-- 研究员1 -->
+              <div class="team-card bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="relative">
+                  <img src="assets/image/zhangqin.jpg" alt="张勤" class="w-full h-96 object-cover" />
+                  <div class="card-overlay absolute inset-0 bg-secondary bg-opacity-80 flex items-center justify-center">
+                    <a href="https://dkdy.sdau.edu.cn/2019/0904/c14944a249751/page.psp" target="_blank" class="bg-white text-secondary px-4 py-2 rounded-lg hover:bg-light transition-all">查看详情</a>
+                  </div>
+                </div>
+                <div class="p-4 text-center">
+                  <h5 class="font-bold text-lg mb-1">张勤</h5>
+                  <p class="text-dark mb-2">教授</p>
+                  <div class="flex justify-center space-x-3 hidden">
+                    <a href="#" class="text-secondary hover:text-primary">
+                      <i class="fa fa-globe"></i>
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 研究员2 -->
+              <div class="team-card bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="relative">
+                  <img src="assets/image/zengyongqing.png" alt="曾勇庆" class="w-full h-96 object-cover" />
+                  <div class="card-overlay absolute inset-0 bg-secondary bg-opacity-80 flex items-center justify-center">
+                    <a href="https://dkdy.sdau.edu.cn/2019/0904/c14944a249757/page.psp" target="_blank" class="bg-white text-secondary px-4 py-2 rounded-lg hover:bg-light transition-all">查看详情</a>
+                  </div>
+                </div>
+                <div class="p-4 text-center">
+                  <h5 class="font-bold text-lg mb-1">曾勇庆</h5>
+                  <p class="text-dark mb-2">教授</p>
+                  <div class="flex justify-center space-x-3 hidden">
+                    <a href="#" class="text-secondary hover:text-primary">
+                      <i class="fa fa-globe"></i>
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 研究员3 -->
+              <div class="team-card bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="relative">
+                  <img src="assets/image/fan.png" alt="樊新忠" class="w-full h-96 object-cover" />
+                  <div class="card-overlay absolute inset-0 bg-secondary bg-opacity-80 flex items-center justify-center">
+                    <a href="https://dkdy.sdau.edu.cn/2019/0904/c14944a249761/page.psp" target="_blank" class="bg-white text-secondary px-4 py-2 rounded-lg hover:bg-light transition-all">查看详情</a>
+                  </div>
+                </div>
+                <div class="p-4 text-center">
+                  <h5 class="font-bold text-lg mb-1">樊新忠</h5>
+                  <p class="text-dark mb-2">教授</p>
+                  <div class="flex justify-center space-x-3 hidden">
+                    <a href="#" class="text-secondary hover:text-primary">
+                      <i class="fa fa-globe"></i>
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 研究员4 -->
+              <div class="team-card bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="relative">
+                  <img src="assets/image/tang.jpg" alt="唐辉" class="w-full h-96 object-cover" />
+                  <div class="card-overlay absolute inset-0 bg-secondary bg-opacity-80 flex items-center justify-center">
+                    <a href="https://dkdy.sdau.edu.cn/2019/0904/c14944a249772/page.psp" target="_blank" class="bg-white text-secondary px-4 py-2 rounded-lg hover:bg-light transition-all">查看详情</a>
+                  </div>
+                </div>
+                <div class="p-4 text-center">
+                  <h5 class="font-bold text-lg mb-1">唐辉</h5>
+                  <p class="text-dark mb-2">教授</p>
+                  <div class="flex justify-center space-x-3 hidden">
+                    <a href="#" class="text-secondary hover:text-primary">
+                      <i class="fa fa-globe"></i>
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 研究员5 -->
+              <div class="team-card bg-white rounded-lg shadow-md overflow-hidden"> 
+                <div class="relative"> 
+                    <img src="assets/image/shi.png" alt="师科荣" class="w-full h-96 object-cover" />
+                    <div class="card-overlay absolute inset-0 bg-secondary bg-opacity-80 flex items-center justify-center">
+                      <a href="https://dkdy.sdau.edu.cn/2019/0904/c14944a249770/page.htm" target="_blank" class="bg-white text-secondary px-4 py-2 rounded-lg hover:bg-light transition-all">查看详情</a>
+                    </div>
+                </div>
+                <div class="p-4 text-center">
+                    <h5 class="font-bold text-lg mb-1">师科荣</h5> 
+                    <p class="text-dark mb-2">教授</p>
+                  <div class="flex justify-center space-x-3 hidden">
+                    <a href="#" class="text-secondary hover:text-primary">
+                      <i class="fa fa-globe"></i>
+                    </a>
+                  </div>
+                </div>
+               </div>
+
+              <!-- 研究员6 -->
+              <div class="team-card bg-white rounded-lg shadow-md overflow-hidden"> 
+                <div class="relative"> 
+                    <img src="assets/image/chao.jpg" alt="宁超" class="w-full h-96 object-cover" />
+                    <div class="card-overlay absolute inset-0 bg-secondary bg-opacity-80 flex items-center justify-center">
+                      <a href="https://dkdy.sdau.edu.cn/2019/0904/c1553a154966/page.psp" target="_blank" class="bg-white text-secondary px-4 py-2 rounded-lg hover:bg-light transition-all">查看详情</a>
+                    </div>
+                </div>
+                <div class="p-4 text-center">
+                    <h5 class="font-bold text-lg mb-1">宁超</h5> 
+                    <p class="text-dark mb-2">教授</p>
+                  <div class="flex justify-center space-x-3 hidden">
+                    <a href="#" class="text-secondary hover:text-primary">
+                      <i class="fa fa-globe"></i>
+                    </a>
+                  </div>
+                </div>
+               </div>
+
+              <!-- 研究员7 -->
+              <div class="team-card bg-white rounded-lg shadow-md overflow-hidden"> 
+                <div class="relative"> 
+                    <img src="assets/image/wangdan.png" alt="王丹" class="w-full h-96 object-cover" />
+                    <div class="card-overlay absolute inset-0 bg-secondary bg-opacity-80 flex items-center justify-center">
+                      <a href="https://dkdy.sdau.edu.cn/2022/1110/c14944a249753/page.psp" target="_blank" class="bg-white text-secondary px-4 py-2 rounded-lg hover:bg-light transition-all">查看详情</a>
+                    </div>
+                </div>
+                <div class="p-4 text-center">
+                    <h5 class="font-bold text-lg mb-1">王丹</h5> 
+                    <p class="text-dark mb-2">教授</p>
+                  <div class="flex justify-center space-x-3 hidden">
+                    <a href="#" class="text-secondary hover:text-primary">
+                      <i class="fa fa-globe"></i>
+                    </a>
+                  </div>
+                </div>
+               </div>
+
+              <!-- 研究员8 -->
+              <div class="team-card bg-white rounded-lg shadow-md overflow-hidden"> 
+                <div class="relative"> 
+                    <img src="assets/image/chen.jpg" alt="陈伟" class="w-full h-96 object-cover" />
+                    <div class="card-overlay absolute inset-0 bg-secondary bg-opacity-80 flex items-center justify-center">
+                      <a href="https://dkdy.sdau.edu.cn/2019/0904/c14944a249760/page.psp" target="_blank" class="bg-white text-secondary px-4 py-2 rounded-lg hover:bg-light transition-all">查看详情</a>
+                    </div>
+                </div>
+                <div class="p-4 text-center">
+                    <h5 class="font-bold text-lg mb-1">陈伟</h5> 
+                    <p class="text-dark mb-2">副教授</p>
+                  <div class="flex justify-center space-x-3 hidden">
+                    <a href="#" class="text-secondary hover:text-primary">
+                      <i class="fa fa-globe"></i>
+                    </a>
+                  </div>
+                </div>
+               </div>
+
+              <!-- 研究员9 -->
+              <div class="team-card bg-white rounded-lg shadow-md overflow-hidden"> 
+                <div class="relative"> 
+                    <img src="assets/image/wenwen.jpg" alt="王文文" class="w-full h-96 object-cover" />
+                    <div class="card-overlay absolute inset-0 bg-secondary bg-opacity-80 flex items-center justify-center">
+                      <a href="https://dkdy.sdau.edu.cn/2019/0904/c14944a249748/page.psp" target="_blank" class="bg-white text-secondary px-4 py-2 rounded-lg hover:bg-light transition-all">查看详情</a>
+                    </div>
+                </div>
+                <div class="p-4 text-center">
+                    <h5 class="font-bold text-lg mb-1">王文文</h5> 
+                    <p class="text-dark mb-2">副教授</p>
+                  <div class="flex justify-center space-x-3 hidden">
+                    <a href="#" class="text-secondary hover:text-primary">
+                      <i class="fa fa-globe"></i>
+                    </a>
+                  </div>
+                </div>
+               </div>
+
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-primary text-white py-8">
+      <div class="container mx-auto px-4">
+        <div class="flex flex-col md:flex-row justify-between">
+          <div class="mb-6 md:mb-0">
+            <div class="flex items-center space-x-2 mb-4">
+              <i class="fa fa-dna text-2xl text-secondary"></i>
+              <span class="text-xl font-bold">遗传改良信息服务平台</span>
+            </div>
+            <p class="text-gray-300 mb-4">面向科研项目的专业数据平台，提供动物遗传育种领域一体化服务</p>
+            <div class="flex space-x-4">
+              <a href="#" class="text-white hover:text-secondary">
+                <i class="fa fa-weixin text-xl"></i>
+              </a>
+              <a href="#" class="text-white hover:text-secondary">
+                <i class="fa fa-weibo text-xl"></i>
+              </a>
+              <a href="#" class="text-white hover:text-secondary">
+                <i class="fa fa-envelope text-xl"></i>
+              </a>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-8">
+            <div>
+              <h3 class="text-lg font-bold mb-4">快速链接</h3>
+              <ul class="space-y-2">
+                <li><a href="index.html" class="text-gray-300 hover:text-white">首页</a></li>
+                <li><a href="data.html" class="text-gray-300 hover:text-white">遗传评估数据</a></li>
+                <li><a href="achievements.html" class="text-gray-300 hover:text-white">优良猪种展览</a></li>
+                <li><a href="team.html" class="text-gray-300 hover:text-white">科研团队</a></li>
+                <li><a href="upload.html" class="text-gray-300 hover:text-white">数据上传</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 class="text-lg font-bold mb-4">相关资源</h3>
+              <ul class="space-y-2">
+                <li><a href="#" class="text-gray-300 hover:text-white">技术文档</a></li>
+                <li><a href="#" class="text-gray-300 hover:text-white">API接口</a></li>
+                <li><a href="#" class="text-gray-300 hover:text-white">数据标准</a></li>
+                <li><a href="#" class="text-gray-300 hover:text-white">常见问题</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 class="text-lg font-bold mb-4">联系我们</h3>
+              <ul class="space-y-2">
+                <li class="flex items-center">
+                  <i class="fa fa-map-marker w-5 text-secondary"></i>
+                  <span class="text-gray-300">山东农业大学动物科技学院</span>
+                </li>
+                <li class="flex items-center">
+                  <i class="fa fa-phone w-5 text-secondary"></i>
+                  <span class="text-gray-300">010-12345678</span>
+                </li>
+                <li class="flex items-center">
+                  <i class="fa fa-envelope w-5 text-secondary"></i>
+                  <span class="text-gray-300">ningchao@sdau.edu.cn</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+      // 页面加载完成后执行
+      document.addEventListener("DOMContentLoaded", function () {
+        // 导航链接激活状态
+        const navLinks = document.querySelectorAll(".nav-link");
+        navLinks.forEach((link) => {
+          if (link.getAttribute("href") === window.location.pathname) {
+            link.classList.add("active");
+          }
+          link.addEventListener("click", function () {
+            navLinks.forEach((item) => item.classList.remove("active"));
+            this.classList.add("active");
+          });
+        });
+
+        // 移动端菜单
+        const mobileMenuButton = document.getElementById("mobile-menu-button");
+        const closeMenuButton = document.getElementById("close-menu-button");
+        const mobileMenu = document.getElementById("mobile-menu");
+
+        mobileMenuButton.addEventListener("click", function () {
+          mobileMenu.classList.add("open");
+        });
+
+        closeMenuButton.addEventListener("click", function () {
+          mobileMenu.classList.remove("open");
+        });
+
+        // 模态框
+        const modal = document.getElementById("modal");
+        const modalTitle = document.getElementById("modal-title");
+        const modalContent = document.getElementById("modal-content");
+        const closeModal = document.getElementById("close-modal");
+        const modalCloseButton = document.getElementById("modal-close-button");
+
+        // function openModal(title, content) {
+        //   modalTitle.textContent = title;
+        //   modalContent.innerHTML = content;
+        //   modal.classList.remove("hidden");
+        // }
+
+        // function closeModalFunc() {
+        //   modal.classList.add("hidden");
+        // }
+
+        closeModal.addEventListener("click", closeModalFunc);
+        modalCloseButton.addEventListener("click", closeModalFunc);
+
+        // 点击模态框外部关闭
+        modal.addEventListener("click", function (e) {
+          if (e.target === modal) {
+            closeModalFunc();
+          }
+        });
+
+        // 团队成员详情
+        // window.showTeamMemberDetails = function (id) {
+        //   let title = "";
+        //   let content = "";
+        //   let image = "";
+        //   let name = "";
+        //   let position = "";
+        //   let bio = "";
+        //   let research = "";
+        //   let publications = [];
+        //   let contact = "";
+
+        //   if (id === "member1") {
+        //     name = "张教授";
+        //     position = "研究员 / 团队负责人";
+        //     image = "https://p3-doubao-search-sign.byteimg.com/pgc-image/689b620f80464615b0003283670e052b~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1792044887&x-signature=V%2FlQ7z03d8e%2Fv8l7L9g%2Fg%2F1yI%3D";
+        //     bio = "张教授，博士，研究员，博士生导师。1995年毕业于中国农业大学动物遗传育种专业，获博士学位。2000-2002年在美国康奈尔大学做访问学者。现任中国农业科学院北京畜牧兽医研究所动物遗传育种研究室主任，国家生猪产业技术体系岗位科学家。";
+        //     research = "主要从事动物遗传育种、基因组学和生物信息学研究。研究方向包括：（1）猪重要经济性状的遗传基础研究；（2）基因组选择技术的开发与应用；（3）猪新品种（配套系）培育。";
+        //     publications = ["Zhang et al. (2025). A novel deep learning approach for genomic selection in pigs. Genetics Selection Evolution, 57(1): 1-12.", "Zhang et al. (2024). Genome-wide association study identifies candidate genes for growth and meat quality traits in Duroc pigs. BMC Genomics, 25(1): 1-15.", "Zhang et al. (2023). Development and application of genomic selection in Chinese indigenous pig breeds. Journal of Animal Science and Biotechnology, 14(1): 1-10."];
+        //     contact = "Email: zhang@caas.cn<br>Office: 010-12345678<br>Office Address: 北京市海淀区中关村南大街5号";
+        //   } else if (id === "member2") {
+        //     name = "李教授";
+        //     position = "研究员";
+        //     image = "https://p3-doubao-search-sign.byteimg.com/labis/b0b2e55170768f46d07b60f8c1be9840~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1792044887&x-signature=%2Fv5%2Bw%2FAVGVSuL%2FSgR4RRuSv8M3Y%3D";
+        //     bio = "李教授，博士，研究员，硕士生导师。2000年毕业于华中农业大学动物遗传育种专业，获博士学位。2005-2007年在丹麦奥胡斯大学做访问学者。现任中国农业科学院北京畜牧兽医研究所动物遗传育种研究室副主任。";
+        //     research = "主要从事猪繁殖性状的遗传改良、分子标记辅助选择和基因组选择研究。研究方向包括：（1）猪繁殖性状的遗传基础研究；（2）分子标记辅助选择技术的开发与应用；（3）猪繁殖性能的遗传改良。";
+        //     publications = ["Li et al. (2025). Genetic basis of reproductive traits in pigs: a review. Animal Reproduction Science, 165: 1-15.", "Li et al. (2024). Identification of candidate genes for litter size in pigs using genome-wide association study. Journal of Animal Science, 102(5): 1-12.", "Li et al. (2023). Development of a molecular breeding value prediction model for pig reproductive traits. Livestock Science, 265: 1-8."];
+        //     contact = "Email: li@caas.cn<br>Office: 010-12345679<br>Office Address: 北京市海淀区中关村南大街5号";
+        //   } else if (id === "member3") {
+        //     name = "王博士";
+        //     position = "副研究员";
+        //     image = "https://p3-doubao-search-sign.byteimg.com/tos-cn-i-be4g95zd3a/946634491718664214~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1792044887&x-signature=fgt0yKc4wz7SocJOT%2FWjpWcf6Rg%3D";
+        //     bio = "王博士，副研究员。2010年毕业于中国农业科学院研究生院动物遗传育种专业，获博士学位。2015-2016年在美国爱荷华州立大学做访问学者。现任中国农业科学院北京畜牧兽医研究所动物遗传育种研究室副研究员。";
+        //     research = "主要从事猪肉质性状的遗传改良、全基因组关联分析和基因编辑研究。研究方向包括：（1）猪肉质性状的遗传基础研究；（2）全基因组关联分析技术的开发与应用；（3）基因编辑技术在猪遗传改良中的应用。";
+        //     publications = ["Wang et al. (2025). Genome-wide association study for meat quality traits in Chinese indigenous pig breeds. Meat Science, 215: 1-10.", "Wang et al. (2024). Identification and functional analysis of candidate genes for intramuscular fat content in pigs. BMC Genomics, 25(1): 1-14.", "Wang et al. (2023). Development of a CRISPR/Cas9-mediated gene editing system for improving meat quality in pigs. Scientific Reports, 13(1): 1-10."];
+        //     contact = "Email: wang@caas.cn<br>Office: 010-12345680<br>Office Address: 北京市海淀区中关村南大街5号";
+        //   } else if (id === "member4") {
+        //     name = "赵博士";
+        //     position = "副研究员";
+        //     image = "https://p3-doubao-search.byteimg.com/tos-cn-i-xv4ileqgde/d18cc951fb4b47fcbaf5f0675cd27344~tplv-a9rns2rl98-image.image?lk3s=feb11e32&x-expires=1792044887&x-signature=1fUmsXZxP8pLePfB585D1kjSwyo%3D";
+        //     bio = "赵博士，副研究员。2012年毕业于华南农业大学动物遗传育种专业，获博士学位。2017-2018年在英国爱丁堡大学做访问学者。现任中国农业科学院北京畜牧兽医研究所动物遗传育种研究室副研究员。";
+        //     research = "主要从事猪生长发育的遗传调控、生物信息学和大数据分析研究。研究方向包括：（1）猪生长发育的遗传调控机制研究；（2）生物信息学方法的开发与应用；（3）大数据分析在动物遗传育种中的应用。";
+        //     publications = ["Zhao et al. (2025). Transcriptomic analysis reveals key genes regulating growth and development in pigs. BMC Genomics, 26(1): 1-15.", "Zhao et al. (2024). Development of a bioinformatics pipeline for analyzing large-scale genomic data in pigs. Frontiers in Genetics, 15: 1-12.", "Zhao et al. (2023). Integration of multi-omics data reveals regulatory networks for growth traits in pigs. Scientific Reports, 13(1): 1-11."];
+        //     contact = "Email: zhao@caas.cn<br>Office: 010-12345681<br>Office Address: 北京市海淀区中关村南大街5号";
+        //   } else if (id === "tech1") {
+        //     name = "钱工";
+        //     position = "高级工程师";
+        //     image = "https://p3-doubao-search-sign.byteimg.com/pgc-image/689b620f80464615b0003283670e052b~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1792044887&x-signature=V%2FlQ7z03d8e%2Fv8l7L9g%2Fg%2F1yI%3D";
+        //     bio = "钱工，高级工程师。2005年毕业于中国农业大学计算机科学与技术专业，获硕士学位。现任中国农业科学院北京畜牧兽医研究所动物遗传育种研究室高级工程师，主要负责遗传改良信息服务平台的设计、开发和维护。";
+        //     research = "主要从事生物信息学软件开发、数据库建设和系统集成工作。研究方向包括：（1）动物遗传育种数据管理系统的开发；（2）遗传评估算法的计算机实现；（3）生物信息学工具的开发与应用。";
+        //     publications = ["Qian et al. (2025). Development of a comprehensive data management system for animal genetic improvement. Journal of Animal Science and Biotechnology, 16(1): 1-8.", "Qian et al. (2024). Implementation of genomic selection algorithms for large-scale data analysis. Bioinformatics, 40(1): 1-8.", "Qian et al. (2023). A web-based platform for pig genetic evaluation and data visualization. Frontiers in Genetics, 14: 1-10."];
+        //     contact = "Email: qian@caas.cn<br>Office: 010-12345682<br>Office Address: 北京市海淀区中关村南大街5号";
+        //   } else if (id === "tech2") {
+        //     name = "孙工";
+        //     position = "工程师";
+        //     image = "https://p3-doubao-search.byteimg.com/labis/b0b2e55170768f46d07b60f8c1be9840~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1792044887&x-signature=%2Fv5%2Bw%2FAVGVSuL%2FSgR4RRuSv8M3Y%3D";
+        //     bio = "孙工，工程师。2010年毕业于北京航空航天大学计算机科学与技术专业，获学士学位。现任中国农业科学院北京畜牧兽医研究所动物遗传育种研究室工程师，主要负责遗传改良信息服务平台的前端开发和用户界面设计。";
+        //     research = "主要从事Web前端开发、用户界面设计和数据可视化工作。研究方向包括：（1）响应式Web应用开发；（2）数据可视化技术的应用；（3）用户体验设计。";
+        //     publications = ["Sun et al. (2024). Development of a responsive web application for animal genetic data visualization. Journal of Animal Science and Biotechnology, 15(1): 1-6.", "Sun et al. (2023). Implementation of interactive data visualization tools for genomic selection results. Bioinformatics, 39(1): 1-7."];
+        //     contact = "Email: sun@caas.cn<br>Office: 010-12345683<br>Office Address: 北京市海淀区中关村南大街5号";
+        //   } else if (id === "tech3") {
+        //     name = "周工";
+        //     position = "工程师";
+        //     image = "https://p3-doubao-search-sign.byteimg.com/tos-cn-i-be4g95zd3a/946634491718664214~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1792044887&x-signature=fgt0yKc4wz7SocJOT%2FWjpWcf6Rg%3D";
+        //     bio = "周工，工程师。2012年毕业于华中科技大学计算机科学与技术专业，获硕士学位。现任中国农业科学院北京畜牧兽医研究所动物遗传育种研究室工程师，主要负责遗传改良信息服务平台的后端开发和数据库管理。";
+        //     research = "主要从事Web后端开发、数据库设计和性能优化工作。研究方向包括：（1）高性能Web服务架构设计；（2）大数据存储与管理；（3）系统性能优化。";
+        //     publications = ["Zhou et al. (2024). Design and implementation of a high-performance database system for animal genetic data. Journal of Animal Science and Biotechnology, 15(1): 1-7.", "Zhou et al. (2023). Optimization of genomic data processing pipeline for large-scale animal breeding programs. Bioinformatics, 39(1): 1-8."];
+        //     contact = "Email: zhou@caas.cn<br>Office: 010-12345684<br>Office Address: 北京市海淀区中关村南大街5号";
+        //   } else if (id === "tech4") {
+        //     name = "吴工";
+        //     position = "助理工程师";
+        //     image = "https://p3-doubao-search.byteimg.com/tos-cn-i-xv4ileqgde/d18cc951fb4b47fcbaf5f0675cd27344~tplv-a9rns2rl98-image.image?lk3s=feb11e32&x-expires=1792044887&x-signature=1fUmsXZxP8pLePfB585D1kjSwyo%3D";
+        //     bio = "吴工，助理工程师。2015年毕业于北京邮电大学计算机科学与技术专业，获学士学位。现任中国农业科学院北京畜牧兽医研究所动物遗传育种研究室助理工程师，主要负责遗传改良信息服务平台的测试、部署和维护。";
+        //     research = "主要从事软件测试、系统部署和技术支持工作。研究方向包括：（1）自动化测试技术；（2）容器化部署；（3）系统监控与维护。";
+        //     publications = ["Wu et al. (2023). Implementation of automated testing for animal genetic data management systems. Journal of Animal Science and Biotechnology, 14(1): 1-5."];
+        //     contact = "Email: wu@caas.cn<br>Office: 010-12345685<br>Office Address: 北京市海淀区中关村南大街5号";
+        //   }
+
+        //   title = `${name} - ${position}`;
+
+        //   content = `
+        //             <div class="flex flex-col md:flex-row">
+        //                 <div class="md:w-1/3 mb-6 md:mb-0 md:pr-6">
+        //                     <img src="${image}" alt="${name}" class="w-full rounded-lg shadow-md">
+        //                     <div class="mt-4 bg-light rounded-lg p-4">
+        //                         <h4 class="font-bold mb-2">联系方式</h4>
+        //                         <div class="text-sm">
+        //                             ${contact}
+        //                         </div>
+        //                     </div>
+        //                 </div>
+        //                 <div class="md:w-2/3">
+        //                     <h4 class="font-bold text-lg mb-2">个人简介</h4>
+        //                     <p class="mb-4">${bio}</p>
+                            
+        //                     <h4 class="font-bold text-lg mb-2">研究方向</h4>
+        //                     <p class="mb-4">${research}</p>
+                            
+        //                     <h4 class="font-bold text-lg mb-2">代表性论文</h4>
+        //                     <ul class="list-disc pl-5 space-y-2 mb-4">
+        //                         ${publications.map((pub) => `<li>${pub}</li>`).join("")}
+        //                     </ul>
+                            
+        //                     <h4 class="font-bold text-lg mb-2">研究项目</h4>
+        //                     <ul class="list-disc pl-5 space-y-2">
+        //                         <li>国家重点研发计划项目：猪基因组选择技术体系构建与应用（2023-2027）</li>
+        //                         <li>国家自然科学基金项目：猪肌肉生长发育的分子调控机制研究（2024-2027）</li>
+        //                         <li>农业农村部重点实验室项目：猪重要经济性状的全基因组关联分析（2023-2025）</li>
+        //                     </ul>
+        //                 </div>
+        //             </div>
+        //         `;
+
+        //   openModal(title, content);
+        // };
+      });
+    </script>
+  </body>
+</html>

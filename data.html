@@ -1,0 +1,1090 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>遗传评估数据 - 遗传改良信息服务平台</title>
+    <!-- Tailwind CSS v3 -->
+    <script src="assets/js/saved_resource"></script>
+    <!-- Font Awesome -->
+    <link href="assets/css/common.css" rel="stylesheet" />
+    <!-- Chart.js -->
+    <script src="assets/js/chart.umd.min.js"></script>
+    <!-- ECharts -->
+    <script src="assets/js/echarts.min.js"></script>
+    <!-- 统一的 Tailwind 配置 -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#2C3E4E",
+              secondary: "#1a56db",
+              light: "#fafafa",
+              dark: "#7F8C8D",
+              success: "#27AE60",
+              warning: "#E67E22",
+              purple: "#9B59B6",
+            },
+            fontFamily: {
+              sans: ["思源黑体", "微软雅黑", "Inter", "Roboto", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <style type="text/tailwindcss">
+      @layer utilities {
+        .content-auto {
+          content-visibility: auto;
+        }
+        .transition-all {
+          transition-property: all;
+          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+          transition-duration: 300ms;
+        }
+        .shadow-hover:hover {
+          box-shadow:
+            0 10px 15px -3px rgba(0, 0, 0, 0.1),
+            0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+      }
+    </style>
+    <style>
+      /* 自定义样式 */
+      .nav-link {
+        position: relative;
+      }
+      .nav-link::after {
+        content: "";
+        position: absolute;
+        width: 0;
+        height: 2px;
+        bottom: -2px;
+        left: 0;
+        background-color: #2980b9;
+        transition: width 0.3s ease;
+      }
+      .nav-link:hover::after,
+      .nav-link.active::after {
+        width: 100%;
+      }
+      .mobile-menu {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out;
+      }
+      .mobile-menu.open {
+        transform: translateX(0);
+      }
+      .table-container {
+        overflow-x: auto;
+      }
+      .table-row:hover {
+        background-color: #f8f9fa;
+      }
+    </style>
+  </head>
+  <body class="bg-light text-primary">
+    <!-- 顶部导航栏 -->
+    <header class="bg-primary text-white shadow-md">
+      <div class="container mx-auto px-4 py-3">
+        <div class="flex justify-between items-center">
+          <!-- Logo -->
+          <div class="flex items-center space-x-2">
+            <i class="fa fa-dna text-2xl text-secondary"></i>
+            <span class="text-xl font-bold">遗传改良信息服务平台</span>
+          </div>
+
+          <!-- 桌面端导航 -->
+          <nav class="hidden md:flex space-x-8">
+            <a href="index.html" class="nav-link py-2" target="geneticInfo">首页</a>
+            <a href="data.html" class="nav-link active py-2" target="geneticInfo">遗传评估数据</a>
+            <a href="achievements.html" class="nav-link py-2" target="geneticInfo">优良猪种展览</a>
+            <a href="team.html" class="nav-link py-2" target="geneticInfo">科研团队</a>
+            <a href="upload.html" class="nav-link py-2" target="geneticInfo">数据上传</a>
+          </nav>
+
+          <!-- 移动端菜单按钮 -->
+          <button id="mobile-menu-button" class="md:hidden text-white focus:outline-none">
+            <i class="fa fa-bars text-xl"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- 移动端导航菜单 -->
+      <div id="mobile-menu" class="mobile-menu fixed top-0 left-0 h-full w-64 bg-primary z-50 md:hidden">
+        <div class="p-4 border-b border-gray-700">
+          <div class="flex justify-between items-center">
+            <span class="text-lg font-bold">菜单导航</span>
+            <button id="close-menu-button" class="text-white focus:outline-none">
+              <i class="fa fa-times"></i>
+            </button>
+          </div>
+        </div>
+        <nav class="p-4">
+          <ul class="space-y-4">
+            <li><a href="index.html" class="block py-2 hover:text-secondary">首页</a></li>
+            <li><a href="data.html" class="block py-2 hover:text-secondary">遗传评估数据</a></li>
+            <li><a href="achievements.html" class="block py-2 hover:text-secondary">优良猪种展览</a></li>
+            <li><a href="team.html" class="block py-2 hover:text-secondary">科研团队</a></li>
+            <li><a href="upload.html" class="block py-2 hover:text-secondary">数据上传</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main>
+      <!-- 遗传评估数据 -->
+      <section id="data" class="min-h-screen bg-white py-6">
+        <div class="container mx-auto px-4">
+          <!-- 面包屑导航 -->
+          <div class="mb-6 flex items-center text-sx">
+            <a href="index.html" class="text-dark hover:text-secondary">首页</a>
+            <i class="fa fa-angle-right mx-2 text-dark"></i>
+            <span class="text-secondary">遗传评估数据</span>
+          </div>
+
+          <!-- 数据查询面板 -->
+          <div class="bg-light rounded-lg shadow-md p-6 mb-8">
+            <h3 class="text-xl font-bold mb-4">数据查询</h3>
+            <form id="data-query-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div>
+                <label class="block text-dark mb-2">猪种</label>
+                <select id="pig-breed" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary">
+                  <option value="all">全部</option>
+                  <option value="duroc">杜洛克</option>
+                  <option value="landrace">长白猪</option>
+                  <option value="yorkshire">大白猪</option>
+                  <option value="local">地方猪种</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-dark mb-2">评估指标</label>
+                <select id="evaluation-index" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary">
+                  <option value="daily_gain">日增重</option>
+                  <option value="lean_rate">瘦肉率</option>
+                  <option value="backfat">背膘厚</option>
+                  <option value="reproduction">繁殖力</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-dark mb-2">时间范围</label>
+                <div class="flex items-center space-x-2">
+                  <input type="date" id="start-date" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" value="2024-01-01" />
+                  <span>至</span>
+                  <input type="date" id="end-date" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" value="2025-03-01" />
+                </div>
+              </div>
+              <div>
+                <label class="block text-dark mb-2">个体ID</label>
+                <div class="flex space-x-2">
+                  <input type="text" id="individual-id" placeholder="请输入" class="flex-1 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" />
+                  <button type="submit" class="bg-secondary hover:bg-blue-600 text-white px-4 py-2 rounded transition-all">查询</button>
+                  <button type="reset" class="bg-gray-300 hover:bg-gray-400 text-primary px-4 py-2 rounded transition-all">重置</button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- 查询结果 -->
+          <div class="bg-light rounded-lg shadow-md p-6">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-xl font-bold">查询结果</h3>
+              <div class="flex items-center space-x-4">
+                <span id="result-count" class="text-dark">共 156 条记录</span>
+                <button id="export-data-btn" class="bg-success hover:bg-green-600 text-white px-4 py-2 rounded transition-all flex items-center">
+                  <i class="fa fa-download mr-2"></i> 导出数据
+                </button>
+              </div>
+            </div>
+
+            <div class="table-container">
+              <table class="w-full bg-white">
+                <thead>
+                  <tr class="bg-primary text-white">
+                    <th class="px-4 py-2 text-left">个体ID</th>
+                    <th class="px-4 py-2 text-left">性别</th>
+                    <th class="px-4 py-2 text-left">100公斤日龄体重</th>
+                    <th class="px-4 py-2 text-left">100公斤背膘厚</th>
+                    <th class="px-4 py-2 text-left">育种值估计</th>
+                    <th class="px-4 py-2 text-left">操作</th>
+                  </tr>
+                </thead>
+                <tbody id="result-table-body">
+                  <tr class="border-b table-row">
+                    <td class="px-4 py-3">YYSDYS322005110</td>
+                    <td class="px-4 py-3">母</td>
+                    <td class="px-4 py-3">145.46249</td>
+                    <td class="px-4 py-3">9.34985</td>
+                    <td class="px-4 py-3 text-secondary font-bold">0.514</td>
+                    <td class="px-4 py-3">
+                      <button class="text-secondary hover:underline" onclick="showDataDetails('D1001')">详情</button>
+                    </td>
+                  </tr>
+                  <tr class="border-b table-row">
+                    <td class="px-4 py-3">YYSDYS322005111</td>
+                    <td class="px-4 py-3">母</td>
+                    <td class="px-4 py-3">159.52437</td>
+                    <td class="px-4 py-3">15.56904</td>
+                    <td class="px-4 py-3 text-secondary font-bold">0.534</td>
+                    <td class="px-4 py-3">
+                      <button class="text-secondary hover:underline" onclick="showDataDetails('L2034')">详情</button>
+                    </td>
+                  </tr>
+                  <tr class="border-b table-row">
+                    <td class="px-4 py-3">YYSDYS322005112</td>
+                    <td class="px-4 py-3">母</td>
+                    <td class="px-4 py-3">151.88286</td>
+                    <td class="px-4 py-3">14.24505</td>
+                    <td class="px-4 py-3 text-secondary font-bold">0.529</td>
+                    <td class="px-4 py-3">
+                      <button class="text-secondary hover:underline" onclick="showDataDetails('Y3156')">详情</button>
+                    </td>
+                  </tr>
+                  <tr class="border-b table-row">
+                    <td class="px-4 py-3">YYSDYS322005128</td>
+                    <td class="px-4 py-3">母</td>
+                    <td class="px-4 py-3">150.99287</td>
+                    <td class="px-4 py-3">9.99148</td>
+                    <td class="px-4 py-3 text-secondary font-bold">0.519</td>
+                    <td class="px-4 py-3">
+                      <button class="text-secondary hover:underline" onclick="showDataDetails('L2035')">详情</button>
+                    </td>
+                  </tr>
+                  <tr class="border-b table-row">
+                    <td class="px-4 py-3">YYSDYS322005160</td>
+                    <td class="px-4 py-3">母</td>
+                    <td class="px-4 py-3">159.08413</td>
+                    <td class="px-4 py-3">11.57093</td>
+                    <td class="px-4 py-3 text-secondary font-bold">0.527</td>
+                    <td class="px-4 py-3">
+                      <button class="text-secondary hover:underline" onclick="showDataDetails('D1002')">详情</button>
+                    </td>
+                  </tr>
+                  <tr class="border-b table-row">
+                    <td class="px-4 py-3">YYSDYS322005162</td>
+                    <td class="px-4 py-3">母</td>
+                    <td class="px-4 py-3">155.5355</td>
+                    <td class="px-4 py-3">13.39661</td>
+                    <td class="px-4 py-3 text-secondary font-bold">0.528</td>
+                    <td class="px-4 py-3">
+                      <button class="text-secondary hover:underline" onclick="showDataDetails('Y3157')">详情</button>
+                    </td>
+                  </tr>
+                  <tr class="border-b table-row">
+                    <td class="px-4 py-3">YYSDYS322005164</td>
+                    <td class="px-4 py-3">母</td>
+                    <td class="px-4 py-3">151.49561</td>
+                    <td class="px-4 py-3">9.95633</td>
+                    <td class="px-4 py-3 text-secondary font-bold">0.519</td>
+                    <td class="px-4 py-3">
+                      <button class="text-secondary hover:underline" onclick="showDataDetails('D1003')">详情</button>
+                    </td>
+                  </tr>
+                  <tr class="border-b table-row">
+                    <td class="px-4 py-3">YYSDYS322005166</td>
+                    <td class="px-4 py-3">母</td>
+                    <td class="px-4 py-3">168.9034</td>
+                    <td class="px-4 py-3">11.44291</td>
+                    <td class="px-4 py-3 text-secondary font-bold">0.527</td>
+                    <td class="px-4 py-3">
+                      <button class="text-secondary hover:underline" onclick="showDataDetails('L2036')">详情</button>
+                    </td>
+                  </tr>
+                  <tr class="border-b table-row">
+                    <td class="px-4 py-3">YYSDYS322005168</td>
+                    <td class="px-4 py-3">母</td>
+                    <td class="px-4 py-3">154.59388</td>
+                    <td class="px-4 py-3">11.78041</td>
+                    <td class="px-4 py-3 text-secondary font-bold">0.527</td>
+                    <td class="px-4 py-3">
+                      <button class="text-secondary hover:underline" onclick="showDataDetails('Y3158')">详情</button>
+                    </td>
+                  </tr>
+                  <tr class="table-row">
+                    <td class="px-4 py-3">YYSDYS322005179</td>
+                    <td class="px-4 py-3">母</td>
+                    <td class="px-4 py-3">140.56019</td>
+                    <td class="px-4 py-3">9.56643</td>
+                    <td class="px-4 py-3 text-secondary font-bold">0.517</td>
+                    <td class="px-4 py-3">
+                      <button class="text-secondary hover:underline" onclick="showDataDetails('L2037')">详情</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- 分页 -->
+            <div class="flex justify-center mt-6">
+              <nav class="flex items-center space-x-2">
+                <button id="prev-page" class="px-3 py-1 border border-gray-300 rounded hover:bg-light">
+                  <i class="fa fa-chevron-left"></i>
+                </button>
+                <button class="px-3 py-1 border border-secondary bg-secondary text-white rounded">1</button>
+                <button class="px-3 py-1 border border-gray-300 rounded hover:bg-light">2</button>
+                <button class="px-3 py-1 border border-gray-300 rounded hover:bg-light">3</button>
+                <span class="px-2">...</span>
+                <button class="px-3 py-1 border border-gray-300 rounded hover:bg-light">8</button>
+                <button id="next-page" class="px-3 py-1 border border-gray-300 rounded hover:bg-light">
+                  <i class="fa fa-chevron-right"></i>
+                </button>
+              </nav>
+            </div>
+          </div>
+
+          <!-- 数据统计图表 -->
+          <div class="mt-8 bg-light rounded-lg shadow-md p-6">
+            <h3 class="text-xl font-bold mb-4">数据统计</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h4 class="font-bold mb-2">各猪种BF_Phe年度平均值（2017-2025）</h4>
+                <div id="bf-phe-chart" class="w-full h-64 bg-white rounded-lg p-2"></div>
+              </div>
+              <div>
+                <h4 class="font-bold mb-2">各猪种AGE_Phe年度平均值（2017-2025）</h4>
+                <div id="age-phe-chart" class="w-full h-64 bg-white rounded-lg p-2"></div>
+              </div>
+              <div>
+                <h4 class="font-bold mb-2">各猪种性状GEBV年度平均值（2017-2026）</h4>
+                <div id="gebv-trend-chart" class="w-full h-64 bg-white rounded-lg p-2"></div>
+              </div>
+              <div>
+                <h4 class="font-bold mb-2">各猪种TNB_Phe年度平均值（2017-2025）</h4>
+                <div id="tnb-phe-chart" class="w-full h-64 bg-white rounded-lg p-2"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-primary text-white py-8">
+      <div class="container mx-auto px-4">
+        <div class="flex flex-col md:flex-row justify-between">
+          <div class="mb-6 md:mb-0">
+            <div class="flex items-center space-x-2 mb-4">
+              <i class="fa fa-dna text-2xl text-secondary"></i>
+              <span class="text-xl font-bold">遗传改良信息服务平台</span>
+            </div>
+            <p class="text-gray-300 mb-4">面向科研项目的专业数据平台，提供动物遗传育种领域一体化服务</p>
+            <div class="flex space-x-4">
+              <a href="#" class="text-white hover:text-secondary">
+                <i class="fa fa-weixin text-xl"></i>
+              </a>
+              <a href="#" class="text-white hover:text-secondary">
+                <i class="fa fa-weibo text-xl"></i>
+              </a>
+              <a href="#" class="text-white hover:text-secondary">
+                <i class="fa fa-envelope text-xl"></i>
+              </a>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-8">
+            <div>
+              <h3 class="text-lg font-bold mb-4">快速链接</h3>
+              <ul class="space-y-2">
+                <li><a href="index.html" class="text-gray-300 hover:text-white">首页</a></li>
+                <li><a href="data.html" class="text-gray-300 hover:text-white">遗传评估数据</a></li>
+                <li><a href="achievements.html" class="text-gray-300 hover:text-white">优良猪种展览</a></li>
+                <li><a href="team.html" class="text-gray-300 hover:text-white">科研团队</a></li>
+                <li><a href="upload.html" class="text-gray-300 hover:text-white">数据上传</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 class="text-lg font-bold mb-4">相关资源</h3>
+              <ul class="space-y-2">
+                <li><a href="#" class="text-gray-300 hover:text-white">技术文档</a></li>
+                <li><a href="#" class="text-gray-300 hover:text-white">API接口</a></li>
+                <li><a href="#" class="text-gray-300 hover:text-white">数据标准</a></li>
+                <li><a href="#" class="text-gray-300 hover:text-white">常见问题</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 class="text-lg font-bold mb-4">联系我们</h3>
+              <ul class="space-y-2">
+                <li class="flex items-center">
+                  <i class="fa fa-map-marker w-5 text-secondary"></i>
+                  <span class="text-gray-300">山东农业大学动物科技学院</span>
+                </li>
+                <li class="flex items-center">
+                  <i class="fa fa-phone w-5 text-secondary"></i>
+                  <span class="text-gray-300">010-12345678</span>
+                </li>
+                <li class="flex items-center">
+                  <i class="fa fa-envelope w-5 text-secondary"></i>
+                  <span class="text-gray-300">ningchao@sdau.edu.cn</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- 模态框 -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+      <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4">
+        <div class="flex justify-between items-center border-b p-4">
+          <h3 id="modal-title" class="text-xl font-bold">详情</h3>
+          <button id="close-modal" class="text-dark hover:text-primary focus:outline-none">
+            <i class="fa fa-times"></i>
+          </button>
+        </div>
+        <div id="modal-content" class="p-6">
+          <!-- 模态框内容将通过JavaScript动态填充 -->
+        </div>
+        <div class="border-t p-4 flex justify-end">
+          <button id="modal-close-button" class="bg-gray-300 hover:bg-gray-400 text-primary px-4 py-2 rounded transition-all">关闭</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+      // 页面加载完成后执行
+      document.addEventListener("DOMContentLoaded", function () {
+        // 导航链接激活状态
+        const navLinks = document.querySelectorAll(".nav-link");
+        navLinks.forEach((link) => {
+          if (link.getAttribute("href") === window.location.pathname) {
+            link.classList.add("active");
+          }
+          link.addEventListener("click", function () {
+            navLinks.forEach((item) => item.classList.remove("active"));
+            this.classList.add("active");
+          });
+        });
+
+        // 移动端菜单
+        const mobileMenuButton = document.getElementById("mobile-menu-button");
+        const closeMenuButton = document.getElementById("close-menu-button");
+        const mobileMenu = document.getElementById("mobile-menu");
+
+        mobileMenuButton.addEventListener("click", function () {
+          mobileMenu.classList.add("open");
+        });
+
+        closeMenuButton.addEventListener("click", function () {
+          mobileMenu.classList.remove("open");
+        });
+
+        // 模态框
+        const modal = document.getElementById("modal");
+        const modalTitle = document.getElementById("modal-title");
+        const modalContent = document.getElementById("modal-content");
+        const closeModal = document.getElementById("close-modal");
+        const modalCloseButton = document.getElementById("modal-close-button");
+
+        function openModal(title, content) {
+          modalTitle.textContent = title;
+          modalContent.innerHTML = content;
+          modal.classList.remove("hidden");
+        }
+
+        function closeModalFunc() {
+          modal.classList.add("hidden");
+        }
+
+        closeModal.addEventListener("click", closeModalFunc);
+        modalCloseButton.addEventListener("click", closeModalFunc);
+
+        // 点击模态框外部关闭
+        modal.addEventListener("click", function (e) {
+          if (e.target === modal) {
+            closeModalFunc();
+          }
+        });
+
+        // 数据详情
+        window.showDataDetails = function (id) {
+          // 创建图表容器
+          const chartContainer = document.createElement("div");
+          chartContainer.id = "detail-chart";
+          chartContainer.style.width = "100%";
+          chartContainer.style.height = "300px";
+
+          // 根据ID获取不同的数据
+          let pigType = "";
+          let dailyGain = 0;
+          let leanRate = 0;
+          let breedingValue = 0;
+
+          if (id === "D1001") {
+            pigType = "杜洛克";
+            dailyGain = 856;
+            leanRate = 68.2;
+            breedingValue = 12.5;
+          } else if (id === "L2034") {
+            pigType = "长白猪";
+            dailyGain = 792;
+            leanRate = 66.8;
+            breedingValue = 9.2;
+          } else if (id === "Y3156") {
+            pigType = "大白猪";
+            dailyGain = 823;
+            leanRate = 67.5;
+            breedingValue = 10.8;
+          } else if (id === "L2035") {
+            pigType = "长白猪";
+            dailyGain = 785;
+            leanRate = 66.3;
+            breedingValue = 8.7;
+          } else if (id === "D1002") {
+            pigType = "杜洛克";
+            dailyGain = 842;
+            leanRate = 67.8;
+            breedingValue = 11.9;
+          } else if (id === "Y3157") {
+            pigType = "大白猪";
+            dailyGain = 815;
+            leanRate = 67.2;
+            breedingValue = 10.5;
+          } else if (id === "D1003") {
+            pigType = "杜洛克";
+            dailyGain = 862;
+            leanRate = 68.5;
+            breedingValue = 12.8;
+          } else if (id === "L2036") {
+            pigType = "长白猪";
+            dailyGain = 798;
+            leanRate = 66.5;
+            breedingValue = 9.5;
+          } else if (id === "Y3158") {
+            pigType = "大白猪";
+            dailyGain = 828;
+            leanRate = 67.8;
+            breedingValue = 11.0;
+          } else if (id === "L2037") {
+            pigType = "长白猪";
+            dailyGain = 780;
+            leanRate = 66.0;
+            breedingValue = 8.5;
+          }
+
+          const content = `
+                    <div class="mb-6">
+                        <h4 class="text-lg font-bold mb-2">个体基本信息</h4>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="bg-light rounded-lg p-4 text-center">
+                                <div class="text-dark mb-1">个体ID</div>
+                                <div class="font-bold">${id}</div>
+                            </div>
+                            <div class="bg-light rounded-lg p-4 text-center">
+                                <div class="text-dark mb-1">猪种</div>
+                                <div class="font-bold">${pigType}</div>
+                            </div>
+                            <div class="bg-light rounded-lg p-4 text-center">
+                                <div class="text-dark mb-1">日龄</div>
+                                <div class="font-bold">180天</div>
+                            </div>
+                            <div class="bg-light rounded-lg p-4 text-center">
+                                <div class="text-dark mb-1">性别</div>
+                                <div class="font-bold">公</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <h4 class="text-lg font-bold mb-2">生产性能指标</h4>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="bg-light rounded-lg p-4 text-center">
+                                <div class="text-dark mb-1">日增重(g)</div>
+                                <div class="font-bold">${dailyGain}</div>
+                            </div>
+                            <div class="bg-light rounded-lg p-4 text-center">
+                                <div class="text-dark mb-1">瘦肉率(%)</div>
+                                <div class="font-bold">${leanRate}</div>
+                            </div>
+                            <div class="bg-light rounded-lg p-4 text-center">
+                                <div class="text-dark mb-1">背膘厚(mm)</div>
+                                <div class="font-bold">12.5</div>
+                            </div>
+                            <div class="bg-light rounded-lg p-4 text-center">
+                                <div class="text-dark mb-1">眼肌面积(cm²)</div>
+                                <div class="font-bold">45.2</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <h4 class="text-lg font-bold mb-2">遗传评估结果</h4>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="bg-light rounded-lg p-4 text-center">
+                                <div class="text-dark mb-1">综合育种值</div>
+                                <div class="font-bold text-secondary">+${breedingValue}</div>
+                            </div>
+                            <div class="bg-light rounded-lg p-4 text-center">
+                                <div class="text-dark mb-1">日增重育种值</div>
+                                <div class="font-bold text-secondary">+${(breedingValue * 0.4).toFixed(1)}</div>
+                            </div>
+                            <div class="bg-light rounded-lg p-4 text-center">
+                                <div class="text-dark mb-1">瘦肉率育种值</div>
+                                <div class="font-bold text-secondary">+${(breedingValue * 0.3).toFixed(1)}</div>
+                            </div>
+                            <div class="bg-light rounded-lg p-4 text-center">
+                                <div class="text-dark mb-1">繁殖力育种值</div>
+                                <div class="font-bold text-secondary">+${(breedingValue * 0.3).toFixed(1)}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 class="text-lg font-bold mb-2">遗传进展曲线</h4>
+                        <div class="bg-white border rounded-lg p-4">
+                            ${chartContainer.outerHTML}
+                        </div>
+                    </div>
+                `;
+
+          openModal(`个体${id}详情`, content);
+
+          // 渲染图表
+          setTimeout(function () {
+            const chart = echarts.init(document.getElementById("detail-chart"));
+
+            const option = {
+              tooltip: {
+                trigger: "axis",
+              },
+              legend: {
+                data: ["EBV值", "群体均值"],
+              },
+              grid: {
+                left: "3%",
+                right: "4%",
+                bottom: "3%",
+                containLabel: true,
+              },
+              xAxis: {
+                type: "category",
+                boundaryGap: false,
+                data: ["2020", "2021", "2022", "2023", "2024", "2025"],
+              },
+              yAxis: {
+                type: "value",
+              },
+              series: [
+                {
+                  name: "EBV值",
+                  type: "line",
+                  data: [2.1, 3.5, 5.8, 8.2, 10.5, breedingValue],
+                  lineStyle: {
+                    color: "#2980B9",
+                  },
+                  itemStyle: {
+                    color: "#2980B9",
+                  },
+                },
+                {
+                  name: "群体均值",
+                  type: "line",
+                  data: [0, 0.5, 1.2, 2.0, 3.1, 4.5],
+                  lineStyle: {
+                    color: "#7F8C8D",
+                  },
+                  itemStyle: {
+                    color: "#7F8C8D",
+                  },
+                },
+              ],
+            };
+
+            chart.setOption(option);
+
+            // 响应窗口大小变化
+            window.addEventListener("resize", function () {
+              chart.resize();
+            });
+          }, 100);
+        };
+
+        // 数据查询表单提交
+        const dataQueryForm = document.getElementById("data-query-form");
+        dataQueryForm.addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          // 获取查询参数
+          const pigBreed = document.getElementById("pig-breed").value;
+          const evaluationIndex = document.getElementById("evaluation-index").value;
+          const startDate = document.getElementById("start-date").value;
+          const endDate = document.getElementById("end-date").value;
+          const individualId = document.getElementById("individual-id").value;
+
+          // 模拟查询结果
+          let resultCount = 156;
+          let resultMessage = `共 ${resultCount} 条记录`;
+
+          // 根据查询条件调整结果数量
+          if (pigBreed !== "all") {
+            resultCount = Math.floor(Math.random() * 50) + 20;
+            resultMessage = `共 ${resultCount} 条记录 (猪种: ${document.getElementById("pig-breed").options[document.getElementById("pig-breed").selectedIndex].text})`;
+          }
+
+          if (individualId) {
+            resultCount = Math.floor(Math.random() * 5) + 1;
+            resultMessage = `共 ${resultCount} 条记录 (个体ID: ${individualId})`;
+          }
+
+          document.getElementById("result-count").textContent = resultMessage;
+
+          // 显示查询中状态
+          //alert("查询功能已触发，实际应用中将连接后端API获取数据");
+        });
+
+        // 导出数据功能
+        const exportDataBtn = document.getElementById("export-data-btn");
+        exportDataBtn.addEventListener("click", function () {
+          // 获取当前查询条件
+          const pigBreed = document.getElementById("pig-breed").value;
+          const breedText = document.getElementById("pig-breed").options[document.getElementById("pig-breed").selectedIndex].text;
+          const evaluationIndex = document.getElementById("evaluation-index").value;
+          const indexText = document.getElementById("evaluation-index").options[document.getElementById("evaluation-index").selectedIndex].text;
+          const startDate = document.getElementById("start-date").value;
+          const endDate = document.getElementById("end-date").value;
+          const individualId = document.getElementById("individual-id").value;
+          
+          // 显示导出进度模态框
+          const exportContent = `
+            <div class="text-center py-4">
+              <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-secondary mb-4"></div>
+              <p class="text-lg">正在导出数据，请稍候...</p>
+              <div class="mt-4 bg-gray-200 rounded-full h-2.5">
+                <div id="export-progress" class="bg-secondary h-2.5 rounded-full" style="width: 0%"></div>
+              </div>
+              <p id="export-status" class="mt-2 text-sm text-dark">准备导出</p>
+            </div>
+          `;
+          
+          openModal("导出数据", exportContent);
+          
+          // 模拟导出进度
+          let progress = 0;
+          const progressBar = document.getElementById("export-progress");
+          const statusText = document.getElementById("export-status");
+          
+          const interval = setInterval(() => {
+            progress += 5;
+            progressBar.style.width = `${progress}%`;
+            
+            if (progress < 30) {
+              statusText.textContent = "正在收集数据...";
+            } else if (progress < 60) {
+              statusText.textContent = "正在处理数据...";
+            } else if (progress < 90) {
+              statusText.textContent = "正在生成文件...";
+            } else {
+              statusText.textContent = "准备下载...";
+            }
+            
+            if (progress >= 100) {
+              clearInterval(interval);
+              
+              // 模拟生成CSV数据
+              setTimeout(() => {
+                // 构建CSV内容
+                let csvContent = "个体ID,猪种,日增重(g),瘦肉率(%),背膘厚(mm),育种值\n";
+                
+                // 获取表格数据
+                const tableRows = document.querySelectorAll("#result-table-body tr");
+                tableRows.forEach(row => {
+                  const cells = row.querySelectorAll("td");
+                  if (cells.length >= 5) {
+                    const id = cells[0].textContent.trim();
+                    const breed = cells[1].textContent.trim();
+                    const gain = cells[2].textContent.trim();
+                    const lean = cells[3].textContent.trim();
+                    const value = cells[4].textContent.trim().replace(/[+\s]/g, '');
+                    
+                    // 添加一些随机的背膘厚数据
+                    const backfat = (Math.random() * 5 + 10).toFixed(1);
+                    
+                    csvContent += `${id},${breed},${gain},${lean},${backfat},${value}\n`;
+                  }
+                });
+                
+                // 创建下载链接
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.setAttribute("href", url);
+                
+                // 设置文件名
+                let fileName = "遗传评估数据_";
+                fileName += `${breedText !== "全部" ? breedText + "_" : ""}`;
+                fileName += `${indexText}_`;
+                fileName += `${startDate}_to_${endDate}.csv`;
+                
+                link.setAttribute("download", fileName);
+                link.style.visibility = 'hidden';
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // 关闭模态框
+                closeModalFunc();
+                
+                // 显示完成消息
+                setTimeout(() => {
+                  alert("数据导出成功！");
+                }, 100);
+              }, 500);
+            }
+          }, 100);
+        });
+
+        // 初始化图表
+        function initCharts() {
+          // BF_Phe 年度平均值（背膘厚表型值）
+          const bfPheChart = echarts.init(document.getElementById("bf-phe-chart"));
+          bfPheChart.setOption({
+            tooltip: { trigger: "axis" },
+            legend: {
+              data: ["LL", "DD", "YY"],
+              bottom: 0,
+              formatter: function (name) {
+                const breedMap = {
+                  LL: "长白猪",
+                  DD: "杜洛克",
+                  YY: "大白猪",
+                };
+                return breedMap[name] || name;
+              },
+            },
+            grid: {
+              left: "3%",
+              right: "4%",
+              bottom: "15%",
+              top: "10%",
+              containLabel: true,
+            },
+            xAxis: {
+              type: "category",
+              data: ["2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025"],
+            },
+            yAxis: {
+              type: "value",
+              name: "Average Phe",
+              min: 7.5,
+              max: 13.5,
+            },
+            series: [
+              {
+                name: "LL",
+                type: "line",
+                data: [null, 13.4, 12.4, 10.5, 10.8, 11.7, 10.5, 8.7, 7.8],
+                itemStyle: { color: "#008000" },
+                symbol: "circle",
+                symbolSize: 8,
+                smooth: false,
+              },
+              {
+                name: "DD",
+                type: "line",
+                data: [null, null, 12.3, 10.8, 10.8, 9.8, 10.9, 10.8, 8.7],
+                itemStyle: { color: "#FF0000" },
+                symbol: "circle",
+                symbolSize: 8,
+                smooth: false,
+              },
+              {
+                name: "YY",
+                type: "line",
+                data: [10.7, 10.7, 10.3, 10.5, 11.1, 11.1, 8.8, 9.8, null],
+                itemStyle: { color: "#0000FF" },
+                symbol: "circle",
+                symbolSize: 8,
+                smooth: false,
+              },
+            ],
+          });
+
+          // AGE_Phe 年度平均值（达上市体重日龄表型值）
+          const agePheChart = echarts.init(document.getElementById("age-phe-chart"));
+          agePheChart.setOption({
+            tooltip: { trigger: "axis" },
+            legend: {
+              data: ["LL", "DD", "YY"],
+              bottom: 0,
+              formatter: function (name) {
+                const breedMap = {
+                  LL: "长白猪",
+                  DD: "杜洛克",
+                  YY: "大白猪",
+                };
+                return breedMap[name] || name;
+              },
+            },
+            grid: {
+              left: "3%",
+              right: "4%",
+              bottom: "15%",
+              top: "10%",
+              containLabel: true,
+            },
+            xAxis: {
+              type: "category",
+              data: ["2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025"],
+            },
+            yAxis: {
+              type: "value",
+              name: "Average Phe",
+              min: 135,
+              max: 165,
+            },
+            series: [
+              {
+                name: "LL",
+                type: "line",
+                data: [null, 158, 149, 157, 155, 154, 156, 162, 153],
+                itemStyle: { color: "#008000" },
+                symbol: "circle",
+                symbolSize: 8,
+                smooth: false,
+              },
+              {
+                name: "DD",
+                type: "line",
+                data: [null, null, 139, 157, 155, 165, 157, 149, 161],
+                itemStyle: { color: "#FF0000" },
+                symbol: "circle",
+                symbolSize: 8,
+                smooth: false,
+              },
+              {
+                name: "YY",
+                type: "line",
+                data: [152, 155, 158, 154, 155, 155, 164, 160, null],
+                itemStyle: { color: "#0000FF" },
+                symbol: "circle",
+                symbolSize: 8,
+                smooth: false,
+              },
+            ],
+          });
+
+          // GEBV 年度平均值（各猪种性状GEBV年度平均值）
+          const gebvTrendChart = echarts.init(document.getElementById("gebv-trend-chart"));
+          gebvTrendChart.setOption({
+            tooltip: { trigger: "axis" },
+            legend: {
+              data: ["LL-AGE", "LL-BF", "LL-TNB", "DD-AGE", "DD-BF", "YY-AGE", "YY-BF", "YY-TNB"],
+              bottom: 0,
+              formatter: function (name) {
+                const nameMap = {
+                  "LL-AGE": "长白-日龄",
+                  "LL-BF": "长白-背膘",
+                  "LL-TNB": "长白-产仔数",
+                  "DD-AGE": "杜洛克-日龄",
+                  "DD-BF": "杜洛克-背膘",
+                  "YY-AGE": "大白-日龄",
+                  "YY-BF": "大白-背膘",
+                  "YY-TNB": "大白-产仔数",
+                };
+                return nameMap[name] || name;
+              },
+            },
+            grid: {
+              left: "3%",
+              right: "4%",
+              bottom: "20%",
+              top: "10%",
+              containLabel: true,
+            },
+            xAxis: {
+              type: "category",
+              data: ["2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025", "2026"],
+            },
+            yAxis: {
+              type: "value",
+              name: "Average GEBV",
+              min: -10,
+              max: 30,
+            },
+            series: [
+              { name: "LL-AGE", type: "line", data: [0, 0, -5, -3, 13, 5, 14, 25, 27, 8], itemStyle: { color: "#008000" }, symbol: "circle", symbolSize: 6 },
+              { name: "LL-BF", type: "line", data: [0, 0, 0, 0, 0, 1, 1, 2, 1, 0], itemStyle: { color: "#00A000" }, symbol: "circle", symbolSize: 6 },
+              { name: "LL-TNB", type: "line", data: [0, 0, 0, 0, 0, 1, 1, 1, 1, 0], itemStyle: { color: "#00C000" }, symbol: "circle", symbolSize: 6 },
+              { name: "DD-AGE", type: "line", data: [-5, -8, -7, -3, -1, 0, 2, 6, 5, 4], itemStyle: { color: "#FF0000" }, symbol: "circle", symbolSize: 6 },
+              { name: "DD-BF", type: "line", data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], itemStyle: { color: "#FF4000" }, symbol: "circle", symbolSize: 6 },
+              { name: "YY-AGE", type: "line", data: [0, 0, 0, -2, 2, 2, 1, 1, 0, 0], itemStyle: { color: "#0000FF" }, symbol: "circle", symbolSize: 6 },
+              { name: "YY-BF", type: "line", data: [0, 0, 0, 0, 1, 1, 1, 1, 0, 0], itemStyle: { color: "#4040FF" }, symbol: "circle", symbolSize: 6 },
+              { name: "YY-TNB", type: "line", data: [0, 0, 0, 0, 1, 1, 1, 1, 0, 0], itemStyle: { color: "#8080FF" }, symbol: "circle", symbolSize: 6 },
+            ],
+          });
+
+          // TNB_Phe 年度平均值（总产仔数表型值）
+          const tnbPheChart = echarts.init(document.getElementById("tnb-phe-chart"));
+          tnbPheChart.setOption({
+            tooltip: { trigger: "axis" },
+            legend: {
+              data: ["LL", "YY"],
+              bottom: 0,
+              formatter: function (name) {
+                const breedMap = {
+                  LL: "长白猪",
+                  YY: "大白猪",
+                };
+                return breedMap[name] || name;
+              },
+            },
+            grid: {
+              left: "3%",
+              right: "4%",
+              bottom: "15%",
+              top: "10%",
+              containLabel: true,
+            },
+            xAxis: {
+              type: "category",
+              data: ["2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025"],
+            },
+            yAxis: {
+              type: "value",
+              name: "Average Phe",
+              min: 10,
+              max: 18,
+            },
+            series: [
+              {
+                name: "LL",
+                type: "line",
+                data: [null, 14.0, 12.9, 12.9, 13.3, 11.0, 15.4, 16.3, 16.9],
+                itemStyle: { color: "#008000" },
+                symbol: "circle",
+                symbolSize: 8,
+                smooth: false,
+              },
+              {
+                name: "YY",
+                type: "line",
+                data: [11.5, 13.0, 15.3, 13.8, 13.4, 13.9, 14.4, 15.1, 15.2],
+                itemStyle: { color: "#0000FF" },
+                symbol: "circle",
+                symbolSize: 8,
+                smooth: false,
+              },
+            ],
+          });
+
+          // 响应窗口大小变化
+          window.addEventListener("resize", function () {
+            bfPheChart.resize();
+            agePheChart.resize();
+            gebvTrendChart.resize();
+            tnbPheChart.resize();
+          });
+        }
+
+        // 页面加载完成后初始化图表
+        initCharts();
+      });
+    </script>
+  </body>
+</html>

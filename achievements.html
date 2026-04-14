@@ -1,0 +1,821 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>优良猪种展览 - 遗传改良信息服务平台</title>
+    <!-- Tailwind CSS v3 -->
+    <script src="assets/js/saved_resource"></script>
+    <!-- Font Awesome -->
+    <link href="assets/css/common.css" rel="stylesheet" />
+    <!-- Chart.js -->
+    <script src="assets/js/chart.umd.min.js"></script>
+    <!-- ECharts -->
+    <script src="assets/js/echarts.min.js"></script>
+    <!-- 统一的 Tailwind 配置 -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#2C3E4E",
+              secondary: "#1a56db",
+              light: "#fafafa",
+              dark: "#7F8C8D",
+              success: "#27AE60",
+              warning: "#E67E22",
+              purple: "#9B59B6",
+            },
+            fontFamily: {
+              sans: ["思源黑体", "微软雅黑", "Inter", "Roboto", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <style type="text/tailwindcss">
+      @layer utilities {
+        .content-auto {
+          content-visibility: auto;
+        }
+        .transition-all {
+          transition-property: all;
+          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+          transition-duration: 300ms;
+        }
+        .shadow-hover:hover {
+          box-shadow:
+            0 10px 15px -3px rgba(0, 0, 0, 0.1),
+            0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+      }
+    </style>
+    <style>
+      /* 自定义样式 */
+      .nav-link {
+        position: relative;
+      }
+      .nav-link::after {
+        content: "";
+        position: absolute;
+        width: 0;
+        height: 2px;
+        bottom: -2px;
+        left: 0;
+        background-color: #2980b9;
+        transition: width 0.3s ease;
+      }
+      .nav-link:hover::after,
+      .nav-link.active::after {
+        width: 100%;
+      }
+      .mobile-menu {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out;
+      }
+      .mobile-menu.open {
+        transform: translateX(0);
+      }
+      .achievement-card {
+        transition: all 0.3s ease;
+      }
+      .achievement-card:hover {
+        transform: translateY(-5px);
+      }
+      .achievement-card:hover .card-overlay {
+        opacity: 1;
+      }
+      .card-overlay {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+    </style>
+  </head>
+  <body class="bg-light text-primary">
+    <!-- 顶部导航栏 -->
+    <header class="bg-primary text-white shadow-md">
+      <div class="container mx-auto px-4 py-3">
+        <div class="flex justify-between items-center">
+          <!-- Logo -->
+          <div class="flex items-center space-x-2">
+            <i class="fa fa-dna text-2xl text-secondary"></i>
+            <span class="text-xl font-bold">遗传改良信息服务平台</span>
+          </div>
+
+          <!-- 桌面端导航 -->
+          <nav class="hidden md:flex space-x-8">
+            <a href="index.html" class="nav-link py-2" target="geneticInfo">首页</a>
+            <a href="data.html" class="nav-link py-2" target="geneticInfo">遗传评估数据</a>
+            <a href="achievements.html" class="nav-link active py-2" target="geneticInfo">优良猪种展览</a>
+            <a href="team.html" class="nav-link py-2" target="geneticInfo">科研团队</a>
+            <a href="upload.html" class="nav-link py-2" target="geneticInfo">数据上传</a>
+          </nav>
+
+          <!-- 移动端菜单按钮 -->
+          <button id="mobile-menu-button" class="md:hidden text-white focus:outline-none">
+            <i class="fa fa-bars text-xl"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- 移动端导航菜单 -->
+      <div id="mobile-menu" class="mobile-menu fixed top-0 left-0 h-full w-64 bg-primary z-50 md:hidden">
+        <div class="p-4 border-b border-gray-700">
+          <div class="flex justify-between items-center">
+            <span class="text-lg font-bold">菜单导航</span>
+            <button id="close-menu-button" class="text-white focus:outline-none">
+              <i class="fa fa-times"></i>
+            </button>
+          </div>
+        </div>
+        <nav class="p-4">
+          <ul class="space-y-4">
+            <li><a href="index.html" class="block py-2 hover:text-secondary">首页</a></li>
+            <li><a href="data.html" class="block py-2 hover:text-secondary">遗传评估数据</a></li>
+            <li><a href="achievements.html" class="block py-2 hover:text-secondary">优良猪种展览</a></li>
+            <li><a href="team.html" class="block py-2 hover:text-secondary">科研团队</a></li>
+            <li><a href="upload.html" class="block py-2 hover:text-secondary">数据上传</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main>
+      <!-- 优良猪种展览 -->
+      <section id="achievements" class="min-h-screen bg-white py-6">
+        <div class="container mx-auto px-4">
+          <!-- 面包屑导航 -->
+          <div class="mb-6 flex items-center text-sx">
+            <a href="index.html" class="text-dark hover:text-secondary">首页</a>
+            <i class="fa fa-angle-right mx-2 text-dark"></i>
+            <span class="text-secondary">优良猪种展览</span>
+          </div>
+
+          <!-- 优良猪种展览 -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- 杜洛克猪 -->
+            <div class="achievement-card bg-white rounded-lg shadow-md overflow-hidden">
+              <div class="relative">
+                <img src="assets/image/du.png" alt="杜洛克猪" class="w-full h-64 object-cover" />
+                <div class="card-overlay absolute inset-0 bg-secondary bg-opacity-80 flex items-center justify-center">
+                  <a href="https://baike.baidu.com/item/%E6%9D%9C%E6%B4%9B%E5%85%8B%E7%8C%AA/3891314" target="_blank" class="bg-white text-secondary px-4 py-2 rounded-lg hover:bg-light transition-all">查看详情</a>
+                </div>
+              </div>
+              <div class="p-4">
+                <h3 class="text-xl font-bold mb-3">杜洛克猪</h3>
+                <p class="text-darkgray mb-4">杜洛克是原产于美国的著名瘦肉型猪种，毛色多为棕红色，半垂耳，体躯深长、后躯肌肉发达、四肢粗壮。该品种生长速度快、饲料转化率高、瘦肉率高且肉质优良，适应性与抗病力较强，繁殖性能中等、母性一般，常作为三元杂交商品猪的终端父本，是目前国内外广泛应用的优良猪种。</p>
+              </div>
+            </div>
+
+            <!-- 长白猪 -->
+            <div class="achievement-card bg-white rounded-lg shadow-md overflow-hidden">
+              <div class="relative">
+                <img src="assets/image/chang.png" alt="长白猪" class="w-full h-64 object-cover" />
+                <div class="card-overlay absolute inset-0 bg-secondary bg-opacity-80 flex items-center justify-center">
+                  <a href="https://baike.baidu.com/item/%E9%95%BF%E7%99%BD%E7%8C%AA/2642264" target="_blank" class="bg-white text-secondary px-4 py-2 rounded-lg hover:bg-light transition-all">查看详情</a>
+                </div>
+              </div>
+              <div class="p-4">
+                <h3 class="text-xl font-bold mb-3">长白猪</h3>
+                <p class="text-darkgray mb-4">长白猪原产于丹麦，毛色全白，头小颈轻，耳大向前平伸下垂，体躯修长呈流线型。该品种生长发育快、饲料利用率高、瘦肉率突出，繁殖性能优良，在杂交配套系中常作为第一父本或母本使用，适合规模化瘦肉型商品猪生产，但对饲养管理条件要求相对较高。</p>
+              </div>
+            </div>
+
+            <!-- 大白猪 -->
+            <div class="achievement-card bg-white rounded-lg shadow-md overflow-hidden">
+              <div class="relative">
+                <img src="assets/image/da.png" alt="大白猪" class="w-full h-64 object-cover" />
+                <div class="card-overlay absolute inset-0 bg-secondary bg-opacity-80 flex items-center justify-center">
+                  <a href="https://baike.baidu.com/item/%E9%95%BF%E7%99%BD%E7%8C%AA/2642264" target="_blank" class="bg-white text-secondary px-4 py-2 rounded-lg hover:bg-light transition-all">查看详情</a>
+                </div>
+              </div>
+              <div class="p-4">
+                <h3 class="text-xl font-bold mb-3">大白猪</h3>
+                <p class="text-darkgray mb-4">大白猪原产于英国，全身被毛白色，耳大直立，体型匀称、背腰平直，后躯丰满。它繁殖性能突出，产仔数多、母性好，同时生长速度快、瘦肉率高、适应性强，是三元杂交体系中理想的母本品种，也是世界上饲养最广泛的瘦肉型猪种。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-primary text-white py-8">
+      <div class="container mx-auto px-4">
+        <div class="flex flex-col md:flex-row justify-between">
+          <div class="mb-6 md:mb-0">
+            <div class="flex items-center space-x-2 mb-4">
+              <i class="fa fa-dna text-2xl text-secondary"></i>
+              <span class="text-xl font-bold">遗传改良信息服务平台</span>
+            </div>
+            <p class="text-gray-300 mb-4">面向科研项目的专业数据平台，提供动物遗传育种领域一体化服务</p>
+            <div class="flex space-x-4">
+              <a href="#" class="text-white hover:text-secondary">
+                <i class="fa fa-weixin text-xl"></i>
+              </a>
+              <a href="#" class="text-white hover:text-secondary">
+                <i class="fa fa-weibo text-xl"></i>
+              </a>
+              <a href="#" class="text-white hover:text-secondary">
+                <i class="fa fa-envelope text-xl"></i>
+              </a>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-8">
+            <div>
+              <h3 class="text-lg font-bold mb-4">快速链接</h3>
+              <ul class="space-y-2">
+                <li><a href="index.html" class="text-gray-300 hover:text-white">首页</a></li>
+                <li><a href="data.html" class="text-gray-300 hover:text-white">遗传评估数据</a></li>
+                <li><a href="achievements.html" class="text-gray-300 hover:text-white">优良猪种展览</a></li>
+                <li><a href="team.html" class="text-gray-300 hover:text-white">科研团队</a></li>
+                <li><a href="upload.html" class="text-gray-300 hover:text-white">数据上传</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 class="text-lg font-bold mb-4">相关资源</h3>
+              <ul class="space-y-2">
+                <li><a href="#" class="text-gray-300 hover:text-white">技术文档</a></li>
+                <li><a href="#" class="text-gray-300 hover:text-white">API接口</a></li>
+                <li><a href="#" class="text-gray-300 hover:text-white">数据标准</a></li>
+                <li><a href="#" class="text-gray-300 hover:text-white">常见问题</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 class="text-lg font-bold mb-4">联系我们</h3>
+              <ul class="space-y-2">
+                <li class="flex items-center">
+                  <i class="fa fa-map-marker w-5 text-secondary"></i>
+                  <span class="text-gray-300">山东农业大学动物科技学院</span>
+                </li>
+                <li class="flex items-center">
+                  <i class="fa fa-phone w-5 text-secondary"></i>
+                  <span class="text-gray-300">010-12345678</span>
+                </li>
+                <li class="flex items-center">
+                  <i class="fa fa-envelope w-5 text-secondary"></i>
+                  <span class="text-gray-300">ningchao@sdau.edu.cn</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- 模态框 -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+      <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4">
+        <div class="flex justify-between items-center border-b p-4">
+          <h3 id="modal-title" class="text-xl font-bold">成果详情</h3>
+          <button id="close-modal" class="text-dark hover:text-primary focus:outline-none">
+            <i class="fa fa-times"></i>
+          </button>
+        </div>
+        <div id="modal-content" class="p-6">
+          <!-- 模态框内容将通过JavaScript动态填充 -->
+        </div>
+        <div class="border-t p-4 flex justify-end">
+          <button id="modal-close-button" class="bg-gray-300 hover:bg-gray-400 text-primary px-4 py-2 rounded transition-all">关闭</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+      // 页面加载完成后执行
+      document.addEventListener("DOMContentLoaded", function () {
+        // 导航链接激活状态
+        const navLinks = document.querySelectorAll(".nav-link");
+        navLinks.forEach((link) => {
+          if (link.getAttribute("href") === window.location.pathname) {
+            link.classList.add("active");
+          }
+          link.addEventListener("click", function () {
+            navLinks.forEach((item) => item.classList.remove("active"));
+            this.classList.add("active");
+          });
+        });
+
+        // 移动端菜单
+        const mobileMenuButton = document.getElementById("mobile-menu-button");
+        const closeMenuButton = document.getElementById("close-menu-button");
+        const mobileMenu = document.getElementById("mobile-menu");
+
+        mobileMenuButton.addEventListener("click", function () {
+          mobileMenu.classList.add("open");
+        });
+
+        closeMenuButton.addEventListener("click", function () {
+          mobileMenu.classList.remove("open");
+        });
+
+        // 模态框
+        const modal = document.getElementById("modal");
+        const modalTitle = document.getElementById("modal-title");
+        const modalContent = document.getElementById("modal-content");
+        const closeModal = document.getElementById("close-modal");
+        const modalCloseButton = document.getElementById("modal-close-button");
+
+        function openModal(title, content) {
+          modalTitle.textContent = title;
+          modalContent.innerHTML = content;
+          modal.classList.remove("hidden");
+        }
+
+        function closeModalFunc() {
+          modal.classList.add("hidden");
+        }
+
+        closeModal.addEventListener("click", closeModalFunc);
+        modalCloseButton.addEventListener("click", closeModalFunc);
+
+        // 点击模态框外部关闭
+        modal.addEventListener("click", function (e) {
+          if (e.target === modal) {
+            closeModalFunc();
+          }
+        });
+
+        // 成果详情
+        window.showAchievementDetails = function (id) {
+          let title = "";
+          let content = "";
+
+          if (id === "paper1") {
+            title = "基于深度学习的基因组选择新方法研究";
+            content = `
+                        <div class="flex flex-col md:flex-row">
+                            <div class="md:w-1/3 mb-4 md:mb-0 md:pr-4">
+                                <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/35822343c2224362b30590a7afaa280c~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260418141402CAD3B137C967528890C2&rrcfp=f06b921b&x-expires=1779084943&x-signature=3ecHOZxbSexCBx4WHcX1XAMKgTc%3D" alt="研究论文" class="w-full rounded-lg">
+                            </div>
+                            <div class="md:w-2/3">
+                                <div class="mb-4">
+                                    <h4 class="font-bold text-lg mb-2">基本信息</h4>
+                                    <div class="space-y-2">
+                                        <div class="flex">
+                                            <span class="w-24 text-dark">论文标题：</span>
+                                            <span>基于深度学习的基因组选择新方法研究</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-24 text-dark">发表期刊：</span>
+                                            <span>Genetics Selection Evolution</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-24 text-dark">发表时间：</span>
+                                            <span>2025-03-15</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-24 text-dark">影响因子：</span>
+                                            <span>4.8</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-24 text-dark">作者：</span>
+                                            <span>张三，李四，王五，赵六</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <h4 class="font-bold text-lg mb-2">摘要</h4>
+                                    <p>本研究提出了一种基于深度学习的基因组选择新方法（DL-GS），通过构建多层神经网络模型，整合基因组测序数据、表型数据和环境因素，显著提高了育种值预测准确性。与传统的基因组选择方法相比，DL-GS方法在复杂性状预测上的准确性提高了15-20%，特别是对于低遗传力性状的预测效果更为显著。研究结果表明，深度学习技术在动物遗传育种领域具有广阔的应用前景。</p>
+                                </div>
+                                
+                                <div>
+                                    <h4 class="font-bold text-lg mb-2">关键词</h4>
+                                    <div class="flex flex-wrap gap-2">
+                                        <span class="bg-blue-100 text-blue-600 px-2 py-1 rounded text-sm">深度学习</span>
+                                        <span class="bg-blue-100 text-blue-600 px-2 py-1 rounded text-sm">基因组选择</span>
+                                        <span class="bg-blue-100 text-blue-600 px-2 py-1 rounded text-sm">育种值预测</span>
+                                        <span class="bg-blue-100 text-blue-600 px-2 py-1 rounded text-sm">神经网络</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+          } else if (id === "patent1") {
+            title = "一种猪基因组选择的方法";
+            content = `
+                        <div class="flex flex-col md:flex-row">
+                            <div class="md:w-1/3 mb-4 md:mb-0 md:pr-4">
+                                <img src="https://p6-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/10d93723cd304f70b88f7ad866ce40ef~tplv-a9rns2rl98-image.image?lk3s=feb11e32&x-expires=1792044887&x-signature=qTkicw8mbib3BkMjiwZJNYJxJrs%3D" alt="专利" class="w-full rounded-lg">
+                            </div>
+                            <div class="md:w-2/3">
+                                <div class="mb-4">
+                                    <h4 class="font-bold text-lg mb-2">基本信息</h4>
+                                    <div class="space-y-2">
+                                        <div class="flex">
+                                            <span class="w-24 text-dark">专利名称：</span>
+                                            <span>一种猪基因组选择的方法</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-24 text-dark">专利类型：</span>
+                                            <span>发明专利</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-24 text-dark">申请号：</span>
+                                            <span>CN115678901A</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-24 text-dark">授权时间：</span>
+                                            <span>2024-12-20</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-24 text-dark">专利权人：</span>
+                                            <span>中国农业科学院北京畜牧兽医研究所</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <h4 class="font-bold text-lg mb-2">技术摘要</h4>
+                                    <p>本发明提供了一种基于全基因组测序数据的猪基因组选择方法，包括以下步骤：（1）采集猪的血液或组织样本，提取基因组DNA；（2）进行全基因组测序，获取SNP标记数据；（3）收集表型数据和系谱数据；（4）构建基因组选择模型，整合SNP标记数据、表型数据和系谱数据；（5）使用交叉验证方法评估模型性能；（6）根据模型预测结果进行种猪选育。本发明方法提高了选育效率和准确性，缩短了育种周期，降低了育种成本。</p>
+                                </div>
+                                
+                                <div>
+                                    <h4 class="font-bold text-lg mb-2">应用前景</h4>
+                                    <p>本专利技术已在多个种猪企业进行了应用示范，取得了显著的经济效益和社会效益。应用该技术后，种猪的日增重提高了10-15%，瘦肉率提高了2-3个百分点，料肉比降低了0.1-0.2，每年为企业增加经济效益数百万元。该技术的推广应用将有力推动我国猪种业的发展，提高我国猪种的国际竞争力。</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+          } else if (id === "software1") {
+            title = "猪遗传评估系统V2.0";
+            content = `
+                        <div class="flex flex-col md:flex-row">
+                            <div class="md:w-1/3 mb-4 md:mb-0 md:pr-4">
+                                <img src="https://p11-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/57656235ef5c46df86771cdf396b1591~tplv-a9rns2rl98-image.image?lk3s=feb11e32&x-expires=1779084938&x-signature=WC3yg5teGBNECiEhlBBW8obvNyc%3D" alt="软件著作权" class="w-full rounded-lg">
+                            </div>
+                            <div class="md:w-2/3">
+                                <div class="mb-4">
+                                    <h4 class="font-bold text-lg mb-2">基本信息</h4>
+                                    <div class="space-y-2">
+                                        <div class="flex">
+                                            <span class="w-24 text-dark">软件名称：</span>
+                                            <span>猪遗传评估系统V2.0</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-24 text-dark">著作权人：</span>
+                                            <span>中国农业科学院北京畜牧兽医研究所</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-24 text-dark">登记号：</span>
+                                            <span>2025SR0345678</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-24 text-dark">开发完成日期：</span>
+                                            <span>2025-01-20</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-24 text-dark">首次发表日期：</span>
+                                            <span>2025-02-10</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <h4 class="font-bold text-lg mb-2">功能介绍</h4>
+                                    <p>猪遗传评估系统V2.0是一套集数据管理、遗传评估、结果可视化于一体的综合软件系统，主要功能包括：</p>
+                                    <ul class="list-disc pl-5 mt-2 space-y-1">
+                                        <li>数据管理：支持表型数据、基因型数据、系谱数据的录入、导入、导出和管理</li>
+                                        <li>遗传评估：支持BLUP、SSBLUP、GBLUP等多种遗传评估方法</li>
+                                        <li>结果分析：提供育种值排名、遗传进展分析、遗传参数估计等功能</li>
+                                        <li>可视化展示：通过图表、报表等形式直观展示评估结果</li>
+                                        <li>用户管理：支持多用户权限管理，确保数据安全</li>
+                                    </ul>
+                                </div>
+                                
+                                <div>
+                                    <h4 class="font-bold text-lg mb-2">技术特点</h4>
+                                    <p>系统采用B/S架构，前端使用Vue.js框架，后端使用Spring Boot框架，数据库采用MySQL。系统具有以下特点：</p>
+                                    <ul class="list-disc pl-5 mt-2 space-y-1">
+                                        <li>界面友好：采用现代化的UI设计，操作简单直观</li>
+                                        <li>性能高效：优化了算法实现，支持大规模数据处理</li>
+                                        <li>可扩展性强：采用模块化设计，便于功能扩展</li>
+                                        <li>安全可靠：完善的权限管理和数据备份机制</li>
+                                        <li>兼容性好：支持多种数据格式的导入导出</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+          } else if (id === "breed1") {
+            title = "优质瘦肉型猪新品种培育";
+            content = `
+                        <div class="flex flex-col md:flex-row">
+                            <div class="md:w-1/3 mb-4 md:mb-0 md:pr-4">
+                                <img src="https://p11-doubao-search-sign.byteimg.com/tos-cn-i-xv4ileqgde/91f461d2d3674502bfe0549dbc3d256b~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1792044887&x-signature=RyYTptQbMcfqVtLSxuS6hPG8Qc8%3D" alt="新品种培育" class="w-full rounded-lg">
+                            </div>
+                            <div class="md:w-2/3">
+                                <div class="mb-4">
+                                    <h4 class="font-bold text-lg mb-2">基本信息</h4>
+                                    <div class="space-y-2">
+                                        <div class="flex">
+                                            <span class="w-24 text-dark">品种名称：</span>
+                                            <span>中畜瘦肉型猪1号</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-24 text-dark">培育单位：</span>
+                                            <span>中国农业科学院北京畜牧兽医研究所</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-24 text-dark">审定编号：</span>
+                                            <span>国审猪20250001</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-24 text-dark">审定时间：</span>
+                                            <span>2025-01-15</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-24 text-dark">品种类型：</span>
+                                            <span>瘦肉型猪配套系</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <h4 class="font-bold text-lg mb-2">品种特点</h4>
+                                    <p>中畜瘦肉型猪1号是通过导入杜洛克、长白猪、大白猪等品种的优良基因，采用分子育种与常规育种相结合的方法培育而成的瘦肉型猪配套系。该品种具有以下特点：</p>
+                                    <ul class="list-disc pl-5 mt-2 space-y-1">
+                                        <li>生长速度快：育肥期日增重可达850-900g</li>
+                                        <li>瘦肉率高：胴体瘦肉率达68-70%</li>
+                                        <li>饲料转化率高：料肉比2.3-2.4:1</li>
+                                        <li>繁殖性能好：初产母猪产仔数11-12头，经产母猪产仔数13-14头</li>
+                                        <li>肉质优良：肉色鲜红，大理石纹适中，肌内脂肪含量3.0-3.5%</li>
+                                        <li>适应性强：适合规模化、集约化养殖</li>
+                                    </ul>
+                                </div>
+                                
+                                <div>
+                                    <h4 class="font-bold text-lg mb-2">推广应用情况</h4>
+                                    <p>该品种已在全国多个省市进行了示范推广，累计推广种猪10万头以上，商品猪100万头以上。应用该品种后，养殖场的经济效益显著提高，每头商品猪增加收益50-100元。该品种的培育成功，对于提高我国猪种的自主创新能力，促进生猪产业的可持续发展具有重要意义。</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+          } else if (id === "paper2") {
+            title = "猪重要经济性状的全基因组关联分析";
+            content = `
+                        <div class="flex flex-col md:flex-row">
+                            <div class="md:w-1/3 mb-4 md:mb-0 md:pr-4">
+                                <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/35822343c2224362b30590a7afaa280c~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260418141402CAD3B137C967528890C2&rrcfp=f06b921b&x-expires=1779084943&x-signature=3ecHOZxbSexCBx4WHcX1XAMKgTc%3D" alt="研究论文" class="w-full rounded-lg">
+                            </div>
+                            <div class="md:w-2/3">
+                                <div class="mb-4">
+                                    <h4 class="font-bold text-lg mb-2">基本信息</h4>
+                                    <div class="space-y-2">
+                                        <div class="flex">
+                                            <span class="w-24 text-dark">论文标题：</span>
+                                            <span>猪重要经济性状的全基因组关联分析</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-24 text-dark">发表期刊：</span>
+                                            <span>BMC Genomics</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-24 text-dark">发表时间：</span>
+                                            <span>2024-11-05</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-24 text-dark">影响因子：</span>
+                                            <span>3.5</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-24 text-dark">作者：</span>
+                                            <span>王五，赵六，孙七，周八</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <h4 class="font-bold text-lg mb-2">摘要</h4>
+                                    <p>本研究利用Illumina PorcineSNP60 BeadChip对2,000头杜洛克猪进行了全基因组关联分析（GWAS），鉴定了多个与生长、肉质和繁殖性状相关的重要基因和SNP标记。研究结果表明：（1）在1号染色体上鉴定到与日增重显著相关的区域，包含IGF2基因；（2）在4号染色体上鉴定到与背膘厚显著相关的区域，包含LEPR基因；（3）在7号染色体上鉴定到与肌内脂肪含量显著相关的区域，包含FABP3基因；（4）在10号染色体上鉴定到与产仔数显著相关的区域，包含ESR1基因。这些研究结果为猪的分子标记辅助选择和基因组选择提供了重要的理论基础。</p>
+                                </div>
+                                
+                                <div>
+                                    <h4 class="font-bold text-lg mb-2">关键词</h4>
+                                    <div class="flex flex-wrap gap-2">
+                                        <span class="bg-blue-100 text-blue-600 px-2 py-1 rounded text-sm">猪</span>
+                                        <span class="bg-blue-100 text-blue-600 px-2 py-1 rounded text-sm">全基因组关联分析</span>
+                                        <span class="bg-blue-100 text-blue-600 px-2 py-1 rounded text-sm">经济性状</span>
+                                        <span class="bg-blue-100 text-blue-600 px-2 py-1 rounded text-sm">SNP标记</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+          } else if (id === "patent2") {
+            title = "一种猪肉质性状的分子标记辅助选择方法";
+            content = `
+                        <div class="flex flex-col md:flex-row">
+                            <div class="md:w-1/3 mb-4 md:mb-0 md:pr-4">
+                                <img src="https://p6-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/10d93723cd304f70b88f7ad866ce40ef~tplv-a9rns2rl98-image.image?lk3s=feb11e32&x-expires=1792044887&x-signature=qTkicw8mbib3BkMjiwZJNYJxJrs%3D" alt="专利" class="w-full rounded-lg">
+                            </div>
+                            <div class="md:w-2/3">
+                                <div class="mb-4">
+                                    <h4 class="font-bold text-lg mb-2">基本信息</h4>
+                                    <div class="space-y-2">
+                                        <div class="flex">
+                                            <span class="w-24 text-dark">专利名称：</span>
+                                            <span>一种猪肉质性状的分子标记辅助选择方法</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-24 text-dark">专利类型：</span>
+                                            <span>发明专利</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-24 text-dark">申请号：</span>
+                                            <span>CN114567890A</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-24 text-dark">授权时间：</span>
+                                            <span>2024-09-18</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-24 text-dark">专利权人：</span>
+                                            <span>中国农业科学院北京畜牧兽医研究所</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <h4 class="font-bold text-lg mb-2">技术摘要</h4>
+                                    <p>本发明提供了一种基于分子标记的猪肉质性状辅助选择方法，包括以下步骤：（1）筛选与猪肉质性状（如肌内脂肪含量、肉色、pH值、嫩度等）相关的分子标记；（2）建立分子标记与肉质性状的关联模型；（3）采集猪的血液或组织样本，提取基因组DNA；（4）使用PCR-RFLP、基因芯片或测序技术检测分子标记的基因型；（5）根据基因型预测个体的肉质性状表现；（6）结合传统选育方法，进行种猪的选留和淘汰。本发明方法可以在早期对种猪进行选择，提高选育效率和准确性。</p>
+                                </div>
+                                
+                                <div>
+                                    <h4 class="font-bold text-lg mb-2">应用前景</h4>
+                                    <p>本专利技术已在多个种猪企业和科研单位进行了应用验证。结果表明，应用该技术后，猪的肌内脂肪含量提高了0.5-1.0个百分点，肉色评分提高了0.5-1.0分，pH值和嫩度也得到了显著改善。该技术的推广应用将有助于提高我国猪肉的品质，满足消费者对高品质猪肉的需求，同时也为种猪企业创造更高的经济效益。</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+          }
+
+          openModal(title, content);
+        };
+
+        // 成果筛选
+        const filterButtons = document.querySelectorAll(".achievement-filter");
+        const achievementItems = document.querySelectorAll(".achievement-item");
+
+        filterButtons.forEach((button) => {
+          button.addEventListener("click", function () {
+            // 移除所有按钮的active状态
+            filterButtons.forEach((btn) => {
+              btn.classList.remove("bg-secondary", "text-white");
+              btn.classList.add("bg-light", "text-primary");
+            });
+
+            // 添加当前按钮的active状态
+            this.classList.remove("bg-light", "text-primary");
+            this.classList.add("bg-secondary", "text-white");
+
+            const filter = this.getAttribute("data-filter");
+
+            // 筛选成果项
+            achievementItems.forEach((item) => {
+              if (filter === "all" || item.getAttribute("data-type") === filter) {
+                item.style.display = "block";
+              } else {
+                item.style.display = "none";
+              }
+            });
+          });
+        });
+
+        // 初始化图表
+        function initCharts() {
+          // 成果类型分布图
+          const typeChart = echarts.init(document.getElementById("achievement-type-chart"));
+          typeChart.setOption({
+            tooltip: {
+              trigger: "item",
+            },
+            legend: {
+              top: "5%",
+              left: "center",
+            },
+            series: [
+              {
+                name: "成果类型",
+                type: "pie",
+                radius: ["40%", "70%"],
+                avoidLabelOverlap: false,
+                itemStyle: {
+                  borderRadius: 10,
+                  borderColor: "#fff",
+                  borderWidth: 2,
+                },
+                label: {
+                  show: false,
+                  position: "center",
+                },
+                emphasis: {
+                  label: {
+                    show: true,
+                    fontSize: "18",
+                    fontWeight: "bold",
+                  },
+                },
+                labelLine: {
+                  show: false,
+                },
+                data: [
+                  { value: 35, name: "发表论文", itemStyle: { color: "#3498db" } },
+                  { value: 20, name: "专利", itemStyle: { color: "#2ecc71" } },
+                  { value: 15, name: "软件著作权", itemStyle: { color: "#9b59b6" } },
+                  { value: 10, name: "新品种培育", itemStyle: { color: "#f39c12" } },
+                ],
+              },
+            ],
+          });
+
+          // 年度成果产出趋势图
+          const trendChart = echarts.init(document.getElementById("achievement-trend-chart"));
+          trendChart.setOption({
+            tooltip: {
+              trigger: "axis",
+            },
+            legend: {
+              data: ["发表论文", "专利", "软件著作权", "新品种培育"],
+            },
+            grid: {
+              left: "3%",
+              right: "4%",
+              bottom: "3%",
+              containLabel: true,
+            },
+            xAxis: {
+              type: "category",
+              boundaryGap: false,
+              data: ["2020", "2021", "2022", "2023", "2024", "2025"],
+            },
+            yAxis: {
+              type: "value",
+            },
+            series: [
+              {
+                name: "发表论文",
+                type: "line",
+                data: [5, 7, 8, 10, 12, 15],
+                lineStyle: {
+                  color: "#3498db",
+                },
+                itemStyle: {
+                  color: "#3498db",
+                },
+              },
+              {
+                name: "专利",
+                type: "line",
+                data: [2, 3, 4, 5, 6, 8],
+                lineStyle: {
+                  color: "#2ecc71",
+                },
+                itemStyle: {
+                  color: "#2ecc71",
+                },
+              },
+              {
+                name: "软件著作权",
+                type: "line",
+                data: [1, 2, 3, 4, 5, 7],
+                lineStyle: {
+                  color: "#9b59b6",
+                },
+                itemStyle: {
+                  color: "#9b59b6",
+                },
+              },
+              {
+                name: "新品种培育",
+                type: "line",
+                data: [0, 1, 1, 2, 3, 5],
+                lineStyle: {
+                  color: "#f39c12",
+                },
+                itemStyle: {
+                  color: "#f39c12",
+                },
+              },
+            ],
+          });
+
+          // 响应窗口大小变化
+          window.addEventListener("resize", function () {
+            typeChart.resize();
+            trendChart.resize();
+          });
+        }
+
+        // 页面加载完成后初始化图表
+        initCharts();
+      });
+    </script>
+  </body>
+</html>
