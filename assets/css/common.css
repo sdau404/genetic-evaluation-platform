@@ -695,6 +695,7 @@ margin-bottom:calc(1rem * var(--tw-space-y-reverse))
 .px-6 {
 	padding-left: 1.5rem;
 	padding-right: 1.5rem
+
 }
 .py-1 {
 	padding-top: 0.25rem;
@@ -1129,4 +1130,21 @@ margin-bottom:calc(1rem * var(--tw-space-y-reverse))
 .lg\:grid-cols-4 {
 	grid-template-columns: repeat(4, minmax(0, 1fr))
 }
+}
+/* 表格对齐修复：数字右移，和表头对齐 */
+.table-container th {
+  text-align: right !important;
+  padding-right: 12px !important;
+}
+.table-container td {
+  text-align: right !important;
+  padding-right: 12px !important;
+}
+.table-container th:first-child,
+.table-container td:first-child,
+.table-container th:nth-child(2),
+.table-container td:nth-child(2) {
+  text-align: left !important;
+  padding-left: 12px !important;
+  padding-right: 0 !important;
 }
