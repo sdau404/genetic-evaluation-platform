@@ -149,42 +149,43 @@
           <div class="bg-light rounded-lg shadow-md p-6 mb-8">
             <h3 class="text-xl font-bold mb-4">数据查询</h3>
             <form id="data-query-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div>
-                <label class="block text-dark mb-2">猪种</label>
-                <select id="pig-breed" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary">
-                  <option value="all">全部</option>
-                  <option value="duroc">杜洛克</option>
-                  <option value="landrace">长白猪</option>
-                  <option value="yorkshire">大白猪</option>
-                  <option value="local">地方猪种</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-dark mb-2">评估指标</label>
-                <select id="evaluation-index" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary">
-                  <option value="daily_gain">日增重</option>
-                  <option value="lean_rate">瘦肉率</option>
-                  <option value="backfat">背膘厚</option>
-                  <option value="reproduction">繁殖力</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-dark mb-2">时间范围</label>
-                <div class="flex items-center space-x-2">
-                  <input type="date" id="start-date" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" value="2024-01-01" />
-                  <span>至</span>
-                  <input type="date" id="end-date" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" value="2025-03-01" />
-                </div>
-              </div>
-              <div>
-                <label class="block text-dark mb-2">个体ID</label>
-                <div class="flex space-x-2">
-                  <input type="text" id="individual-id" placeholder="请输入" class="flex-1 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" />
-                  <button type="submit" class="bg-secondary hover:bg-blue-600 text-white px-4 py-2 rounded transition-all">查询</button>
-                  <button type="reset" class="bg-gray-300 hover:bg-gray-400 text-primary px-4 py-2 rounded transition-all">重置</button>
-                </div>
-              </div>
-            </form>
+             <div>
+               <label class="block text-dark mb-2">猪种</label>
+               <select id="pig-breed" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary">
+                 <option value="all">全部</option>
+                 <option value="duroc">杜洛克</option>
+                 <option value="landrace">长白猪</option>
+                 <option value="yorkshire">大白猪</option>
+                 <option value="local">地方猪种</option>
+               </select>
+             </div>
+             <div>
+               <label class="block text-dark mb-2">评估指标</label>
+               <select id="evaluation-index" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary">
+                 <option value="daily_gain">日增重</option>
+                 <option value="lean_rate">瘦肉率</option>
+                 <option value="backfat">背膘厚</option>
+                 <option value="reproduction">繁殖力</option>
+               </select>
+             </div>
+             <div>
+               <label class="block text-dark mb-2">时间范围</label>
+               <div class="flex items-center space-x-2">
+                 <input type="date" id="start-date" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" value="2024-01-01" />
+                 <span>至</span>
+                 <input type="date" id="end-date" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" value="2025-03-01" />
+               </div>
+             </div>
+             <!-- 新增 lg:col-span-2 跨两格 -->
+             <div class="lg:col-span-2">
+               <label class="block text-dark mb-2">个体ID</label>
+               <div class="flex space-x-2">
+                 <input type="text" id="individual-id" placeholder="请输入" class="flex-1 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" />
+                 <button type="submit" class="bg-secondary hover:bg-blue-600 text-white px-4 py-2 rounded transition-all">查询</button>
+                 <button type="reset" class="bg-gray-300 hover:bg-gray-400 text-primary px-4 py-2 rounded transition-all">重置</button>
+               </div>
+             </div>
+           </form>
           </div>
 
           <!-- 查询结果 -->
