@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>科研团队 - 遗传改良信息服务平台</title>
+    <!-- 图标库 -->
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --clr-dark: #1a1a2e;
+            --clr-dark-secondary: #222831;
+            --clr-cream: #faf7f2;
+            --clr-white: #ffffff;
+            --clr-green: #7cb342;
+            --clr-green-hover: #9ccc65;
+            --clr-green-dark: #558b2f;
+            --clr-gray: #666666;
+            --clr-gray-light: #999999;
+            --clr-border: #e0dcd5;
+            --clr-overlay: rgba(0, 0, 0, 0.55);
+            --clr-shadow: rgba(0, 0, 0, 0.08);
+            --clr-shadow-hover: rgba(0, 0, 0, 0.16);
+            --radius-sm: 8px;
+            --radius-md: 14px;
+            --radius-lg: 20px;
+            --radius-btn: 30px;
+            --transition-fast: 0.2s ease;
+            --transition-smooth: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-bounce: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            --shadow-card: 0 2px 12px var(--clr-shadow);
+            --shadow-card-hover: 0 8px 30px var(--clr-shadow-hover);
+            --shadow-nav: 0 4px 20px rgba(0, 0, 0, 0.15);
+            --font-heading: 'Microsoft Yahei', 'PingFang SC', 'Helvetica Neue', sans-serif;
+            --max-width: 1200px;
+            --header-height: 68px;
+        }
+
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            font-family: var(--font-heading);
+            background-color: var(--clr-cream);
+            color: var(--clr-dark);
+            line-height: 1.7;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 90%;
+            max-width: var(--max-width);
+            margin: 0 auto;
+        }
+
+        /* ============ 头部导航 ============ */
+        .header {
+            background-color: var(--clr-dark);
+            color: #fff;
+            padding: 0;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            height: var(--header-height);
+            box-shadow: var(--shadow-nav);
+        }
+        .header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100%;
+        }
+        /* ============ new顶部导航栏 ============ */
+        .logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .logo-img {
+            height: 42px;
+            margin-right: 12px;
+        }
+
+        .site-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+/* ============ old顶部导航栏 ============ */
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+
+        .logo h1 {
+            color: #fff;
+            font-size: 30px;
+            font-weight: 700;
+            white-space: nowrap;
+            letter-spacing: 0.5px;
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+        .nav ul {
+            display: flex;
+            list-style: none;
+            gap: 6px;
+            align-items: center;
+        }
+        .nav a {
+            color: #e0dcd5;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            padding: 10px 16px;
+            border-radius: var(--radius-sm);
+            transition: all var(--transition-fast);
+            position: relative;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+        .nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%) scaleX(0);
+            width: 20px;
+            height: 2.5px;
+            background-color: var(--clr-green);
+            border-radius: 2px;
+            transition: transform var(--transition-smooth);
+        }
+        .nav a:hover {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.07);
+        }
+        .nav a:hover::after {
+            transform: translateX(-50%) scaleX(1);
+        }
+        .nav a.active {
+            color: #fff;
+            background-color: rgba(124, 179, 66, 0.2);
+            font-weight: 600;
+        }
+        .nav a.active::after {
+            transform: translateX(-50%) scaleX(1);
+            width: 28px;
+            background-color: var(--clr-green);
+        }
+        #mobileBtn {
+            display: none;
+            background: none;
+            border: none;
+            color: #f8f5f0;
+            font-size: 26px;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            transition: all var(--transition-fast);
+            z-index: 1001;
+        }
+        #mobileBtn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--clr-green);
+        }
+
+        /* 移动端菜单 */
+        .mobileMenu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100vh;
+            height: 100dvh;
+            background-color: var(--clr-dark-secondary);
+            z-index: 1002;
+            transform: translateX(-100%);
+            transition: transform var(--transition-smooth);
+            box-shadow: 4px 0 30px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        .mobileMenu.show {
+            transform: translateX(0);
+        }
+        .mobileMenu .menuHeader {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            flex-shrink: 0;
+        }
+        .mobileMenu .menuHeader h3 {
+            color: #f8f5f0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .mobileMenu #closeBtn {
+            background: none;
+            border: none;
+            color: #ccc;
+            font-size: 22px;
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 6px;
+            transition: all var(--transition-fast);
+        }
+        .mobileMenu #closeBtn:hover {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .mobileMenu ul {
+            list-style: none;
+            padding: 12px 0;
+            flex: 1;
+        }
+        .mobileMenu ul li {
+            margin: 2px 0;
+        }
+        .mobileMenu ul a {
+            display: block;
+            color: #d5d0c8;
+            text-decoration: none;
+            padding: 14px 24px;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all var(--transition-fast);
+            border-left: 3px solid transparent;
+            letter-spacing: 0.4px;
+        }
+        .mobileMenu ul a:hover {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-left-color: var(--clr-green);
+            padding-left: 28px;
+        }
+        .menuOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            height: 100dvh;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1001;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--transition-smooth);
+        }
+        .menuOverlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* ============ 面包屑 ============ */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 22px 0 10px;
+            font-size: 14px;
+            color: var(--clr-gray-light);
+            flex-wrap: wrap;
+        }
+        .breadcrumb a {
+            color: var(--clr-gray);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color var(--transition-fast);
+        }
+        .breadcrumb a:hover {
+            color: var(--clr-green-dark);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+        .breadcrumb span.separator {
+            color: #ccc;
+            user-select: none;
+            font-weight: 300;
+        }
+        .breadcrumb span.active {
+            color: var(--clr-dark);
+            font-weight: 600;
+            pointer-events: none;
+        }
+
+        /* ============ 页面标题 ============ */
+        .pageTitle {
+            font-size: 30px;
+            text-align: center;
+            margin: 10px 0 36px;
+            color: var(--clr-dark);
+            font-weight: 700;
+            position: relative;
+            padding-bottom: 18px;
+            letter-spacing: 0.5px;
+        }
+        .pageTitle::after {
+            content: "";
+            display: block;
+            width: 70px;
+            height: 3.5px;
+            background: linear-gradient(to right, var(--clr-green), var(--clr-green-hover));
+            margin: 0 auto;
+            border-radius: 3px;
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* ============ 面板卡片 ============ */
+        .panel {
+            background-color: var(--clr-white);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-card);
+            padding: 28px 30px;
+            margin-bottom: 30px;
+        }
+        .panel h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--clr-dark);
+            margin-bottom: 18px;
+            position: relative;
+            padding-left: 14px;
+        }
+        .panel h3::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 4px;
+            bottom: 4px;
+            width: 4px;
+            background-color: var(--clr-green);
+            border-radius: 3px;
+        }
+        .panel p {
+            margin-bottom: 14px;
+            color: var(--clr-gray);
+            font-size: 15px;
+        }
+        .panel ul {
+            margin-bottom: 14px;
+            padding-left: 20px;
+            color: var(--clr-gray);
+        }
+        .panel ul li {
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+        /* ============ 团队成员网格 ============ */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: 24px;
+        }
+        .team-card {
+            background-color: #fff;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            box-shadow: var(--shadow-card);
+            transition: all var(--transition-smooth);
+            cursor: pointer;
+            position: relative;
+        }
+        .team-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-card-hover);
+        }
+        .card-img-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 3 / 4;
+            overflow: hidden;
+            background-color: #e8e4df;
+        }
+        .card-img-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform var(--transition-smooth);
+        }
+        .team-card:hover .card-img-wrapper img {
+            transform: scale(1.06);
+        }
+        .card-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(26, 83, 25, 0.75);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity var(--transition-smooth);
+        }
+        .team-card:hover .card-overlay {
+            opacity: 1;
+        }
+        .card-overlay .btn-detail {
+            display: inline-block;
+            background-color: #fff;
+            color: var(--clr-dark);
+            padding: 10px 22px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 14px;
+            text-decoration: none;
+            transition: all var(--transition-bounce);
+            transform: translateY(10px);
+            opacity: 0;
+        }
+        .team-card:hover .card-overlay .btn-detail {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .card-overlay .btn-detail:hover {
+            background-color: var(--clr-green);
+            color: #fff;
+        }
+        .card-info {
+            padding: 16px 18px;
+            text-align: center;
+        }
+        .card-info h5 {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--clr-dark);
+            margin-bottom: 4px;
+        }
+        .card-info .role {
+            font-size: 13px;
+            color: var(--clr-gray-light);
+            font-weight: 500;
+        }
+
+        /* ============ 页脚 ============ */
+        .footer {
+            background-color: var(--clr-dark);
+            color: #f8f5f0;
+            padding: 40px 0 0;
+            margin-top: auto;
+        }
+        .footerWrap {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 30px;
+            padding-bottom: 28px;
+        }
+        .footerLeft {
+            flex: 1.4;
+            min-width: 260px;
+        }
+        .footerLeft .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .footerLeft .logo i {
+            font-size: 24px;
+            color: var(--clr-green);
+        }
+        .footerLeft .logo h1 {
+            font-size: 20px;
+            color: #f8f5f0;
+            font-weight: 700;
+        }
+        .footerLeft p {
+            font-size: 14px;
+            color: #b0aca5;
+            line-height: 1.7;
+            max-width: 360px;
+        }
+        .footerGroup {
+            flex: 1;
+            min-width: 160px;
+        }
+        .footerGroup h3 {
+            font-size: 16px;
+            margin-bottom: 14px;
+            color: #f8f5f0;
+            font-weight: 600;
+            letter-spacing: 0.4px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        .footerGroup h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 30px;
+            height: 2px;
+            background-color: var(--clr-green);
+            border-radius: 2px;
+        }
+        .footerGroup ul {
+            list-style: none;
+        }
+        .footerGroup li {
+            margin-bottom: 9px;
+            font-size: 14px;
+            color: #b0aca5;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .footerGroup li i {
+            color: var(--clr-green);
+            font-size: 13px;
+            width: 16px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .footerGroup a {
+            color: #b0aca5;
+            text-decoration: none;
+            transition: all var(--transition-fast);
+            font-size: 14px;
+        }
+        .footerGroup a:hover {
+            color: var(--clr-green-hover);
+            padding-left: 4px;
+        }
+        .copyright {
+            width: 100%;
+            text-align: center;
+            padding: 16px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 13px;
+            color: #888;
+            letter-spacing: 0.3px;
+        }
+
+        /* ============ 响应式设计 ============ */
+        @media (max-width: 1024px) {
+            .pageTitle {
+                font-size: 26px;
+            }
+            .logo h1 {
+                font-size: 17px;
+            }
+        }
+        @media (max-width: 768px) {
+            .header {
+                height: 58px;
+            }
+            .logo h1 {
+                font-size: 15px;
+            }
+            .nav {
+                display: none;
+            }
+            #mobileBtn {
+                display: block;
+            }
+            .pageTitle {
+                font-size: 23px;
+                margin: 8px 0 24px;
+                padding-bottom: 14px;
+            }
+            .pageTitle::after {
+                width: 50px;
+                height: 3px;
+            }
+            .breadcrumb {
+                padding: 14px 0 6px;
+                font-size: 13px;
+            }
+            .panel {
+                padding: 18px 20px;
+                margin-bottom: 20px;
+            }
+            .team-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 16px;
+            }
+            .card-info h5 {
+                font-size: 15px;
+            }
+            .footerWrap {
+                flex-direction: column;
+                gap: 24px;
+            }
+            .footerLeft p {
+                max-width: 100%;
+            }
+            .footer {
+                padding: 28px 0 0;
+            }
+            .copyright {
+                font-size: 12px;
+                padding: 12px 0;
+            }
+        }
+        @media (max-width: 420px) {
+            .container {
+                width: 94%;
+            }
+            .logo h1 {
+                font-size: 13px;
+            }
+            .pageTitle {
+                font-size: 20px;
+            }
+            .team-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            .card-info {
+                padding: 12px 10px;
+            }
+            .card-overlay .btn-detail {
+                padding: 8px 16px;
+                font-size: 12px;
+            }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .panel, .team-card {
+            animation: fadeInUp 0.45s ease forwards;
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部导航 -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <div class="logo">
+                     <img src="assets/image/logo.png" alt="平台Logo" class="logo-img">
+                </div>
+                <h1>山东省奶牛遗传改良信息服务平台</h1>
+            </div>
+            <nav class="nav">
+                <ul>
+                    <li><a href="cow.html">首页</a></li>
+                    <li><a href="jieshao.html" class="active">介绍</a></li>
+                    <li><a href="shangchuan.html">数据上传</a></li>
+                    <li><a href="shuju.html" >结果查询</a></li>
+                    <li><a href="jieshao.html#section1">联系我们</a></li>
+                </ul>
+            </nav>
+            <button id="mobileBtn" aria-label="打开菜单">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- 移动端菜单 -->
+    <div class="mobileMenu" id="mobileMenu">
+        <div class="menuHeader">
+            <h3>菜单导航</h3>
+            <button id="closeBtn" aria-label="关闭菜单"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <ul>
+            <li><a href="cow.html">首页</a></li>
+            <li><a href="shuju.html">遗传评估数据</a></li>
+            <li><a href="show.html">优良牛种展览</a></li>
+            <li><a href="tuandui.html">介绍</a></li>
+            <li><a href="shangchuan.html">数据上传</a></li>
+        </ul>
+    </div>
+    <div class="menuOverlay" id="menuOverlay"></div>
+
+    <!-- 主内容 -->
+    <main class="container">
+        <!-- 面包屑导航 -->
+        <nav class="breadcrumb" aria-label="面包屑导航">
+            <a href="cow.html">首页</a>
+            <span class="separator">›</span>
+            <span class="active">介绍</span>
+        </nav>
+
+        <h2 class="pageTitle">介绍</h2>
+
+        <!-- 平台介绍 -->
+        <div class="panel">
+            <h3>平台介绍</h3>
+            <p>山东省奶牛遗传信息服务平台是面向奶牛育种领域的综合性遗传评估与信息服务载体，聚焦构建奶牛全基因组选择平台及遗传评估技术体系，为我国奶牛种业自主创新提供重要的技术支撑与服务保障。
+平台围绕新奶牛育种方法及评估体系的关键共性技术，整合基因组数据、表型数据与育种信息资源，提供系统化的遗传评估服务与信息咨询。通过自主研发的北方奶牛高繁长产奶年限基因组遗传评估技术，平台可为奶牛养殖企业、育种机构及相关从业者提供精准的遗传参数评估、育种值预测及选种选配方案，助力实现奶牛精准选育。
+平台致力于推动建立符合我国奶牛群体特点的遗传评估体系，服务于北方特色奶牛种质基础群建设与优质奶牛育种群创制，加快群体改良进程。同时，平台通过遗传信息的共享与服务，促进奶牛育种技术成果转化应用，提高牛只利用效率、降低饲养成本，为我国奶牛种业高质量发展和生态畜牧业建设提供坚实的信息服务支撑。</p>
+            <p>平台采用先进的高性能计算架构与可视化技术，支持育种群体的遗传评估。核心算法涵盖了 GBLUP系列模型、LGC优化算法以及机器学习模型，能够为奶牛、肉牛、猪等主要畜种提供精准的遗传参数估计和选择决策支持。</p>
+            <p><strong>核心特色：</strong></p>
+            <ul>
+                <li><strong>标准化流程：</strong>严格遵循国际动物遗传育种数据标准，确保分析结果可靠、可重复。</li>
+                <li><strong>交互式分析：</strong>用户可自由选择分析模型、参数及可视化方式。</li>
+                <li><strong>安全可控：</strong>数据加密传输，支持私有化部署与权限管理，保障科研数据安全。</li>
+                <li><strong>持续更新：</strong>紧跟国际基因组选择研究前沿，定期迭代算法库与功能模块。</li>
+            </ul>
+        </div>
+
+        <!-- 项目介绍 -->
+        <div class="panel">
+            <h3>项目介绍</h3>
+            <p>本项目研究背景及研究内容为：</p>
+            <ul>
+                <li><strong>（1）关键科学问题</strong></li>
+                <p>奶牛高繁殖力、长产奶年限等性状遗传力较低，针对此类性状，现有基因组选择技术评估准确性差，亟需建立精准高效的基因组选择方法。</p>
+                <li><strong>（2）关键技术问题</strong></li>
+               <p> 针对高繁长产奶年限多性状选择难度大、效率低等问题，亟需开发具有自主知识产权的全基因组选择技术体系，构建配套的遗传评估模型与方法。</p>
+                <li><strong>（3）主要研究内容</strong></li>
+                <p>目前基因组育种值估计主要针对数量性状，而奶牛的繁殖性状多为低遗传力性状，且部分繁殖性状（如一次配种是否受胎）属于二分类性状，产奶年限的数据是截断数据，它们与常规的数量性状有较大差异，因此需要针对这些性状设计相应的模型，如广义线性模型、贝叶斯模型、生存分析模型等，并筛选最佳的模型，同时还要研发适用于这种模型的相关算法和计算程序，构建繁殖力和产奶年限性状基因组育种值估计平台。</p>
+            </ul>
+            <p>上述项目的实施，不仅推动了动物遗传育种领域的基础理论创新，也为我国畜禽种业自主发展提供了关键技术支撑。</p>
+        </div>
+
+        <!-- 团队介绍 -->
+        <div class="panel">
+            <h3>团队介绍</h3>
+            <p>动物遗传改良信息服务平台（sdauanimal.com）由山东农业大学动物科技学院张勤教授团队研发。平台依托高校在动物遗传育种领域的学科优势，紧密对接畜牧产业实际需求，形成产学研深度融合的专业技术平台，致力于打造兼具科学性、实用性与可扩展性的遗传评估与基因组选择工具体系。</p>
+            <p><strong>学术带头人：张勤 教授</strong></p>
+            <p>张勤教授是我国动物遗传育种领域的知名专家，长期从事畜禽基因组选择、遗传评估模型与育种方法优化等研究工作，在基因组预测与复杂性状遗传解析方面取得了一系列具有国际影响力的研究成果。作为第一或通讯作者发表论文150余篇，其中SCI收录论文100余篇；主编专著4部、教材3部；获国家科技进步二等奖2项，为平台核心算法与模型体系提供了坚实的理论基础。</p>
+            <p><strong>团队构成</strong></p>
+            <p>平台核心团队由动物遗传育种与繁殖学、生物信息学、分子遗传学等多学科成员组成，涵盖教授、副教授、博士后及博士研究生，形成了集理论研究、算法开发与工程实现于一体的人才梯队，能够支撑平台的持续研发与技术迭代。</p>
+            <p><strong>依托单位</strong></p>
+            <p>平台依托单位为山东农业大学动物科技学院。该学院是国内畜牧兽医领域的重要科研与教学基地，拥有畜牧学和兽医学两个博士后科研流动站，科研条件完备、学术积累深厚，为平台建设与长期发展提供了稳定、可靠的学术与技术支撑。</p>
+            <p>团队与国内外多家科研机构、企业建立了长期合作关系，共同开展动物遗传改良技术研究和应用，为我国动物种业的发展提供技术支撑。</p>
+        </div>
+
+        <!-- 团队人员 -->
+        <div class="panel">
+            <h3>团队成员</h3>
+            <div class="team-grid">
+                <!-- 张勤 -->
+                <div class="team-card">
+                    <div class="card-img-wrapper">
+                        <img src="assets/image/zhangqin.jpg" alt="张勤">
+                        <div class="card-overlay">
+                            <a href="https://dkdy.sdau.edu.cn/2019/0904/c14944a249751/page.psp" target="_blank" rel="noopener noreferrer" class="btn-detail">查看详情</a>
+                        </div>
+                    </div>
+                    <div class="card-info">
+                        <h5>张勤</h5>
+                        <p class="role">教授</p>
+                    </div>
+                </div>
+                <!-- 王丹 -->
+                <div class="team-card">
+                    <div class="card-img-wrapper">
+                        <img src="assets/image/wangdan.png" alt="王丹">
+                        <div class="card-overlay">
+                            <a href="https://dkdy.sdau.edu.cn/2022/1110/c14944a249753/page.psp" target="_blank" rel="noopener noreferrer" class="btn-detail">查看详情</a>
+                        </div>
+                    </div>
+                    <div class="card-info">
+                        <h5>王丹</h5>
+                        <p class="role">教授</p>
+                    </div>
+                </div>
+                <!-- 宁超 -->
+                <div class="team-card">
+                    <div class="card-img-wrapper">
+                        <img src="assets/image/chao.jpg" alt="宁超">
+                        <div class="card-overlay">
+                            <a href="https://dkdy.sdau.edu.cn/2019/0904/c1553a154966/page.psp" target="_blank" rel="noopener noreferrer" class="btn-detail">查看详情</a>
+                        </div>
+                    </div>
+                    <div class="card-info">
+                        <h5>宁超</h5>
+                        <p class="role">教授</p>
+                    </div>
+                </div>
+                <!-- 苗正澳 -->
+                <div class="team-card">
+                    <div class="card-img-wrapper">
+                        <img src="#" alt="苗正澳">
+                        <div class="card-overlay">
+                            <a href="#" target="_blank" rel="noopener noreferrer" class="btn-detail">查看详情</a>
+                        </div>
+                    </div>
+                    <div class="card-info">
+                        <h5>苗正澳</h5>
+                        <p class="role">师兄</p>
+                    </div>
+                </div>
+                <!-- 欧康丽 -->
+                <div class="team-card">
+                    <div class="card-img-wrapper">
+                        <img src="#" alt="欧康丽">
+                        <div class="card-overlay">
+                            <a href="#" target="_blank" rel="noopener noreferrer" class="btn-detail">查看详情</a>
+                        </div>
+                    </div>
+                    <div class="card-info">
+                        <h5>欧康丽</h5>
+                        <p class="role">师姐</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footerWrap">
+                <div class="footerLeft">
+                    <div class="logo">
+                        <i class="fa-solid fa-dna"></i>
+                        <h1>遗传改良信息服务平台</h1>
+                    </div>
+                    <p>面向科研项目的专业数据平台，提供动物遗传育种领域一体化服务</p>
+                </div>
+                <div class="footerGroup">
+                    <h3>快速链接</h3>
+                    <ul>
+                        <li><a href="index.html">首页</a></li>
+                        <li><a href="data.html">遗传评估数据</a></li>
+                        <li><a href="achievements.html">优良猪种展览</a></li>
+                    </ul>
+                </div>
+                <div class="footerGroup">
+                    <h3>相关资源</h3>
+                    <ul>
+                        <li><a href="#">技术文档</a></li>
+                        <li><a href="#">API接口</a></li>
+                        <li><a href="#">数据标准</a></li>
+                        <li><a href="#">常见问题</a></li>
+                    </ul>
+                </div>
+                <div class="footerGroup">
+                    <h3 id="section1">联系我们</h3>
+                    <ul>
+                        <li><i class="fa-solid fa-map-marker-alt"></i> 山东农业大学动物科技学院</li>
+                        <li><i class="fa-solid fa-phone"></i> 010-12345678</li>
+                        <li><i class="fa-solid fa-envelope"></i> ningchao@sdau.edu.cn</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">© 2025 遗传改良信息服务平台 版权所有</div>
+        </div>
+    </footer>
+
+    <script>
+        (function() {
+            // 移动端菜单
+            const mobileBtn = document.getElementById('mobileBtn');
+            const closeBtn = document.getElementById('closeBtn');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const menuOverlay = document.getElementById('menuOverlay');
+            const body = document.body;
+
+            function openMenu() {
+                mobileMenu.classList.add('show');
+                menuOverlay.classList.add('show');
+                body.style.overflow = 'hidden';
+                setTimeout(() => closeBtn.focus(), 350);
+            }
+            function closeMenu() {
+                mobileMenu.classList.remove('show');
+                menuOverlay.classList.remove('show');
+                body.style.overflow = '';
+                mobileBtn.focus();
+            }
+            if (mobileBtn && closeBtn && mobileMenu && menuOverlay) {
+                mobileBtn.addEventListener('click', openMenu);
+                closeBtn.addEventListener('click', closeMenu);
+                menuOverlay.addEventListener('click', closeMenu);
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && mobileMenu.classList.contains('show')) {
+                        closeMenu();
+                    }
+                });
+                mobileMenu.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', () => setTimeout(closeMenu, 150));
+                });
+                let prevW = window.innerWidth;
+                window.addEventListener('resize', function() {
+                    const curW = window.innerWidth;
+                    if ((prevW <= 768 && curW > 768) || (prevW > 768 && curW <= 768)) {
+                        if (mobileMenu.classList.contains('show')) closeMenu();
+                    }
+                    prevW = curW;
+                });
+            }
+
+            // 导航激活状态
+            const currentPath = window.location.pathname.split('/').pop() || 'tuandui.html';
+            document.querySelectorAll('.nav a').forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

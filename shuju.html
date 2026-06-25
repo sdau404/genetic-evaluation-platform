@@ -1,0 +1,1738 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>遗传评估数据 - 遗传改良信息服务平台</title>
+    <!-- 图标库 -->
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- ECharts -->
+    <script src="assets/js/echarts.min.js">
+    </script>
+    <style>
+        :root {
+            --clr-dark: #1a1a2e;
+            --clr-dark-secondary: #222831;
+            --clr-cream: #faf7f2;
+            --clr-white: #ffffff;
+            --clr-green: #7cb342;
+            --clr-green-hover: #9ccc65;
+            --clr-green-dark: #558b2f;
+            --clr-gray: #666666;
+            --clr-gray-light: #999999;
+            --clr-border: #e0dcd5;
+            --clr-overlay: rgba(0, 0, 0, 0.55);
+            --clr-shadow: rgba(0, 0, 0, 0.08);
+            --clr-shadow-hover: rgba(0, 0, 0, 0.16);
+            --clr-blue: #2980b9;
+            --clr-blue-light: #3498db;
+            --radius-sm: 8px;
+            --radius-md: 14px;
+            --radius-lg: 20px;
+            --radius-btn: 30px;
+            --transition-fast: 0.2s ease;
+            --transition-smooth: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-bounce: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            --shadow-card: 0 2px 12px var(--clr-shadow);
+            --shadow-card-hover: 0 8px 30px var(--clr-shadow-hover);
+            --shadow-nav: 0 4px 20px rgba(0, 0, 0, 0.15);
+            --font-heading: 'Microsoft Yahei', 'PingFang SC', 'Helvetica Neue', sans-serif;
+            --max-width: 1200px;
+            --header-height: 68px;
+        }
+
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            font-family: var(--font-heading);
+            background-color: var(--clr-cream);
+            color: var(--clr-dark);
+            line-height: 1.7;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 90%;
+            max-width: var(--max-width);
+            margin: 0 auto;
+        }
+
+        /* ============ 头部导航 ============ */
+        .header {
+            background-color: var(--clr-dark);
+            color: #fff;
+            padding: 0;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            height: var(--header-height);
+            box-shadow: var(--shadow-nav);
+        }
+        .header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100%;
+        }
+        /* ============ new顶部导航栏 ============ */
+        .logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .logo-img {
+            height: 42px;
+            margin-right: 12px;
+        }
+
+        .site-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+/* ============ old顶部导航栏 ============ */
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+
+        .logo h1 {
+            color: #fff;
+            font-size: 30px;
+            font-weight: 700;
+            white-space: nowrap;
+            letter-spacing: 0.5px;
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+        .nav ul {
+            display: flex;
+            list-style: none;
+            gap: 6px;
+            align-items: center;
+        }
+        .nav a {
+            color: #e0dcd5;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            padding: 10px 16px;
+            border-radius: var(--radius-sm);
+            transition: all var(--transition-fast);
+            position: relative;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+        .nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%) scaleX(0);
+            width: 20px;
+            height: 2.5px;
+            background-color: var(--clr-green);
+            border-radius: 2px;
+            transition: transform var(--transition-smooth);
+        }
+        .nav a:hover {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.07);
+        }
+        .nav a:hover::after {
+            transform: translateX(-50%) scaleX(1);
+        }
+        .nav a.active {
+            color: #fff;
+            background-color: rgba(124, 179, 66, 0.2);
+            font-weight: 600;
+        }
+        .nav a.active::after {
+            transform: translateX(-50%) scaleX(1);
+            width: 28px;
+            background-color: var(--clr-green);
+        }
+        #mobileBtn {
+            display: none;
+            background: none;
+            border: none;
+            color: #f8f5f0;
+            font-size: 26px;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            transition: all var(--transition-fast);
+            z-index: 1001;
+        }
+        #mobileBtn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--clr-green);
+        }
+
+        /* 移动端菜单 */
+        .mobileMenu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100vh;
+            height: 100dvh;
+            background-color: var(--clr-dark-secondary);
+            z-index: 1002;
+            transform: translateX(-100%);
+            transition: transform var(--transition-smooth);
+            box-shadow: 4px 0 30px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        .mobileMenu.show {
+            transform: translateX(0);
+        }
+        .mobileMenu .menuHeader {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            flex-shrink: 0;
+        }
+        .mobileMenu .menuHeader h3 {
+            color: #f8f5f0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .mobileMenu #closeBtn {
+            background: none;
+            border: none;
+            color: #ccc;
+            font-size: 22px;
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 6px;
+            transition: all var(--transition-fast);
+        }
+        .mobileMenu #closeBtn:hover {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .mobileMenu ul {
+            list-style: none;
+            padding: 12px 0;
+            flex: 1;
+        }
+        .mobileMenu ul li {
+            margin: 2px 0;
+        }
+        .mobileMenu ul a {
+            display: block;
+            color: #d5d0c8;
+            text-decoration: none;
+            padding: 14px 24px;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all var(--transition-fast);
+            border-left: 3px solid transparent;
+            letter-spacing: 0.4px;
+        }
+        .mobileMenu ul a:hover {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-left-color: var(--clr-green);
+            padding-left: 28px;
+        }
+        .menuOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            height: 100dvh;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1001;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--transition-smooth);
+        }
+        .menuOverlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* ============ 面包屑 ============ */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 22px 0 10px;
+            font-size: 14px;
+            color: var(--clr-gray-light);
+            flex-wrap: wrap;
+        }
+        .breadcrumb a {
+            color: var(--clr-gray);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color var(--transition-fast);
+        }
+        .breadcrumb a:hover {
+            color: var(--clr-green-dark);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+        .breadcrumb span.separator {
+            color: #ccc;
+            user-select: none;
+            font-weight: 300;
+        }
+        .breadcrumb span.active {
+            color: var(--clr-dark);
+            font-weight: 600;
+            pointer-events: none;
+        }
+
+        /* ============ 页面标题 ============ */
+        .pageTitle {
+            font-size: 30px;
+            text-align: center;
+            margin: 10px 0 36px;
+            color: var(--clr-dark);
+            font-weight: 700;
+            position: relative;
+            padding-bottom: 18px;
+            letter-spacing: 0.5px;
+        }
+        .pageTitle::after {
+            content: "";
+            display: block;
+            width: 70px;
+            height: 3.5px;
+            background: linear-gradient(to right, var(--clr-green), var(--clr-green-hover));
+            margin: 0 auto;
+            border-radius: 3px;
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* ============ 卡片面板 ============ */
+        .panel {
+            background-color: var(--clr-white);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-card);
+            padding: 24px 28px;
+            margin-bottom: 28px;
+        }
+        .panel h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--clr-dark);
+            margin-bottom: 18px;
+            position: relative;
+            padding-left: 14px;
+        }
+        .panel h3::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 4px;
+            bottom: 4px;
+            width: 4px;
+            background-color: var(--clr-green);
+            border-radius: 3px;
+        }
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .panel-header h3 {
+            margin-bottom: 0;
+        }
+
+        /* ============ 表单样式 ============ */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            align-items: end;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .form-group label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--clr-gray);
+            letter-spacing: 0.2px;
+        }
+        .form-group select,
+        .form-group input[type="date"],
+        .form-group input[type="text"] {
+            width: 100%;
+            border: 1.5px solid var(--clr-border);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            font-size: 14px;
+            font-family: var(--font-heading);
+            color: var(--clr-dark);
+            background-color: #fdfcf9;
+            transition: all var(--transition-fast);
+            outline: none;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+        .form-group select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 36px;
+            cursor: pointer;
+        }
+        .form-group select:focus,
+        .form-group input:focus {
+            border-color: var(--clr-green);
+            box-shadow: 0 0 0 3px rgba(124, 179, 66, 0.1);
+            background-color: #fff;
+        }
+        .form-group input[type="date"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+            opacity: 0.6;
+        }
+        .date-range {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .date-range span {
+            color: var(--clr-gray-light);
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            align-items: end;
+            height: 100%;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 22px;
+            border-radius: var(--radius-btn);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-bounce);
+            border: none;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+            font-family: var(--font-heading);
+            text-decoration: none;
+        }
+        .btn-primary {
+            background-color: var(--clr-green);
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background-color: var(--clr-green-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(124, 179, 66, 0.35);
+        }
+        .btn-outline {
+            background-color: #fff;
+            color: var(--clr-gray);
+            border: 1.5px solid var(--clr-border);
+        }
+        .btn-outline:hover {
+            background-color: #f5f2ec;
+            border-color: #ccc;
+            transform: translateY(-2px);
+        }
+        .btn-sm {
+            padding: 7px 16px;
+            font-size: 13px;
+            border-radius: 20px;
+        }
+        .btn-xs {
+            padding: 5px 12px;
+            font-size: 12px;
+            border-radius: 16px;
+            font-weight: 500;
+        }
+        .btn-link {
+            background: none;
+            color: var(--clr-green-dark);
+            padding: 4px 8px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            font-family: var(--font-heading);
+            font-size: 13px;
+            transition: color var(--transition-fast);
+            text-decoration: none;
+        }
+        .btn-link:hover {
+            color: var(--clr-green);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        /* ============ 表格 ============ */
+        .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--clr-border);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+            font-size: 14px;
+            min-width: 700px;
+        }
+        thead tr {
+            background-color: var(--clr-dark);
+        }
+        thead th {
+            color: #f8f5f0;
+            padding: 13px 16px;
+            text-align: left;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+            font-size: 13px;
+        }
+        tbody tr {
+            border-bottom: 1px solid #eee;
+            transition: background-color var(--transition-fast);
+        }
+        tbody tr:hover {
+            background-color: #f9f7f2;
+        }
+        tbody tr:last-child {
+            border-bottom: none;
+        }
+        tbody td {
+            padding: 12px 16px;
+            color: var(--clr-dark);
+            vertical-align: middle;
+        }
+        .highlight-value {
+            color: var(--clr-green-dark);
+            font-weight: 700;
+        }
+        .text-muted {
+            color: var(--clr-gray-light);
+            font-size: 13px;
+        }
+
+        /* ============ 分页 ============ */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+        .pagination button {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1.5px solid var(--clr-border);
+            background-color: #fff;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--clr-gray);
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-heading);
+        }
+        .pagination button:hover {
+            background-color: #f5f2ec;
+            border-color: #ccc;
+        }
+        .pagination button.active {
+            background-color: var(--clr-green);
+            border-color: var(--clr-green);
+            color: #fff;
+            font-weight: 700;
+        }
+        .pagination button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .pagination .ellipsis {
+            width: 36px;
+            text-align: center;
+            color: var(--clr-gray-light);
+            user-select: none;
+        }
+
+        /* ============ 图表网格 ============ */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        .chart-card {
+            background-color: #fff;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--clr-border);
+            padding: 16px;
+        }
+        .chart-card h4 {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--clr-dark);
+            margin-bottom: 8px;
+            letter-spacing: 0.2px;
+        }
+        .chart-inner {
+            width: 100%;
+            height: 280px;
+        }
+
+        /* ============ 模态框 ============ */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--transition-smooth);
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-dialog {
+            width: 90%;
+            max-width: 720px;
+            max-height: 85vh;
+            background-color: #fff;
+            border-radius: var(--radius-md);
+            box-shadow: 0 12px 50px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: transform var(--transition-smooth);
+        }
+        .modal-overlay.show .modal-dialog {
+            transform: translateY(0);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            border-bottom: 1px solid #eee;
+            flex-shrink: 0;
+        }
+        .modal-header h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--clr-dark);
+        }
+        .modal-header button {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--clr-gray-light);
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: all var(--transition-fast);
+        }
+        .modal-header button:hover {
+            color: var(--clr-dark);
+            background-color: #f0ece5;
+        }
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .modal-footer {
+            padding: 14px 24px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        .modal-footer .btn {
+            padding: 9px 24px;
+            font-size: 14px;
+        }
+
+        /* 详情卡片 */
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .detail-item {
+            background-color: #faf7f2;
+            border-radius: var(--radius-sm);
+            padding: 16px 12px;
+            text-align: center;
+            border: 1px solid #ece7dd;
+        }
+        .detail-item .detail-label {
+            font-size: 12px;
+            color: var(--clr-gray-light);
+            margin-bottom: 4px;
+            letter-spacing: 0.2px;
+        }
+        .detail-item .detail-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--clr-dark);
+        }
+        .detail-value.accent {
+            color: var(--clr-green-dark);
+        }
+
+        /* 进度条 */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #e8e4df;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 16px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--clr-green), var(--clr-green-hover));
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e8e4df;
+            border-top-color: var(--clr-green);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ============ 页脚 ============ */
+        .footer {
+            background-color: var(--clr-dark);
+            color: #f8f5f0;
+            padding: 40px 0 0;
+            margin-top: auto;
+        }
+        .footerWrap {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 30px;
+            padding-bottom: 28px;
+        }
+        .footerLeft {
+            flex: 1.4;
+            min-width: 260px;
+        }
+        .footerLeft .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .footerLeft .logo i {
+            font-size: 24px;
+            color: var(--clr-green);
+        }
+        .footerLeft .logo h1 {
+            font-size: 20px;
+            color: #f8f5f0;
+            font-weight: 700;
+        }
+        .footerLeft p {
+            font-size: 14px;
+            color: #b0aca5;
+            line-height: 1.7;
+            max-width: 360px;
+        }
+        .footerGroup {
+            flex: 1;
+            min-width: 160px;
+        }
+        .footerGroup h3 {
+            font-size: 16px;
+            margin-bottom: 14px;
+            color: #f8f5f0;
+            font-weight: 600;
+            letter-spacing: 0.4px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        .footerGroup h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 30px;
+            height: 2px;
+            background-color: var(--clr-green);
+            border-radius: 2px;
+        }
+        .footerGroup ul {
+            list-style: none;
+        }
+        .footerGroup li {
+            margin-bottom: 9px;
+            font-size: 14px;
+            color: #b0aca5;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .footerGroup li i {
+            color: var(--clr-green);
+            font-size: 13px;
+            width: 16px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .footerGroup a {
+            color: #b0aca5;
+            text-decoration: none;
+            transition: all var(--transition-fast);
+            font-size: 14px;
+        }
+        .footerGroup a:hover {
+            color: var(--clr-green-hover);
+            padding-left: 4px;
+        }
+        .copyright {
+            width: 100%;
+            text-align: center;
+            padding: 16px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 13px;
+            color: #888;
+            letter-spacing: 0.3px;
+        }
+
+        /* ============ 响应式 ============ */
+        @media (max-width: 1024px) {
+            .form-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+            .detail-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .pageTitle {
+                font-size: 26px;
+            }
+            .logo h1 {
+                font-size: 17px;
+            }
+        }
+        @media (max-width: 768px) {
+            .header {
+                height: 58px;
+            }
+            .header .container {
+                flex-direction: row;
+                gap: 0;
+            }
+            .logo h1 {
+                font-size: 15px;
+                letter-spacing: 0;
+            }
+            .logo i {
+                font-size: 22px;
+            }
+            .nav {
+                display: none;
+            }
+            #mobileBtn {
+                display: block;
+            }
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .date-range {
+                flex-wrap: wrap;
+            }
+            .btn-group {
+                flex-wrap: wrap;
+            }
+            .pageTitle {
+                font-size: 23px;
+                margin: 8px 0 24px;
+                padding-bottom: 14px;
+            }
+            .pageTitle::after {
+                width: 50px;
+                height: 3px;
+            }
+            .breadcrumb {
+                padding: 14px 0 6px;
+                font-size: 13px;
+            }
+            .panel {
+                padding: 16px 18px;
+                margin-bottom: 20px;
+            }
+            .panel h3 {
+                font-size: 17px;
+            }
+            .chart-inner {
+                height: 240px;
+            }
+            .detail-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+            .detail-item {
+                padding: 12px 8px;
+            }
+            .detail-item .detail-value {
+                font-size: 15px;
+            }
+            .modal-dialog {
+                max-width: 95%;
+                max-height: 90vh;
+            }
+            .footerWrap {
+                flex-direction: column;
+                gap: 24px;
+                padding-bottom: 20px;
+            }
+            .footerLeft {
+                min-width: auto;
+            }
+            .footerLeft p {
+                max-width: 100%;
+            }
+            .footerGroup {
+                min-width: auto;
+            }
+            .footer {
+                padding: 28px 0 0;
+            }
+            .copyright {
+                font-size: 12px;
+                padding: 12px 0;
+            }
+            table {
+                min-width: 550px;
+                font-size: 12px;
+            }
+            thead th,
+            tbody td {
+                padding: 10px 10px;
+            }
+        }
+        @media (max-width: 420px) {
+            .container {
+                width: 94%;
+            }
+            .logo h1 {
+                font-size: 13px;
+            }
+            .logo i {
+                font-size: 19px;
+            }
+            .pageTitle {
+                font-size: 20px;
+            }
+            .detail-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 6px;
+            }
+            .detail-item {
+                padding: 10px 6px;
+            }
+            .detail-item .detail-value {
+                font-size: 14px;
+            }
+            .mobileMenu {
+                width: 260px;
+            }
+            .btn {
+                padding: 8px 16px;
+                font-size: 13px;
+            }
+            .pagination button {
+                width: 30px;
+                height: 30px;
+                font-size: 12px;
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .panel {
+            animation: fadeInUp 0.45s ease forwards;
+        }
+        .panel:nth-child(2) {
+            animation-delay: 0.05s;
+        }
+        .panel:nth-child(3) {
+            animation-delay: 0.1s;
+        }
+
+        @media print {
+            .header,
+            .footer,
+            .mobileMenu,
+            .menuOverlay,
+            #mobileBtn,
+            .modal-overlay {
+                display: none !important;
+            }
+            body {
+                background: #fff;
+            }
+            .panel {
+                box-shadow: none;
+                break-inside: avoid;
+                border: 1px solid #ddd;
+            }
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部导航 -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <div class="logo">
+                     <img src="assets/image/logo.png" alt="平台Logo" class="logo-img">
+                </div>
+                <h1>山东省奶牛遗传改良信息服务平台</h1>
+            </div>
+            <nav class="nav">
+                <ul>
+                    <li><a href="cow.html">首页</a></li>
+                    <li><a href="jieshao.html">介绍</a></li>
+                    <li><a href="shangchuan.html">数据上传</a></li>
+                    <li><a href="shuju.html" class="active">结果查询</a></li>
+                    <li><a href="jieshao.html#section1">联系我们</a></li>
+                </ul>
+            </nav>
+            <button id="mobileBtn" aria-label="打开菜单">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- 移动端菜单 -->
+    <div class="mobileMenu" id="mobileMenu">
+        <div class="menuHeader">
+            <h3>菜单导航</h3>
+            <button id="closeBtn" aria-label="关闭菜单"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <ul>
+            <li><a href="cow.html">首页</a></li>
+            <li><a href="shuju.html">遗传评估数据</a></li>
+            <li><a href="show.html">优良牛种展览</a></li>
+            <li><a href="tuandui.html">科研团队</a></li>
+            <li><a href="upload.html">数据上传</a></li>
+        </ul>
+    </div>
+    <div class="menuOverlay" id="menuOverlay"></div>
+
+    <!-- 主内容 -->
+    <main class="container">
+        <!-- 面包屑导航 -->
+        <nav class="breadcrumb" aria-label="面包屑导航">
+            <a href="index.html">首页</a>
+            <span class="separator">›</span>
+            <span class="active">遗传评估数据</span>
+        </nav>
+
+        <h2 class="pageTitle">遗传评估数据</h2>
+
+        <!-- 数据查询面板 -->
+        <div class="panel">
+            <h3>数据查询</h3>
+            <form id="data-query-form" class="form-grid">
+                <div class="form-group">
+                    <label for="pig-breed">牛种</label>
+                    <select id="pig-breed">
+                        <option value="all">全部</option>
+                        <option value="duroc">杜洛克</option>
+                        <option value="landrace">长白牛</option>
+                        <option value="yorkshire">大白牛</option>
+                        <option value="local">地方牛种</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="evaluation-index">评估指标</label>
+                    <select id="evaluation-index">
+                        <option value="daily_gain">日增重</option>
+                        <option value="lean_rate">瘦肉率</option>
+                        <option value="backfat">背膘厚</option>
+                        <option value="reproduction">繁殖力</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>时间范围</label>
+                    <div class="date-range">
+                        <input type="date" id="start-date" value="2024-01-01">
+                        <span>至</span>
+                        <input type="date" id="end-date" value="2025-03-01">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="individual-id">个体ID</label>
+                    <div class="btn-group">
+                        <input type="text" id="individual-id" placeholder="请输入" style="flex:1;min-width:100px;">
+                        <button type="submit" class="btn btn-primary btn-sm">查询</button>
+                        <button type="reset" class="btn btn-outline btn-sm">重置</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- 查询结果 -->
+        <div class="panel">
+            <div class="panel-header">
+                <h3>查询结果</h3>
+                <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                    <span id="result-count" class="text-muted">共 156 条记录</span>
+                    <button id="export-data-btn" class="btn btn-primary btn-sm">
+                        <i class="fa-solid fa-download"></i> 导出数据
+                    </button>
+                </div>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>个体ID</th>
+                            <th>性别</th>
+                            <th>100公斤日龄体重</th>
+                            <th>100公斤日龄体重育种值</th>
+                            <th>100公斤背膘厚</th>
+                            <th>育种值估计</th>
+                        </tr>
+                    </thead>
+                    <tbody id="result-table-body">
+                        <tr>
+                            <td>YYSDYS322005110</td>
+                            <td>母</td>
+                            <td>145.46249</td>
+                            <td>9.34985</td>
+                            <td class="highlight-value">0.514</td>
+                            <td><button class="btn-link" onclick="showDataDetails('D1001')">详情</button></td>
+                        </tr>
+                        <tr>
+                            <td>YYSDYS322005111</td>
+                            <td>母</td>
+                            <td>159.52437</td>
+                            <td>15.56904</td>
+                            <td class="highlight-value">0.534</td>
+                            <td><button class="btn-link" onclick="showDataDetails('L2034')">详情</button></td>
+                        </tr>
+                        <tr>
+                            <td>YYSDYS322005112</td>
+                            <td>母</td>
+                            <td>151.88286</td>
+                            <td>14.24505</td>
+                            <td class="highlight-value">0.529</td>
+                            <td><button class="btn-link" onclick="showDataDetails('Y3156')">详情</button></td>
+                        </tr>
+                        <tr>
+                            <td>YYSDYS322005128</td>
+                            <td>母</td>
+                            <td>150.99287</td>
+                            <td>9.99148</td>
+                            <td class="highlight-value">0.519</td>
+                            <td><button class="btn-link" onclick="showDataDetails('L2035')">详情</button></td>
+                        </tr>
+                        <tr>
+                            <td>YYSDYS322005160</td>
+                            <td>母</td>
+                            <td>159.08413</td>
+                            <td>11.57093</td>
+                            <td class="highlight-value">0.527</td>
+                            <td><button class="btn-link" onclick="showDataDetails('D1002')">详情</button></td>
+                        </tr>
+                        <tr>
+                            <td>YYSDYS322005162</td>
+                            <td>母</td>
+                            <td>155.5355</td>
+                            <td>13.39661</td>
+                            <td class="highlight-value">0.528</td>
+                            <td><button class="btn-link" onclick="showDataDetails('Y3157')">详情</button></td>
+                        </tr>
+                        <tr>
+                            <td>YYSDYS322005164</td>
+                            <td>母</td>
+                            <td>151.49561</td>
+                            <td>9.95633</td>
+                            <td class="highlight-value">0.519</td>
+                            <td><button class="btn-link" onclick="showDataDetails('D1003')">详情</button></td>
+                        </tr>
+                        <tr>
+                            <td>YYSDYS322005166</td>
+                            <td>母</td>
+                            <td>168.9034</td>
+                            <td>11.44291</td>
+                            <td class="highlight-value">0.527</td>
+                            <td><button class="btn-link" onclick="showDataDetails('L2036')">详情</button></td>
+                        </tr>
+                        <tr>
+                            <td>YYSDYS322005168</td>
+                            <td>母</td>
+                            <td>154.59388</td>
+                            <td>11.78041</td>
+                            <td class="highlight-value">0.527</td>
+                            <td><button class="btn-link" onclick="showDataDetails('Y3158')">详情</button></td>
+                        </tr>
+                        <tr>
+                            <td>YYSDYS322005179</td>
+                            <td>母</td>
+                            <td>140.56019</td>
+                            <td>9.56643</td>
+                            <td class="highlight-value">0.517</td>
+                            <td><button class="btn-link" onclick="showDataDetails('L2037')">详情</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- 分页 -->
+            <div class="pagination">
+                <button id="prev-page" disabled><i class="fa-solid fa-chevron-left"></i></button>
+                <button class="active">1</button>
+                <button>2</button>
+                <button>3</button>
+                <span class="ellipsis">…</span>
+                <button>8</button>
+                <button id="next-page"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+        </div>
+
+        <!-- 数据统计图表 -->
+        <div class="panel">
+            <h3>数据统计</h3>
+            <div class="chart-grid">
+                <div class="chart-card">
+                    <h4>各牛种BF_Phe年度平均值（2017-2025）</h4>
+                    <div id="bf-phe-chart" class="chart-inner"></div>
+                </div>
+                <div class="chart-card">
+                    <h4>各牛种AGE_Phe年度平均值（2017-2025）</h4>
+                    <div id="age-phe-chart" class="chart-inner"></div>
+                </div>
+                <div class="chart-card">
+                    <h4>各牛种性状GEBV年度平均值（2017-2026）</h4>
+                    <div id="gebv-trend-chart" class="chart-inner"></div>
+                </div>
+                <div class="chart-card">
+                    <h4>各牛种TNB_Phe年度平均值（2017-2025）</h4>
+                    <div id="tnb-phe-chart" class="chart-inner"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footerWrap">
+                <div class="footerLeft">
+                    <div class="logo">
+                        <i class="fa-solid fa-dna"></i>
+                        <h1>遗传改良信息服务平台</h1>
+                    </div>
+                    <p>面向科研项目的专业数据平台，提供动物遗传育种领域一体化服务</p>
+                </div>
+                <div class="footerGroup">
+                    <h3>快速链接</h3>
+                    <ul>
+                        <li><a href="index.html">首页</a></li>
+                        <li><a href="data.html">遗传评估数据</a></li>
+                        <li><a href="show.html">优良牛种展览</a></li>
+                    </ul>
+                </div>
+                <div class="footerGroup">
+                    <h3>相关资源</h3>
+                    <ul>
+                        <li><a href="#">技术文档</a></li>
+                        <li><a href="#">API接口</a></li>
+                        <li><a href="#">数据标准</a></li>
+                        <li><a href="#">常见问题</a></li>
+                    </ul>
+                </div>
+                <div class="footerGroup">
+                    <h3>联系我们</h3>
+                    <ul>
+                        <li><i class="fa-solid fa-map-marker-alt"></i> 山东农业大学动物科技学院</li>
+                        <li><i class="fa-solid fa-phone"></i> 010-12345678</li>
+                        <li><i class="fa-solid fa-envelope"></i> ningchao@sdau.edu.cn</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">© 2026 遗传改良信息服务平台 版权所有</div>
+        </div>
+    </footer>
+
+    <!-- 模态框 -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3 id="modal-title">详情</h3>
+                <button id="close-modal-btn" aria-label="关闭"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body" id="modal-content">
+                <!-- 动态填充 -->
+            </div>
+            <div class="modal-footer">
+                <button id="modal-close-footer" class="btn btn-outline btn-sm">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ============ 移动端菜单 ============
+            const mobileBtn = document.getElementById('mobileBtn');
+            const closeBtn = document.getElementById('closeBtn');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const menuOverlay = document.getElementById('menuOverlay');
+            const body = document.body;
+
+            function openMenu() {
+                mobileMenu.classList.add('show');
+                menuOverlay.classList.add('show');
+                body.style.overflow = 'hidden';
+                setTimeout(() => closeBtn.focus(), 350);
+            }
+
+            function closeMenu() {
+                mobileMenu.classList.remove('show');
+                menuOverlay.classList.remove('show');
+                body.style.overflow = '';
+                mobileBtn.focus();
+            }
+            if (mobileBtn && closeBtn && mobileMenu && menuOverlay) {
+                mobileBtn.addEventListener('click', openMenu);
+                closeBtn.addEventListener('click', closeMenu);
+                menuOverlay.addEventListener('click', closeMenu);
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && mobileMenu.classList.contains('show')) {
+                        closeMenu();
+                    }
+                });
+                mobileMenu.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', () => setTimeout(closeMenu, 150));
+                });
+                let prevW = window.innerWidth;
+                window.addEventListener('resize', function() {
+                    const curW = window.innerWidth;
+                    if ((prevW <= 768 && curW > 768) || (prevW > 768 && curW <= 768)) {
+                        if (mobileMenu.classList.contains('show')) closeMenu();
+                    }
+                    prevW = curW;
+                });
+            }
+
+            // ============ 模态框 ============
+            const modalOverlay = document.getElementById('modal-overlay');
+            const modalTitle = document.getElementById('modal-title');
+            const modalContent = document.getElementById('modal-content');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            const modalCloseFooter = document.getElementById('modal-close-footer');
+
+            function openModal(title, content) {
+                modalTitle.textContent = title;
+                modalContent.innerHTML = content;
+                modalOverlay.classList.add('show');
+                body.style.overflow = 'hidden';
+            }
+
+            function closeModalFunc() {
+                modalOverlay.classList.remove('show');
+                body.style.overflow = '';
+            }
+            if (closeModalBtn) closeModalBtn.addEventListener('click', closeModalFunc);
+            if (modalCloseFooter) modalCloseFooter.addEventListener('click', closeModalFunc);
+            if (modalOverlay) {
+                modalOverlay.addEventListener('click', function(e) {
+                    if (e.target === modalOverlay) closeModalFunc();
+                });
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && modalOverlay.classList.contains('show')) {
+                        closeModalFunc();
+                    }
+                });
+            }
+
+            // ============ 数据详情 ============
+            window.showDataDetails = function(id) {
+                let pigType = '',
+                    dailyGain = 0,
+                    leanRate = 0,
+                    breedingValue = 0;
+                const map = {
+                    'D1001': ['杜洛克', 856, 68.2, 12.5],
+                    'L2034': ['长白猪', 792, 66.8, 9.2],
+                    'Y3156': ['大白猪', 823, 67.5, 10.8],
+                    'L2035': ['长白猪', 785, 66.3, 8.7],
+                    'D1002': ['杜洛克', 842, 67.8, 11.9],
+                    'Y3157': ['大白猪', 815, 67.2, 10.5],
+                    'D1003': ['杜洛克', 862, 68.5, 12.8],
+                    'L2036': ['长白猪', 798, 66.5, 9.5],
+                    'Y3158': ['大白猪', 828, 67.8, 11.0],
+                    'L2037': ['长白猪', 780, 66.0, 8.5]
+                };
+                if (map[id]) {
+                    [pigType, dailyGain, leanRate, breedingValue] = map[id];
+                }
+                const content = `
+                    <div style="margin-bottom:20px;">
+                        <h4 style="font-weight:700;margin-bottom:10px;color:#222;">个体基本信息</h4>
+                        <div class="detail-grid">
+                            <div class="detail-item"><div class="detail-label">个体ID</div><div class="detail-value">${id}</div></div>
+                            <div class="detail-item"><div class="detail-label">猪种</div><div class="detail-value">${pigType}</div></div>
+                            <div class="detail-item"><div class="detail-label">日龄</div><div class="detail-value">180天</div></div>
+                            <div class="detail-item"><div class="detail-label">性别</div><div class="detail-value">公</div></div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom:20px;">
+                        <h4 style="font-weight:700;margin-bottom:10px;color:#222;">生产性能指标</h4>
+                        <div class="detail-grid">
+                            <div class="detail-item"><div class="detail-label">日增重(g)</div><div class="detail-value">${dailyGain}</div></div>
+                            <div class="detail-item"><div class="detail-label">瘦肉率(%)</div><div class="detail-value">${leanRate}</div></div>
+                            <div class="detail-item"><div class="detail-label">背膘厚(mm)</div><div class="detail-value">12.5</div></div>
+                            <div class="detail-item"><div class="detail-label">眼肌面积(cm²)</div><div class="detail-value">45.2</div></div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom:20px;">
+                        <h4 style="font-weight:700;margin-bottom:10px;color:#222;">遗传评估结果</h4>
+                        <div class="detail-grid">
+                            <div class="detail-item"><div class="detail-label">综合育种值</div><div class="detail-value accent">+${breedingValue}</div></div>
+                            <div class="detail-item"><div class="detail-label">日增重育种值</div><div class="detail-value accent">+${(breedingValue*0.4).toFixed(1)}</div></div>
+                            <div class="detail-item"><div class="detail-label">瘦肉率育种值</div><div class="detail-value accent">+${(breedingValue*0.3).toFixed(1)}</div></div>
+                            <div class="detail-item"><div class="detail-label">繁殖力育种值</div><div class="detail-value accent">+${(breedingValue*0.3).toFixed(1)}</div></div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 style="font-weight:700;margin-bottom:10px;color:#222;">遗传进展曲线</h4>
+                        <div style="background:#fff;border:1px solid #e0dcd5;border-radius:8px;padding:16px;">
+                            <div id="detail-chart" style="width:100%;height:300px;"></div>
+                        </div>
+                    </div>
+                `;
+                openModal('个体' + id + '详情', content);
+                setTimeout(() => {
+                    const chartDom = document.getElementById('detail-chart');
+                    if (chartDom && typeof echarts !== 'undefined') {
+                        const chart = echarts.init(chartDom);
+                        chart.setOption({
+                            tooltip: { trigger: 'axis' },
+                            legend: { data: ['EBV值', '群体均值'], bottom: 0 },
+                            grid: { left: '3%', right: '4%', bottom: '15%', top: '8%',
+                            containLabel: true },
+                            xAxis: { type: 'category', data: ['2020', '2021', '2022', '2023',
+                                    '2024', '2025'
+                                ] },
+                            yAxis: { type: 'value' },
+                            series: [
+                                { name: 'EBV值', type: 'line', data: [2.1, 3.5, 5.8, 8.2, 10.5,
+                                        breedingValue
+                                    ], lineStyle: { color: '#2980B9' },
+                                    itemStyle: { color: '#2980B9' } },
+                                { name: '群体均值', type: 'line', data: [0, 0.5, 1.2, 2.0, 3.1,
+                                        4.5
+                                    ], lineStyle: { color: '#7F8C8D' },
+                                    itemStyle: { color: '#7F8C8D' } }
+                            ]
+                        });
+                        window.addEventListener('resize', () => chart.resize());
+                    }
+                }, 150);
+            };
+
+            // ============ 查询表单 ============
+            const dataQueryForm = document.getElementById('data-query-form');
+            if (dataQueryForm) {
+                dataQueryForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const pigBreed = document.getElementById('pig-breed').value;
+                    const individualId = document.getElementById('individual-id').value;
+                    let resultCount = 156;
+                    let resultMessage = '共 ' + resultCount + ' 条记录';
+                    if (pigBreed !== 'all') {
+                        resultCount = Math.floor(Math.random() * 50) + 20;
+                        const breedSelect = document.getElementById('pig-breed');
+                        resultMessage = '共 ' + resultCount + ' 条记录 (猪种: ' + breedSelect.options[
+                            breedSelect.selectedIndex].text + ')';
+                    }
+                    if (individualId) {
+                        resultCount = Math.floor(Math.random() * 5) + 1;
+                        resultMessage = '共 ' + resultCount + ' 条记录 (个体ID: ' + individualId + ')';
+                    }
+                    document.getElementById('result-count').textContent = resultMessage;
+                });
+            }
+
+            // ============ 导出数据 ============
+            const exportDataBtn = document.getElementById('export-data-btn');
+            if (exportDataBtn) {
+                exportDataBtn.addEventListener('click', function() {
+                    const exportContent = `
+                        <div style="text-align:center;padding:20px 0;">
+                            <div class="spinner"></div>
+                            <p style="font-size:16px;color:#222;margin-bottom:12px;">正在导出数据，请稍候...</p>
+                            <div class="progress-bar">
+                                <div id="export-progress" class="progress-fill" style="width:0%;"></div>
+                            </div>
+                            <p id="export-status" style="font-size:13px;color:#999;margin-top:8px;">准备导出</p>
+                        </div>
+                    `;
+                    openModal('导出数据', exportContent);
+                    let progress = 0;
+                    const progressFill = document.getElementById('export-progress');
+                    const statusText = document.getElementById('export-status');
+                    const interval = setInterval(() => {
+                        progress += 5;
+                        if (progressFill) progressFill.style.width = progress + '%';
+                        if (statusText) {
+                            if (progress < 30) statusText.textContent = '正在收集数据...';
+                            else if (progress < 60) statusText.textContent = '正在处理数据...';
+                            else if (progress < 90) statusText.textContent = '正在生成文件...';
+                            else statusText.textContent = '准备下载...';
+                        }
+                        if (progress >= 100) {
+                            clearInterval(interval);
+                            setTimeout(() => {
+                                let csvContent =
+                                    '个体ID,猪种,日增重(g),瘦肉率(%),背膘厚(mm),育种值\n';
+                                document.querySelectorAll('#result-table-body tr').forEach(
+                                    row => {
+                                        const cells = row.querySelectorAll('td');
+                                        if (cells.length >= 5) {
+                                            const cid = cells[0].textContent.trim();
+                                            const breed = cells[1].textContent.trim();
+                                            const gain = cells[2].textContent.trim();
+                                            const lean = cells[3].textContent.trim();
+                                            const val = cells[4].textContent.trim()
+                                                .replace(/[+\s]/g, '');
+                                            const backfat = (Math.random() * 5 + 10).toFixed(
+                                                1);
+                                            csvContent +=
+                                                `${cid},${breed},${gain},${lean},${backfat},${val}\n`;
+                                        }
+                                    });
+                                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                                const url = URL.createObjectURL(blob);
+                                const link = document.createElement('a');
+                                link.href = url;
+                                const breedSelect = document.getElementById('pig-breed');
+                                const breedText = breedSelect ? breedSelect.options[breedSelect
+                                    .selectedIndex].text : '全部';
+                                const indexSelect = document.getElementById('evaluation-index');
+                                const indexText = indexSelect ? indexSelect.options[indexSelect
+                                    .selectedIndex].text : '';
+                                const startDate = document.getElementById('start-date')?.value ||
+                                    '2024-01-01';
+                                const endDate = document.getElementById('end-date')?.value ||
+                                    '2025-03-01';
+                                link.download =
+                                    `遗传评估数据_${breedText}_${indexText}_${startDate}_to_${endDate}.csv`;
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                                closeModalFunc();
+                            }, 500);
+                        }
+                    }, 100);
+                });
+            }
+
+            // ============ 初始化图表 ============
+            function initCharts() {
+                if (typeof echarts === 'undefined') return;
+                const bfPheChart = echarts.init(document.getElementById('bf-phe-chart'));
+                bfPheChart && bfPheChart.setOption({
+                    tooltip: { trigger: 'axis' },
+                    legend: { data: ['LL', 'DD', 'YY'], bottom: 0, formatter: function(n) { return { LL: '长白猪',
+                            DD: '杜洛克', YY: '大白猪' } [n] || n; } },
+                    grid: { left: '3%', right: '4%', bottom: '15%', top: '10%', containLabel: true },
+                    xAxis: { type: 'category', data: ['2017', '2018', '2019', '2020', '2021', '2022', '2023',
+                            '2024', '2025'
+                        ] },
+                    yAxis: { type: 'value', name: 'Average Phe', min: 7.5, max: 13.5 },
+                    series: [
+                        { name: 'LL', type: 'line', data: [null, 13.4, 12.4, 10.5, 10.8, 11.7, 10.5, 8.7,
+                                7.8
+                            ], itemStyle: { color: '#008000' }, symbol: 'circle', symbolSize: 8,
+                            smooth: false },
+                        { name: 'DD', type: 'line', data: [null, null, 12.3, 10.8, 10.8, 9.8, 10.9, 10.8,
+                                8.7
+                            ], itemStyle: { color: '#FF0000' }, symbol: 'circle', symbolSize: 8,
+                            smooth: false },
+                        { name: 'YY', type: 'line', data: [10.7, 10.7, 10.3, 10.5, 11.1, 11.1, 8.8, 9.8,
+                                null
+                            ], itemStyle: { color: '#0000FF' }, symbol: 'circle', symbolSize: 8,
+                            smooth: false }
+                    ]
+                });
+                const agePheChart = echarts.init(document.getElementById('age-phe-chart'));
+                agePheChart && agePheChart.setOption({
+                    tooltip: { trigger: 'axis' },
+                    legend: { data: ['LL', 'DD', 'YY'], bottom: 0, formatter: function(n) { return { LL: '长白猪',
+                            DD: '杜洛克', YY: '大白猪' } [n] || n; } },
+                    grid: { left: '3%', right: '4%', bottom: '15%', top: '10%', containLabel: true },
+                    xAxis: { type: 'category', data: ['2017', '2018', '2019', '2020', '2021', '2022', '2023',
+                            '2024', '2025'
+                        ] },
+                    yAxis: { type: 'value', name: 'Average Phe', min: 135, max: 165 },
+                    series: [
+                        { name: 'LL', type: 'line', data: [null, 158, 149, 157, 155, 154, 156, 162,
+                            153
+                        ], itemStyle: { color: '#008000' }, symbol: 'circle', symbolSize: 8,
+                            smooth: false },
+                        { name: 'DD', type: 'line', data: [null, null, 139, 157, 155, 165, 157, 149,
+                            161
+                        ], itemStyle: { color: '#FF0000' }, symbol: 'circle', symbolSize: 8,
+                            smooth: false },
+                        { name: 'YY', type: 'line', data: [152, 155, 158, 154, 155, 155, 164, 160,
+                            null
+                        ], itemStyle: { color: '#0000FF' }, symbol: 'circle', symbolSize: 8,
+                            smooth: false }
+                    ]
+                });
+                const gebvTrendChart = echarts.init(document.getElementById('gebv-trend-chart'));
+                gebvTrendChart && gebvTrendChart.setOption({
+                    tooltip: { trigger: 'axis' },
+                    legend: { data: ['LL-AGE', 'LL-BF', 'LL-TNB', 'DD-AGE', 'DD-BF', 'YY-AGE', 'YY-BF',
+                            'YY-TNB'
+                        ], bottom: 0, formatter: function(n) { const m = { 'LL-AGE': '长白-日龄',
+                                'LL-BF': '长白-背膘', 'LL-TNB': '长白-产仔数', 'DD-AGE': '杜洛克-日龄',
+                                'DD-BF': '杜洛克-背膘', 'YY-AGE': '大白-日龄', 'YY-BF': '大白-背膘',
+                                'YY-TNB': '大白-产仔数' }; return m[n] || n; } },
+                    grid: { left: '3%', right: '4%', bottom: '20%', top: '10%', containLabel: true },
+                    xAxis: { type: 'category', data: ['2017', '2018', '2019', '2020', '2021', '2022', '2023',
+                            '2024', '2025', '2026'
+                        ] },
+                    yAxis: { type: 'value', name: 'Average GEBV', min: -10, max: 30 },
+                    series: [
+                        { name: 'LL-AGE', type: 'line', data: [0, 0, -5, -3, 13, 5, 14, 25, 27, 8],
+                            itemStyle: { color: '#008000' }, symbol: 'circle', symbolSize: 6 },
+                        { name: 'LL-BF', type: 'line', data: [0, 0, 0, 0, 0, 1, 1, 2, 1, 0],
+                            itemStyle: { color: '#00A000' }, symbol: 'circle', symbolSize: 6 },
+                        { name: 'LL-TNB', type: 'line', data: [0, 0, 0, 0, 0, 1, 1, 1, 1, 0],
+                            itemStyle: { color: '#00C000' }, symbol: 'circle', symbolSize: 6 },
+                        { name: 'DD-AGE', type: 'line', data: [-5, -8, -7, -3, -1, 0, 2, 6, 5, 4],
+                            itemStyle: { color: '#FF0000' }, symbol: 'circle', symbolSize: 6 },
+                        { name: 'DD-BF', type: 'line', data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            itemStyle: { color: '#FF4000' }, symbol: 'circle', symbolSize: 6 },
+                        { name: 'YY-AGE', type: 'line', data: [0, 0, 0, -2, 2, 2, 1, 1, 0, 0],
+                            itemStyle: { color: '#0000FF' }, symbol: 'circle', symbolSize: 6 },
+                        { name: 'YY-BF', type: 'line', data: [0, 0, 0, 0, 1, 1, 1, 1, 0, 0],
+                            itemStyle: { color: '#4040FF' }, symbol: 'circle', symbolSize: 6 },
+                        { name: 'YY-TNB', type: 'line', data: [0, 0, 0, 0, 1, 1, 1, 1, 0, 0],
+                            itemStyle: { color: '#8080FF' }, symbol: 'circle', symbolSize: 6 }
+                    ]
+                });
+                const tnbPheChart = echarts.init(document.getElementById('tnb-phe-chart'));
+                tnbPheChart && tnbPheChart.setOption({
+                    tooltip: { trigger: 'axis' },
+                    legend: { data: ['LL', 'YY'], bottom: 0, formatter: function(n) { return { LL: '长白猪',
+                            YY: '大白猪' } [n] || n; } },
+                    grid: { left: '3%', right: '4%', bottom: '15%', top: '10%', containLabel: true },
+                    xAxis: { type: 'category', data: ['2017', '2018', '2019', '2020', '2021', '2022', '2023',
+                            '2024', '2025'
+                        ] },
+                    yAxis: { type: 'value', name: 'Average Phe', min: 10, max: 18 },
+                    series: [
+                        { name: 'LL', type: 'line', data: [null, 14.0, 12.9, 12.9, 13.3, 11.0, 15.4, 16.3,
+                                16.9
+                            ], itemStyle: { color: '#008000' }, symbol: 'circle', symbolSize: 8,
+                            smooth: false },
+                        { name: 'YY', type: 'line', data: [11.5, 13.0, 15.3, 13.8, 13.4, 13.9, 14.4, 15.1,
+                                15.2
+                            ], itemStyle: { color: '#0000FF' }, symbol: 'circle', symbolSize: 8,
+                            smooth: false }
+                    ]
+                });
+                window.addEventListener('resize', function() {
+                    bfPheChart && bfPheChart.resize();
+                    agePheChart && agePheChart.resize();
+                    gebvTrendChart && gebvTrendChart.resize();
+                    tnbPheChart && tnbPheChart.resize();
+                });
+            }
+            initCharts();
+        })();
+    </script>
+</body>
+</html>

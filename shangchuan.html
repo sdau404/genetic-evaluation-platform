@@ -1,0 +1,1521 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据上传 - 遗传改良信息服务平台</title>
+    <!-- 图标库 -->
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --clr-dark: #1a1a2e;
+            --clr-dark-secondary: #222831;
+            --clr-cream: #faf7f2;
+            --clr-white: #ffffff;
+            --clr-green: #7cb342;
+            --clr-green-hover: #9ccc65;
+            --clr-green-dark: #558b2f;
+            --clr-gray: #666666;
+            --clr-gray-light: #999999;
+            --clr-border: #e0dcd5;
+            --clr-overlay: rgba(0, 0, 0, 0.55);
+            --clr-shadow: rgba(0, 0, 0, 0.08);
+            --clr-shadow-hover: rgba(0, 0, 0, 0.16);
+            --clr-red: #e74c3c;
+            --clr-blue: #2980b9;
+            --radius-sm: 8px;
+            --radius-md: 14px;
+            --radius-lg: 20px;
+            --radius-btn: 30px;
+            --transition-fast: 0.2s ease;
+            --transition-smooth: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-bounce: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            --shadow-card: 0 2px 12px var(--clr-shadow);
+            --shadow-card-hover: 0 8px 30px var(--clr-shadow-hover);
+            --shadow-nav: 0 4px 20px rgba(0, 0, 0, 0.15);
+            --font-heading: 'Microsoft Yahei', 'PingFang SC', 'Helvetica Neue', sans-serif;
+            --max-width: 1200px;
+            --header-height: 68px;
+        }
+
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            font-family: var(--font-heading);
+            background-color: var(--clr-cream);
+            color: var(--clr-dark);
+            line-height: 1.7;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 90%;
+            max-width: var(--max-width);
+            margin: 0 auto;
+        }
+
+        /* ============ 头部导航 ============ */
+        .header {
+            background-color: var(--clr-dark);
+            color: #fff;
+            padding: 0;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            height: var(--header-height);
+            box-shadow: var(--shadow-nav);
+        }
+        .header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100%;
+        }
+        /* ============ new顶部导航栏 ============ */
+        .logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .logo-img {
+            height: 42px;
+            margin-right: 12px;
+        }
+
+        .site-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+/* ============ old顶部导航栏 ============ */
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+
+        .logo h1 {
+            color: #fff;
+            font-size: 30px;
+            font-weight: 700;
+            white-space: nowrap;
+            letter-spacing: 0.5px;
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+        .nav ul {
+            display: flex;
+            list-style: none;
+            gap: 6px;
+            align-items: center;
+        }
+        .nav a {
+            color: #e0dcd5;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            padding: 10px 16px;
+            border-radius: var(--radius-sm);
+            transition: all var(--transition-fast);
+            position: relative;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+        .nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%) scaleX(0);
+            width: 20px;
+            height: 2.5px;
+            background-color: var(--clr-green);
+            border-radius: 2px;
+            transition: transform var(--transition-smooth);
+        }
+        .nav a:hover {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.07);
+        }
+        .nav a:hover::after {
+            transform: translateX(-50%) scaleX(1);
+        }
+        .nav a.active {
+            color: #fff;
+            background-color: rgba(124, 179, 66, 0.2);
+            font-weight: 600;
+        }
+        .nav a.active::after {
+            transform: translateX(-50%) scaleX(1);
+            width: 28px;
+            background-color: var(--clr-green);
+        }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+        .user-greeting {
+            color: #f8f5f0;
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        .btn-logout {
+            background: none;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            color: #f8f5f0;
+            padding: 6px 14px;
+            border-radius: var(--radius-btn);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-family: var(--font-heading);
+        }
+        .btn-logout:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: var(--clr-green);
+            color: var(--clr-green);
+        }
+        .btn-login-header {
+            background-color: var(--clr-green);
+            border: none;
+            color: #fff;
+            padding: 8px 20px;
+            border-radius: var(--radius-btn);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-bounce);
+            font-family: var(--font-heading);
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .btn-login-header:hover {
+            background-color: var(--clr-green-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(124, 179, 66, 0.3);
+        }
+        #mobileBtn {
+            display: none;
+            background: none;
+            border: none;
+            color: #f8f5f0;
+            font-size: 26px;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            transition: all var(--transition-fast);
+            z-index: 1001;
+        }
+        #mobileBtn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--clr-green);
+        }
+
+        /* 移动端菜单 */
+        .mobileMenu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100vh;
+            height: 100dvh;
+            background-color: var(--clr-dark-secondary);
+            z-index: 1002;
+            transform: translateX(-100%);
+            transition: transform var(--transition-smooth);
+            box-shadow: 4px 0 30px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        .mobileMenu.show {
+            transform: translateX(0);
+        }
+        .mobileMenu .menuHeader {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            flex-shrink: 0;
+        }
+        .mobileMenu .menuHeader h3 {
+            color: #f8f5f0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .mobileMenu #closeBtn {
+            background: none;
+            border: none;
+            color: #ccc;
+            font-size: 22px;
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 6px;
+            transition: all var(--transition-fast);
+        }
+        .mobileMenu #closeBtn:hover {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .mobileMenu ul {
+            list-style: none;
+            padding: 12px 0;
+            flex: 1;
+        }
+        .mobileMenu ul li {
+            margin: 2px 0;
+        }
+        .mobileMenu ul a,
+        .mobileMenu ul button {
+            display: block;
+            color: #d5d0c8;
+            text-decoration: none;
+            padding: 14px 24px;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all var(--transition-fast);
+            border-left: 3px solid transparent;
+            letter-spacing: 0.4px;
+            background: none;
+            border-right: none;
+            border-top: none;
+            border-bottom: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            font-family: var(--font-heading);
+        }
+        .mobileMenu ul a:hover,
+        .mobileMenu ul button:hover {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-left-color: var(--clr-green);
+            padding-left: 28px;
+        }
+        .menuOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            height: 100dvh;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1001;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--transition-smooth);
+        }
+        .menuOverlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* ============ 面包屑 ============ */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 22px 0 10px;
+            font-size: 14px;
+            color: var(--clr-gray-light);
+            flex-wrap: wrap;
+        }
+        .breadcrumb a {
+            color: var(--clr-gray);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color var(--transition-fast);
+        }
+        .breadcrumb a:hover {
+            color: var(--clr-green-dark);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+        .breadcrumb span.separator {
+            color: #ccc;
+            user-select: none;
+            font-weight: 300;
+        }
+        .breadcrumb span.active {
+            color: var(--clr-dark);
+            font-weight: 600;
+            pointer-events: none;
+        }
+
+        /* ============ 页面标题 ============ */
+        .pageTitle {
+            font-size: 30px;
+            text-align: center;
+            margin: 10px 0 36px;
+            color: var(--clr-dark);
+            font-weight: 700;
+            position: relative;
+            padding-bottom: 18px;
+            letter-spacing: 0.5px;
+        }
+        .pageTitle::after {
+            content: "";
+            display: block;
+            width: 70px;
+            height: 3.5px;
+            background: linear-gradient(to right, var(--clr-green), var(--clr-green-hover));
+            margin: 0 auto;
+            border-radius: 3px;
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* ============ 面板卡片 ============ */
+        .panel {
+            background-color: var(--clr-white);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-card);
+            padding: 24px 28px;
+            margin-bottom: 28px;
+        }
+        .panel h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--clr-dark);
+            margin-bottom: 18px;
+            position: relative;
+            padding-left: 14px;
+        }
+        .panel h3::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 4px;
+            bottom: 4px;
+            width: 4px;
+            background-color: var(--clr-green);
+            border-radius: 3px;
+        }
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .panel-header h3 {
+            margin-bottom: 0;
+        }
+
+        /* ============ 按钮 ============ */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 22px;
+            border-radius: var(--radius-btn);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-bounce);
+            border: none;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+            font-family: var(--font-heading);
+            text-decoration: none;
+        }
+        .btn-primary {
+            background-color: var(--clr-green);
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background-color: var(--clr-green-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(124, 179, 66, 0.35);
+        }
+        .btn-outline {
+            background-color: #fff;
+            color: var(--clr-gray);
+            border: 1.5px solid var(--clr-border);
+        }
+        .btn-outline:hover {
+            background-color: #f5f2ec;
+            border-color: #ccc;
+            transform: translateY(-2px);
+        }
+        .btn-sm {
+            padding: 7px 16px;
+            font-size: 13px;
+            border-radius: 20px;
+        }
+        .btn-xs {
+            padding: 5px 12px;
+            font-size: 12px;
+            border-radius: 16px;
+        }
+        .btn-link {
+            background: none;
+            color: var(--clr-green-dark);
+            padding: 4px 8px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            font-family: var(--font-heading);
+            font-size: 13px;
+            transition: color var(--transition-fast);
+            text-decoration: none;
+        }
+        .btn-link:hover {
+            color: var(--clr-green);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        /* ============ 表单样式 ============ */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .form-group label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--clr-gray);
+        }
+        .form-group select,
+        .form-group input[type="date"],
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group input[type="password"],
+        .form-group textarea {
+            width: 100%;
+            border: 1.5px solid var(--clr-border);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            font-size: 14px;
+            font-family: var(--font-heading);
+            color: var(--clr-dark);
+            background-color: #fdfcf9;
+            transition: all var(--transition-fast);
+            outline: none;
+        }
+        .form-group select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 36px;
+            cursor: pointer;
+        }
+        .form-group select:focus,
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: var(--clr-green);
+            box-shadow: 0 0 0 3px rgba(124, 179, 66, 0.1);
+            background-color: #fff;
+        }
+        .date-range {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .date-range span {
+            color: var(--clr-gray-light);
+            flex-shrink: 0;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--clr-gray);
+        }
+        .checkbox-group input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--clr-green);
+        }
+        .required {
+            color: var(--clr-red);
+        }
+
+        /* ============ 选项卡 ============ */
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            border-bottom: 2px solid var(--clr-border);
+            margin-bottom: 20px;
+            gap: 4px;
+        }
+        .tab-btn {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--clr-gray);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            font-family: var(--font-heading);
+        }
+        .tab-btn:hover {
+            color: var(--clr-dark);
+        }
+        .tab-btn.active {
+            color: var(--clr-green-dark);
+            border-bottom-color: var(--clr-green);
+        }
+        .tab-pane {
+            display: none;
+        }
+        .tab-pane.active {
+            display: block;
+        }
+
+        /* ============ 上传区域 ============ */
+        .upload-zone {
+            border: 2px dashed var(--clr-border);
+            border-radius: var(--radius-md);
+            padding: 30px 20px;
+            text-align: center;
+            transition: all var(--transition-fast);
+            background-color: #fdfdfb;
+            cursor: pointer;
+        }
+        .upload-zone:hover {
+            border-color: var(--clr-green);
+            background-color: #f9f7f2;
+        }
+        .upload-zone i {
+            font-size: 40px;
+            color: var(--clr-gray-light);
+            margin-bottom: 12px;
+        }
+        .upload-zone p {
+            color: var(--clr-gray);
+            margin-bottom: 6px;
+        }
+        .upload-zone .file-hint {
+            font-size: 13px;
+            color: var(--clr-gray-light);
+        }
+        .upload-zone input[type="file"] {
+            display: none;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #e8e4df;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 12px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--clr-green), var(--clr-green-hover));
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+        .file-info-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background-color: #f5f2ec;
+            border-radius: var(--radius-sm);
+            padding: 10px 16px;
+            margin-top: 12px;
+            font-size: 14px;
+        }
+
+        /* ============ 表格 ============ */
+        .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--clr-border);
+            margin-top: 12px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+            font-size: 13px;
+            min-width: 650px;
+        }
+        thead tr {
+            background-color: var(--clr-dark);
+        }
+        thead th {
+            color: #f8f5f0;
+            padding: 12px 14px;
+            text-align: left;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+        tbody tr {
+            border-bottom: 1px solid #eee;
+        }
+        tbody tr:hover {
+            background-color: #f9f7f2;
+        }
+        tbody td {
+            padding: 10px 14px;
+            color: var(--clr-dark);
+            vertical-align: middle;
+        }
+
+        /* ============ 流程步骤 ============ */
+        .steps {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .step-number {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--clr-green);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+        .step-arrow {
+            color: var(--clr-gray-light);
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        /* ============ 登录卡片 ============ */
+        .login-card {
+            max-width: 460px;
+            margin: 40px auto;
+            text-align: center;
+            padding: 40px 30px;
+        }
+        .login-card i {
+            font-size: 48px;
+            color: var(--clr-gray-light);
+            margin-bottom: 16px;
+        }
+
+        /* ============ 模态框 ============ */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--transition-smooth);
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-dialog {
+            width: 90%;
+            max-width: 480px;
+            background-color: #fff;
+            border-radius: var(--radius-md);
+            box-shadow: 0 12px 50px rgba(0, 0, 0, 0.3);
+            transform: translateY(20px);
+            transition: transform var(--transition-smooth);
+            overflow: hidden;
+        }
+        .modal-overlay.show .modal-dialog {
+            transform: translateY(0);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            border-bottom: 1px solid #eee;
+        }
+        .modal-header h3 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        .modal-header button {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--clr-gray-light);
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+        .modal-header button:hover {
+            color: var(--clr-dark);
+            background-color: #f0ece5;
+        }
+        .modal-body {
+            padding: 24px;
+        }
+        .modal-footer {
+            padding: 14px 24px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .alert {
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 16px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .alert-danger {
+            background-color: #fce4e4;
+            color: #a94442;
+        }
+        .alert-success {
+            background-color: #e6f5e6;
+            color: #2d6a2d;
+        }
+
+        /* ============ 页脚 ============ */
+        .footer {
+            background-color: var(--clr-dark);
+            color: #f8f5f0;
+            padding: 40px 0 0;
+            margin-top: auto;
+        }
+        .footerWrap {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 30px;
+            padding-bottom: 28px;
+        }
+        .footerLeft {
+            flex: 1.4;
+            min-width: 260px;
+        }
+        .footerLeft .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .footerLeft .logo i {
+            font-size: 24px;
+            color: var(--clr-green);
+        }
+        .footerLeft .logo h1 {
+            font-size: 20px;
+            color: #f8f5f0;
+            font-weight: 700;
+        }
+        .footerLeft p {
+            font-size: 14px;
+            color: #b0aca5;
+            line-height: 1.7;
+            max-width: 360px;
+        }
+        .footerGroup {
+            flex: 1;
+            min-width: 160px;
+        }
+        .footerGroup h3 {
+            font-size: 16px;
+            margin-bottom: 14px;
+            color: #f8f5f0;
+            font-weight: 600;
+            letter-spacing: 0.4px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        .footerGroup h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 30px;
+            height: 2px;
+            background-color: var(--clr-green);
+            border-radius: 2px;
+        }
+        .footerGroup ul {
+            list-style: none;
+        }
+        .footerGroup li {
+            margin-bottom: 9px;
+            font-size: 14px;
+            color: #b0aca5;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .footerGroup li i {
+            color: var(--clr-green);
+            font-size: 13px;
+            width: 16px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .footerGroup a {
+            color: #b0aca5;
+            text-decoration: none;
+            transition: all var(--transition-fast);
+            font-size: 14px;
+        }
+        .footerGroup a:hover {
+            color: var(--clr-green-hover);
+            padding-left: 4px;
+        }
+        .copyright {
+            width: 100%;
+            text-align: center;
+            padding: 16px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 13px;
+            color: #888;
+            letter-spacing: 0.3px;
+        }
+
+        /* ============ 响应式 ============ */
+        @media (max-width: 1024px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .pageTitle {
+                font-size: 26px;
+            }
+            .logo h1 {
+                font-size: 17px;
+            }
+        }
+        @media (max-width: 768px) {
+            .header {
+                height: 58px;
+            }
+            .logo h1 {
+                font-size: 15px;
+            }
+            .nav {
+                display: none;
+            }
+            #mobileBtn {
+                display: block;
+            }
+            .header-actions {
+                gap: 8px;
+            }
+            .btn-login-header,
+            .btn-logout {
+                padding: 6px 14px;
+                font-size: 12px;
+            }
+            .user-greeting {
+                display: none;
+            }
+            .pageTitle {
+                font-size: 23px;
+                margin: 8px 0 24px;
+                padding-bottom: 14px;
+            }
+            .panel {
+                padding: 16px 18px;
+                margin-bottom: 20px;
+            }
+            .panel h3 {
+                font-size: 17px;
+            }
+            .steps {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .step-arrow {
+                display: none;
+            }
+            .footerWrap {
+                flex-direction: column;
+                gap: 24px;
+            }
+            .footerLeft p {
+                max-width: 100%;
+            }
+            .footer {
+                padding: 28px 0 0;
+            }
+            .copyright {
+                font-size: 12px;
+                padding: 12px 0;
+            }
+            table {
+                min-width: 500px;
+                font-size: 12px;
+            }
+        }
+        @media (max-width: 420px) {
+            .container {
+                width: 94%;
+            }
+            .logo h1 {
+                font-size: 13px;
+            }
+            .pageTitle {
+                font-size: 20px;
+            }
+            .btn {
+                padding: 8px 16px;
+                font-size: 13px;
+            }
+            .mobileMenu {
+                width: 260px;
+            }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .panel {
+            animation: fadeInUp 0.45s ease forwards;
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部导航 -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <div class="logo">
+                     <img src="assets/image/logo.png" alt="平台Logo" class="logo-img">
+                </div>
+                <h1>山东省奶牛遗传改良信息服务平台</h1>
+            </div>
+            <nav class="nav">
+                <ul>
+                    <li><a href="cow.html">首页</a></li>
+                    <li><a href="jieshao.html">介绍</a></li>
+                    <li><a href="shangchuan.html" class="active">数据上传</a></li>
+                    <li><a href="shuju.html" >结果查询</a></li>
+                    <li><a href="jieshao.html#section1">联系我们</a></li>
+                </ul>
+            </nav>
+            <div class="header-actions">
+                <div id="user-info" style="display:none; align-items:center; gap:10px;">
+                    <span class="user-greeting">欢迎，<span id="username-display"></span></span>
+                    <button id="logout-button" class="btn-logout"><i class="fa-solid fa-sign-out"></i> 退出</button>
+                </div>
+                <button id="login-button-header" class="btn-login-header"><i class="fa-solid fa-sign-in"></i> 登录</button>
+                <button id="mobileBtn" aria-label="打开菜单"><i class="fa-solid fa-bars"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 移动端菜单 -->
+    <div class="mobileMenu" id="mobileMenu">
+        <div class="menuHeader">
+            <h3>菜单导航</h3>
+            <button id="closeBtn" aria-label="关闭菜单"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <ul>
+            <li><a href="cow.html">首页</a></li>
+            <li><a href="shuju.html">遗传评估数据</a></li>
+            <li><a href="show.html">优良牛种展览</a></li>
+            <li><a href="tuandui.html">科研团队</a></li>
+            <li><a href="shangchuan.html">数据上传</a></li>
+            <li style="border-top:1px solid rgba(255,255,255,0.1); margin-top:12px; padding-top:8px;">
+                <div id="mobile-user-info" style="display:none;">
+                    <p style="color:#f8f5f0; margin-bottom:8px;">欢迎，<span id="mobile-username-display"></span></p>
+                    <button id="mobile-logout-button" style="width:100%; background-color:#e74c3c; color:#fff; padding:10px; border:none; border-radius:6px; cursor:pointer;">退出登录</button>
+                </div>
+                <button id="mobile-login-button" class="btn-login-header" style="width:100%; margin-top:10px;">登录</button>
+            </li>
+        </ul>
+    </div>
+    <div class="menuOverlay" id="menuOverlay"></div>
+
+    <!-- 主内容 -->
+    <main class="container" style="padding-bottom:20px;">
+        <nav class="breadcrumb">
+            <a href="index.html">首页</a>
+            <span class="separator">›</span>
+            <span class="active">数据上传</span>
+        </nav>
+        <h2 class="pageTitle">数据上传</h2>
+
+        <!-- 未登录提示 -->
+        <div id="not-logged-in" class="panel login-card">
+            <i class="fa-solid fa-lock"></i>
+            <h3 style="margin-bottom:12px; padding-left:0;">请先登录</h3>
+            <p style="color:var(--clr-gray); margin-bottom:24px;">数据上传功能需要登录后才能使用，请使用您的账号登录系统。</p>
+            <button id="login-button-main" class="btn btn-primary"><i class="fa-solid fa-sign-in"></i> 立即登录</button>
+        </div>
+
+        <!-- 登录后内容区 -->
+        <div id="main-content" style="display:none;">
+            <!-- 上传流程 -->
+            <div class="panel">
+                <h3>上传流程</h3>
+                <div class="steps">
+                    <div class="step"><div class="step-number">1</div><span>准备数据</span></div>
+                    <span class="step-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+                    <div class="step"><div class="step-number">2</div><span>填写信息</span></div>
+                    <span class="step-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+                    <div class="step"><div class="step-number">3</div><span>上传文件</span></div>
+                    <span class="step-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+                    <div class="step"><div class="step-number">4</div><span>提交审核</span></div>
+                </div>
+            </div>
+
+            <!-- 数据上传表单 -->
+            <div class="panel">
+                <h3>数据上传表单</h3>
+                <div class="tabs" id="upload-tabs">
+                    <button class="tab-btn active" data-tab="phenotype">表型数据</button>
+                    <button class="tab-btn" data-tab="genotype">基因型数据</button>
+                    <button class="tab-btn" data-tab="pedigree">系谱数据</button>
+                    <button class="tab-btn" data-tab="other">其他数据</button>
+                </div>
+
+                <!-- 表型数据 -->
+                <div class="tab-pane active" id="tab-phenotype">
+                    <form id="phenotype-upload-form" onsubmit="handleSubmit(event)">
+                        <div class="form-grid">
+                            <div class="form-group"><label>数据名称 <span class="required">*</span></label><input type="text" placeholder="请输入数据名称" required></div>
+                            <div class="form-group"><label>数据类型 <span class="required">*</span></label><select required><option value="">请选择</option><option>生长性能</option><option>肉质性状</option><option>繁殖性能</option><option>抗病性能</option><option>其他</option></select></div>
+                            <div class="form-group"><label>牛种 <span class="required">*</span></label><select required><option value="">请选择</option><option>xxx</option><option>xxx</option><option>xxx</option><option>地方牛种</option><option>其他</option></select></div>
+                            <div class="form-group"><label>数据来源 <span class="required">*</span></label><input type="text" placeholder="请输入数据来源" required></div>
+                            <div class="form-group"><label>采集时间范围 <span class="required">*</span></label><div class="date-range"><input type="date" required><span>至</span><input type="date" required></div></div>
+                            <div class="form-group"><label>样本数量 <span class="required">*</span></label><input type="number" placeholder="请输入样本数量" required></div>
+                        </div>
+                        <div class="form-group" style="margin-top:18px;"><label>数据描述 <span class="required">*</span></label><textarea rows="4" placeholder="请详细描述数据的采集方法、处理过程等信息" required></textarea></div>
+                        <div class="form-group" style="margin-top:18px;">
+                            <label>数据文件 <span class="required">*</span></label>
+                            <div class="upload-zone" id="upload-zone-phenotype">
+                                <i class="fa-solid fa-cloud-upload"></i>
+                                <p>点击或拖拽文件到此处上传</p>
+                                <p class="file-hint">支持 Excel、CSV、TXT 格式，单个文件不超过 100MB</p>
+                                <input type="file" id="file-phenotype" accept=".xlsx,.xls,.csv,.txt" required>
+                            </div>
+                            <div id="progress-phenotype" style="display:none;">
+                                <div class="progress-bar"><div class="progress-fill" style="width:0%;"></div></div>
+                                <span style="font-size:13px; color:var(--clr-gray);">上传进度 0%</span>
+                            </div>
+                            <div id="file-info-phenotype" class="file-info-bar" style="display:none;">
+                                <i class="fa-solid fa-file-lines"></i>
+                                <span id="file-name-phenotype"></span>
+                                <button type="button" class="btn-link" style="margin-left:auto;" onclick="clearFile('phenotype')">移除</button>
+                            </div>
+                        </div>
+                        <div class="checkbox-group" style="margin-top:18px;">
+                            <input type="checkbox" id="agree-phenotype" required>
+                            <label for="agree-phenotype">我已阅读并同意 <a href="#" style="color:var(--clr-green-dark);">数据上传协议</a></label>
+                        </div>
+                        <div style="text-align:right; margin-top:18px;">
+                            <button type="submit" class="btn btn-primary">提交审核</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 基因型数据 -->
+                <div class="tab-pane" id="tab-genotype">
+                    <form onsubmit="handleSubmit(event)">
+                        <div class="form-grid">
+                            <div class="form-group"><label>数据名称 <span class="required">*</span></label><input type="text" placeholder="请输入数据名称" required></div>
+                            <div class="form-group"><label>芯片类型 <span class="required">*</span></label><select required><option value="">请选择</option><option>Illumina PorcineSNP60</option><option>Affymetrix Axiom Porcine</option><option>定制芯片</option><option>全基因组测序</option><option>其他</option></select></div>
+                            <div class="form-group"><label>猪种 <span class="required">*</span></label><select required><option value="">请选择</option><option>杜洛克</option><option>长白猪</option><option>大白猪</option><option>地方猪种</option><option>其他</option></select></div>
+                            <div class="form-group"><label>数据来源 <span class="required">*</span></label><input type="text" placeholder="请输入数据来源" required></div>
+                            <div class="form-group"><label>检测时间 <span class="required">*</span></label><input type="date" required></div>
+                            <div class="form-group"><label>样本数量 <span class="required">*</span></label><input type="number" placeholder="请输入样本数量" required></div>
+                        </div>
+                        <div class="form-group" style="margin-top:18px;"><label>数据描述 <span class="required">*</span></label><textarea rows="4" placeholder="请详细描述数据的检测方法、处理过程等信息" required></textarea></div>
+                        <div class="form-group" style="margin-top:18px;">
+                            <label>数据文件 <span class="required">*</span></label>
+                            <div class="upload-zone" id="upload-zone-genotype">
+                                <i class="fa-solid fa-cloud-upload"></i>
+                                <p>点击或拖拽文件到此处上传</p>
+                                <p class="file-hint">支持 PLINK、VCF、HAPMAP 格式，单个文件不超过 500MB</p>
+                                <input type="file" accept=".bed,.bim,.fam,.vcf,.vcf.gz,.hapmap" required>
+                            </div>
+                        </div>
+                        <div class="checkbox-group" style="margin-top:18px;"><input type="checkbox" required><label>我已阅读并同意 <a href="#" style="color:var(--clr-green-dark);">数据上传协议</a></label></div>
+                        <div style="text-align:right; margin-top:18px;"><button type="submit" class="btn btn-primary">提交审核</button></div>
+                    </form>
+                </div>
+
+                <!-- 系谱数据 -->
+                <div class="tab-pane" id="tab-pedigree">
+                    <form onsubmit="handleSubmit(event)">
+                        <div class="form-grid">
+                            <div class="form-group"><label>数据名称 <span class="required">*</span></label><input type="text" placeholder="请输入数据名称" required></div>
+                            <div class="form-group"><label>猪种 <span class="required">*</span></label><select required><option value="">请选择</option><option>杜洛克</option><option>长白猪</option><option>大白猪</option><option>地方猪种</option><option>其他</option></select></div>
+                            <div class="form-group"><label>数据来源 <span class="required">*</span></label><input type="text" placeholder="请输入数据来源" required></div>
+                            <div class="form-group"><label>系谱深度 <span class="required">*</span></label><input type="number" placeholder="请输入系谱深度" required></div>
+                            <div class="form-group"><label>个体数量 <span class="required">*</span></label><input type="number" placeholder="请输入个体数量" required></div>
+                        </div>
+                        <div class="form-group" style="margin-top:18px;"><label>数据描述 <span class="required">*</span></label><textarea rows="4" placeholder="请详细描述系谱数据的收集方法、处理过程等信息" required></textarea></div>
+                        <div class="form-group" style="margin-top:18px;">
+                            <label>数据文件 <span class="required">*</span></label>
+                            <div class="upload-zone" id="upload-zone-pedigree">
+                                <i class="fa-solid fa-cloud-upload"></i>
+                                <p>点击或拖拽文件到此处上传</p>
+                                <p class="file-hint">支持 Excel、CSV、TXT 格式，单个文件不超过 50MB</p>
+                                <input type="file" accept=".xlsx,.xls,.csv,.txt" required>
+                            </div>
+                        </div>
+                        <div class="checkbox-group" style="margin-top:18px;"><input type="checkbox" required><label>我已阅读并同意 <a href="#" style="color:var(--clr-green-dark);">数据上传协议</a></label></div>
+                        <div style="text-align:right; margin-top:18px;"><button type="submit" class="btn btn-primary">提交审核</button></div>
+                    </form>
+                </div>
+
+                <!-- 其他数据 -->
+                <div class="tab-pane" id="tab-other">
+                    <form onsubmit="handleSubmit(event)">
+                        <div class="form-grid">
+                            <div class="form-group"><label>数据名称 <span class="required">*</span></label><input type="text" placeholder="请输入数据名称" required></div>
+                            <div class="form-group"><label>数据类型 <span class="required">*</span></label><select required><option value="">请选择</option><option>图像数据</option><option>视频数据</option><option>传感器数据</option><option>环境气候数据</option><option>其他</option></select></div>
+                            <div class="form-group"><label>猪种</label><select><option value="">请选择</option><option>杜洛克</option><option>长白猪</option><option>大白猪</option><option>地方猪种</option><option>其他</option></select></div>
+                            <div class="form-group"><label>数据来源 <span class="required">*</span></label><input type="text" placeholder="请输入数据来源" required></div>
+                            <div class="form-group"><label>数据时间范围</label><div class="date-range"><input type="date"><span>至</span><input type="date"></div></div>
+                        </div>
+                        <div class="form-group" style="margin-top:18px;"><label>数据描述 <span class="required">*</span></label><textarea rows="4" placeholder="请详细描述数据类型、收集方法等信息" required></textarea></div>
+                        <div class="form-group" style="margin-top:18px;">
+                            <label>数据文件 <span class="required">*</span></label>
+                            <div class="upload-zone"><i class="fa-solid fa-cloud-upload"></i><p>点击或拖拽文件到此处上传</p><p class="file-hint">支持多种格式，单个文件不超过 200MB</p><input type="file" required></div>
+                        </div>
+                        <div class="checkbox-group" style="margin-top:18px;"><input type="checkbox" required><label>我已阅读并同意 <a href="#" style="color:var(--clr-green-dark);">数据上传协议</a></label></div>
+                        <div style="text-align:right; margin-top:18px;"><button type="submit" class="btn btn-primary">提交审核</button></div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 数据标准说明 -->
+            <div class="panel">
+                <h3>数据标准说明</h3>
+                <div class="tabs" id="standard-tabs">
+                    <button class="tab-btn active" data-tab="phenotype-standard">表型数据标准</button>
+                    <button class="tab-btn" data-tab="genotype-standard">基因型数据标准</button>
+                    <button class="tab-btn" data-tab="pedigree-standard">系谱数据标准</button>
+                </div>
+                <div class="tab-pane active" id="tab-phenotype-standard">
+                    <p style="margin-bottom:10px;"><strong>数据格式：</strong>Excel (.xlsx, .xls)、CSV (.csv)、TXT (.txt)</p>
+                    <div class="table-container">
+                        <table>
+                            <thead><tr><th>字段名</th><th>数据类型</th><th>说明</th><th>示例</th><th>必填</th></tr></thead>
+                            <tbody>
+                                <tr><td>individual_id</td><td>字符串</td><td>个体ID</td><td>D1001</td><td>是</td></tr>
+                                <tr><td>sex</td><td>字符串</td><td>M/F</td><td>M</td><td>是</td></tr>
+                                <tr><td>birth_date</td><td>日期</td><td>YYYY-MM-DD</td><td>2024-01-15</td><td>是</td></tr>
+                                <tr><td>breed</td><td>字符串</td><td>品种</td><td>杜洛克</td><td>是</td></tr>
+                                <tr><td>trait_name</td><td>字符串</td><td>性状名称</td><td>日增重</td><td>是</td></tr>
+                                <tr><td>trait_value</td><td>数值</td><td>保留两位小数</td><td>856.50</td><td>是</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <a href="#" style="display:inline-flex;align-items:center;gap:5px;margin-top:12px;color:var(--clr-green-dark);"><i class="fa-solid fa-download"></i> 下载表型数据模板</a>
+                </div>
+                <div class="tab-pane" id="tab-genotype-standard">
+                    <p><strong>支持格式：</strong>PLINK (.bed/.bim/.fam)、VCF (.vcf/.vcf.gz)、HAPMAP</p>
+                    <p style="margin-top:8px;">需附带样本信息文件，包含 individual_id, sex, breed 等字段。</p>
+                    <a href="#" style="display:inline-flex;align-items:center;gap:5px;margin-top:12px;color:var(--clr-green-dark);"><i class="fa-solid fa-download"></i> 下载基因型数据模板</a>
+                </div>
+                <div class="tab-pane" id="tab-pedigree-standard">
+                    <p><strong>数据格式：</strong>Excel, CSV, TXT</p>
+                    <div class="table-container">
+                        <table>
+                            <thead><tr><th>字段名</th><th>说明</th><th>示例</th></tr></thead>
+                            <tbody>
+                                <tr><td>individual_id</td><td>个体ID</td><td>D1001</td></tr>
+                                <tr><td>sire_id</td><td>父本ID (未知用0)</td><td>D0501</td></tr>
+                                <tr><td>dam_id</td><td>母本ID (未知用0)</td><td>D0502</td></tr>
+                                <tr><td>sex</td><td>M/F</td><td>M</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <a href="#" style="display:inline-flex;align-items:center;gap:5px;margin-top:12px;color:var(--clr-green-dark);"><i class="fa-solid fa-download"></i> 下载系谱数据模板</a>
+                </div>
+            </div>
+
+            <!-- 常见问题 -->
+            <div class="panel">
+                <h3>常见问题</h3>
+                <div style="display:flex;flex-direction:column;gap:16px;">
+                    <div style="background:#f9f7f2; border-radius:8px; padding:16px;"><strong>如何选择数据类型？</strong><p>根据数据内容选择表型、基因型、系谱或其他类型。</p></div>
+                    <div style="background:#f9f7f2; border-radius:8px; padding:16px;"><strong>审核需要多久？</strong><p>一般1-3个工作日，通过邮件通知结果。</p></div>
+                    <div style="background:#f9f7f2; border-radius:8px; padding:16px;"><strong>上传失败怎么办？</strong><p>请检查文件格式、大小和网络，或联系 support@example.com</p></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footerWrap">
+                <div class="footerLeft">
+                    <div class="logo"><i class="fa-solid fa-dna"></i><h1>遗传改良信息服务平台</h1></div>
+                    <p>面向科研项目的专业数据平台，提供动物遗传育种领域一体化服务</p>
+                </div>
+                <div class="footerGroup">
+                    <h3>快速链接</h3>
+                    <ul>
+                        <li><a href="index.html">首页</a></li>
+                        <li><a href="data.html">遗传评估数据</a></li>
+                        <li><a href="achievements.html">优良猪种展览</a></li>
+                    </ul>
+                </div>
+                <div class="footerGroup">
+                    <h3>相关资源</h3>
+                    <ul>
+                        <li><a href="#">技术文档</a></li>
+                        <li><a href="#">API接口</a></li>
+                        <li><a href="#">数据标准</a></li>
+                        <li><a href="#">常见问题</a></li>
+                    </ul>
+                </div>
+                <div class="footerGroup">
+                    <h3>联系我们</h3>
+                    <ul>
+                        <li><i class="fa-solid fa-map-marker-alt"></i> 山东农业大学动物科技学院</li>
+                        <li><i class="fa-solid fa-phone"></i> 010-12345678</li>
+                        <li><i class="fa-solid fa-envelope"></i> ningchao@sdau.edu.cn</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">© 2025 遗传改良信息服务平台 版权所有</div>
+        </div>
+    </footer>
+
+    <!-- 登录模态框 -->
+    <div class="modal-overlay" id="login-modal">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3>用户登录</h3>
+                <button id="close-login-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div id="login-alert" style="display:none;"></div>
+                <form id="login-form">
+                    <div class="form-group"><label>用户名 <span class="required">*</span></label><input type="text" id="username" placeholder="请输入用户名" required></div>
+                    <div class="form-group" style="margin-top:14px;"><label>密码 <span class="required">*</span></label><input type="password" id="password" placeholder="请输入密码" required></div>
+                    <div class="checkbox-group" style="margin-top:16px;"><input type="checkbox" id="remember-me"><label for="remember-me">记住我</label></div>
+                    <button type="submit" class="btn btn-primary" style="width:100%; margin-top:20px;">登录</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 提交成功模态框 -->
+    <div class="modal-overlay" id="success-modal">
+        <div class="modal-dialog">
+            <div class="modal-header"><h3>提交成功</h3><button id="close-success-modal"><i class="fa-solid fa-xmark"></i></button></div>
+            <div class="modal-body" style="text-align:center;">
+                <div style="width:60px;height:60px;background-color:#e6f5e6;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;"><i class="fa-solid fa-check" style="font-size:28px;color:var(--clr-green-dark);"></i></div>
+                <p>数据已成功上传，我们将在1-3个工作日内完成审核。</p>
+            </div>
+            <div class="modal-footer"><button class="btn btn-primary btn-sm" id="close-success-btn">确定</button></div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // 移动端菜单
+            const mobileBtn = document.getElementById('mobileBtn');
+            const closeBtn = document.getElementById('closeBtn');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const menuOverlay = document.getElementById('menuOverlay');
+            function openMenu(){ mobileMenu.classList.add('show'); menuOverlay.classList.add('show'); document.body.style.overflow='hidden'; }
+            function closeMenu(){ mobileMenu.classList.remove('show'); menuOverlay.classList.remove('show'); document.body.style.overflow=''; }
+            mobileBtn?.addEventListener('click', openMenu);
+            closeBtn?.addEventListener('click', closeMenu);
+            menuOverlay?.addEventListener('click', closeMenu);
+            document.addEventListener('keydown', e => { if(e.key==='Escape' && mobileMenu.classList.contains('show')) closeMenu(); });
+            mobileMenu?.querySelectorAll('a, button').forEach(el => el.addEventListener('click', () => setTimeout(closeMenu, 150)));
+
+            // 登录状态管理
+            const userInfo = document.getElementById('user-info');
+            const mobileUserInfo = document.getElementById('mobile-user-info');
+            const loginBtnHeader = document.getElementById('login-button-header');
+            const mobileLoginBtn = document.getElementById('mobile-login-button');
+            const notLoggedIn = document.getElementById('not-logged-in');
+            const mainContent = document.getElementById('main-content');
+            const usernameDisplay = document.getElementById('username-display');
+            const mobileUsernameDisplay = document.getElementById('mobile-username-display');
+
+            function updateUIForLogin(username) {
+                if(username) {
+                    userInfo.style.display = 'flex';
+                    mobileUserInfo.style.display = 'block';
+                    loginBtnHeader.style.display = 'none';
+                    mobileLoginBtn.style.display = 'none';
+                    notLoggedIn.style.display = 'none';
+                    mainContent.style.display = 'block';
+                    usernameDisplay.textContent = username;
+                    mobileUsernameDisplay.textContent = username;
+                } else {
+                    userInfo.style.display = 'none';
+                    mobileUserInfo.style.display = 'none';
+                    loginBtnHeader.style.display = 'inline-flex';
+                    mobileLoginBtn.style.display = 'block';
+                    notLoggedIn.style.display = 'block';
+                    mainContent.style.display = 'none';
+                }
+            }
+
+            const storedUsername = localStorage.getItem('username');
+            updateUIForLogin(storedUsername);
+
+            // 登录模态框
+            const loginModal = document.getElementById('login-modal');
+            const loginForm = document.getElementById('login-form');
+            const loginAlert = document.getElementById('login-alert');
+            function openLoginModal(){ loginModal.classList.add('show'); document.body.style.overflow='hidden'; }
+            function closeLoginModal(){ loginModal.classList.remove('show'); document.body.style.overflow=''; loginForm.reset(); loginAlert.style.display='none'; }
+            document.getElementById('close-login-modal')?.addEventListener('click', closeLoginModal);
+            loginModal?.addEventListener('click', e => { if(e.target===loginModal) closeLoginModal(); });
+            document.getElementById('login-button-header')?.addEventListener('click', openLoginModal);
+            document.getElementById('mobile-login-button')?.addEventListener('click', openLoginModal);
+            document.getElementById('login-button-main')?.addEventListener('click', openLoginModal);
+            document.getElementById('logout-button')?.addEventListener('click', ()=>{ localStorage.removeItem('username'); updateUIForLogin(null); });
+            document.getElementById('mobile-logout-button')?.addEventListener('click', ()=>{ localStorage.removeItem('username'); updateUIForLogin(null); closeMenu(); });
+
+            loginForm?.addEventListener('submit', function(e){
+                e.preventDefault();
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                if(username === '992844278@qq.com' && password === '404sdausdau') {
+                    localStorage.setItem('username', username);
+                    loginAlert.className = 'alert alert-success';
+                    loginAlert.textContent = '登录成功！';
+                    loginAlert.style.display = 'block';
+                    setTimeout(() => { closeLoginModal(); updateUIForLogin(username); }, 800);
+                } else {
+                    loginAlert.className = 'alert alert-danger';
+                    loginAlert.textContent = '用户名或密码错误！';
+                    loginAlert.style.display = 'block';
+                }
+            });
+
+            // 选项卡切换
+            function setupTabs(tabContainer, panePrefix) {
+                const tabs = tabContainer.querySelectorAll('.tab-btn');
+                tabs.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        tabs.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        const target = btn.dataset.tab;
+                        document.querySelectorAll(`.tab-pane[id^="${panePrefix}"]`).forEach(p => p.classList.remove('active'));
+                        document.getElementById(`tab-${target}`)?.classList.add('active');
+                    });
+                });
+            }
+            setupTabs(document.getElementById('upload-tabs'), 'tab-');
+            setupTabs(document.getElementById('standard-tabs'), 'tab-');
+
+            // 文件上传模拟
+            window.clearFile = function(type) {
+                const fileInput = document.getElementById(`file-${type}`);
+                if(fileInput) fileInput.value = '';
+                const info = document.getElementById(`file-info-${type}`);
+                const progress = document.getElementById(`progress-${type}`);
+                if(info) info.style.display = 'none';
+                if(progress) progress.style.display = 'none';
+            };
+            document.querySelectorAll('.upload-zone').forEach(zone => {
+                zone.addEventListener('click', (e) => {
+                    if(e.target.tagName !== 'INPUT') zone.querySelector('input[type="file"]')?.click();
+                });
+                const fileInput = zone.querySelector('input[type="file"]');
+                if(fileInput) {
+                    fileInput.addEventListener('change', function() {
+                        const file = this.files[0];
+                        if(!file) return;
+                        const type = this.id.replace('file-', '');
+                        const progressDiv = document.getElementById(`progress-${type}`);
+                        const infoDiv = document.getElementById(`file-info-${type}`);
+                        const nameSpan = document.getElementById(`file-name-${type}`);
+                        if(progressDiv) progressDiv.style.display = 'block';
+                        if(infoDiv) infoDiv.style.display = 'none';
+                        let percent = 0;
+                        const fill = progressDiv?.querySelector('.progress-fill');
+                        const text = progressDiv?.querySelector('span');
+                        const interval = setInterval(() => {
+                            percent += 5;
+                            if(fill) fill.style.width = percent + '%';
+                            if(text) text.textContent = `上传进度 ${percent}%`;
+                            if(percent >= 100) {
+                                clearInterval(interval);
+                                if(progressDiv) progressDiv.style.display = 'none';
+                                if(infoDiv && nameSpan) {
+                                    nameSpan.textContent = file.name;
+                                    infoDiv.style.display = 'flex';
+                                }
+                            }
+                        }, 80);
+                    });
+                }
+            });
+
+            // 表单提交成功模态框
+            const successModal = document.getElementById('success-modal');
+            window.handleSubmit = function(e) {
+                e.preventDefault();
+                successModal?.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            };
+            document.getElementById('close-success-modal')?.addEventListener('click', ()=>{ successModal.classList.remove('show'); document.body.style.overflow=''; });
+            document.getElementById('close-success-btn')?.addEventListener('click', ()=>{ successModal.classList.remove('show'); document.body.style.overflow=''; });
+            successModal?.addEventListener('click', e => { if(e.target===successModal) { successModal.classList.remove('show'); document.body.style.overflow=''; } });
+        })();
+    </script>
+</body>
+</html>
